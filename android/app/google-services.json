@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "400307057307",
+    "project_id": "agro-waste-mobile-app",
+    "storage_bucket": "agro-waste-mobile-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:400307057307:android:ee3f12ddb2d26dceec0c3e",
+        "android_client_info": {
+          "package_name": "com.metajua.metajua"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "400307057307-c7grd91bia3ftglhepef27qc0sgg3rkp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.metajua.metajua",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "400307057307-9l1g5d73rlgq4lp5klogrg9r5mhtbmpl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhGCA2IdYJjq-dQOZ8Gs9QzC3n3BlmgD4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "400307057307-9l1g5d73rlgq4lp5klogrg9r5mhtbmpl.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "400307057307-9dirt64rdee1ovbdfohq6otmgbojcpcq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.metajua.metajua"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
