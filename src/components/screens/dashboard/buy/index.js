@@ -4,37 +4,21 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icons from 'react-native-vector-icons/MaterialIcons';
+import { useSelector, useDispatch } from 'react-redux';
 
-import { colors, defaultSize } from '../../../config';
-import Fallback from '../../common/fallback';
+import { colors, defaultSize } from '../../../../config';
+import Fallback from '../../../common/fallback';
+import { saveBuyData } from '../../../../store/actions';
 
-const { white, green, blue, lightGray, darkGray } = colors;
-const Button = lazy(() => import('../../common/button'));
-const Select = lazy(() => import('../../common/select'));
-const RNModal = lazy(() => import('../../common/rnModal'));
-const Input = lazy(() => import('../../common/input'));
-
-const products = [
-    {type: 'product', id: 'one', name: 'Coffee'},
-    {type: 'product', id: 'two', name: 'Maize'}
-]
-const subProducts = [
-    {type: 'subproduct', id: 'one', name: 'Coffee'},
-    {type: 'subproduct', id: 'two', name: 'Maize'}
-]
-const suppliers = [
-    {type: 'supplier', id: 'one', name: 'Ben Kiwanuka'},
-    {type: 'supplier', id: 'two', name: 'Kizito Lule'}
-]
+const { white, green, lightGray, darkGray } = colors;
+const Button = lazy(() => import('../../../common/button'));
+const Select = lazy(() => import('../../../common/select'));
+const RNModal = lazy(() => import('../../../common/rnModal'));
+const Input = lazy(() => import('../../../common/input'));
 
 const categories = [
     {type: 'category', id: 1, name: 'Farmer'},
-    {type: 'trader', id: 2, name: 'Trader'}
-]
-
-const qualities = [
-    {type: 'quantity', id: 1, name: 'Q1'},
-    {type: 'quantity', id: 2, name: 'Q2'}
+    {type: 'category', id: 2, name: 'Trader'}
 ]
 
 if (Platform.OS === 'android') {
@@ -46,14 +30,19 @@ if (Platform.OS === 'android') {
 const transition = LayoutAnimation.create(200, 'easeInEaseOut', 'scaleY');
 
 const Buy = (props) => {
+    const dispatch = useDispatch();
     const { width, height } = useWindowDimensions();
+
+    // redux
+    const {products, subProducts, qualities} = useSelector(state => state.product);
+    const {suppliers} = useSelector(state => state.supplier)
 
     // state
     const [product, setProduct] = useState({id: 'none', progress: new Animated.Value(45) , name: 'Product', open: false});
     const [subProduct, setSubProduct] = useState({id: 'none', progress: new Animated.Value(45), name: 'Sub Product', open: false});
     const [category, setCategory] = useState({id: 'none', progress: new Animated.Value(45), name: 'Category', open: false});
     const [supplier, setSupplier] = useState({id: 'none', progress: new Animated.Value(45), name: 'Supplier', open: false});
-    const [quantity, setQuantity] = useState({id: 'none', progress: new Animated.Value(45), name: 'Quanity', open: false});
+    const [quality, setQuality] = useState({id: 'none', progress: new Animated.Value(45), name: 'Quality', open: false});
     // input
     const [defaultWeight, setDefaultWeight] = useState({value: '0', error: ''});
     const [weighInput, setWeightInput] = useState({visible: false, value: '0', error: ''});
@@ -98,9 +87,9 @@ const Buy = (props) => {
                 useNativeDriver: false
             }).start()
         } else {
-            setQuantity({...quantity, open: !quantity.open, name });
-            Animated.timing(quantity.progress, {
-                toValue: quantity.open ? 45 : 150,
+            setQuality({...quality, open: !quality.open, name });
+            Animated.timing(quality.progress, {
+                toValue: quality.open ? 45 : 150,
                 duration: 200,
                 useNativeDriver: false
             }).start()
@@ -140,8 +129,8 @@ const Buy = (props) => {
                 useNativeDriver: false
             }).start()
         } else {
-            setQuantity({...quantity, id: id === quantity.id ? '' : id, name, open: false });
-            Animated.timing(quantity.progress, {
+            setQuality({...quality, id: id === quality.id ? '' : id, name, open: false });
+            Animated.timing(quality.progress, {
                 toValue: 45,
                 duration: 200,
                 useNativeDriver: false
@@ -167,6 +156,7 @@ const Buy = (props) => {
 
     const onModalContainer = () => {
         closeModal();
+        saveDataHandler();
         props.navigation.navigate('summary')
     }
 
@@ -199,6 +189,23 @@ const Buy = (props) => {
         addTotalHandler();
     }, [defaultWeight.value, weighInput.value, pricePerUnit.value])
 
+    const saveDataHandler = () => {
+        dispatch(saveBuyData({
+            product: product.name,
+            subProduct: subProduct.name,
+            category: category.name,
+            individual: supplier.name,
+            quality: quality.name,
+            quantity1: defaultWeight.value,
+            quantity2: weighInput.value,
+            totalWeight: totalWeight.value,
+            totalAmount: totalPayable.value
+        }))
+
+    }
+
+    let enabled = product.name !== 'Product' && subProduct.name !== 'Sub Product' && category.name !== 'Category' && supplier.name !== 'Supplier' && quality.name !== 'Quality'
+
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
@@ -214,7 +221,7 @@ const Buy = (props) => {
                     <View>
                         <Select
                             height={product.progress}
-                            onToggleSelector={() => onToggleSelector('product', 'Your Product')}
+                            onToggleSelector={() => onToggleSelector('product', 'Product')}
                             productName={product.name}
                             isProductOpen={product.open}
                             productList={products}
@@ -227,7 +234,7 @@ const Buy = (props) => {
                     <View>
                         <Select
                             height={subProduct.progress}
-                            onToggleSelector={() => onToggleSelector('subproduct', 'Your Sub Product')}
+                            onToggleSelector={() => onToggleSelector('subproduct', 'Sub Product')}
                             productName={subProduct.name}
                             isProductOpen={subProduct.open}
                             productList={subProducts}
@@ -240,7 +247,7 @@ const Buy = (props) => {
                     <View>
                         <Select
                             height={category.progress}
-                            onToggleSelector={() => onToggleSelector('category', 'Your Category')}
+                            onToggleSelector={() => onToggleSelector('category', 'Category')}
                             productName={category.name}
                             isProductOpen={category.open}
                             productList={categories}
@@ -253,7 +260,7 @@ const Buy = (props) => {
                     <View>
                         <Select
                             height={supplier.progress}
-                            onToggleSelector={() => onToggleSelector('supplier', 'Your Supplier')}
+                            onToggleSelector={() => onToggleSelector('supplier', 'Supplier')}
                             productName={supplier.name}
                             isProductOpen={supplier.open}
                             productList={suppliers}
@@ -278,14 +285,14 @@ const Buy = (props) => {
                 <View style={[styles.modalContainerStyle, {height: height * .55, width: width * .8}]}>
                     <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
                         <Select
-                            height={quantity.progress}
-                            onToggleSelector={() => onToggleSelector('quantity', 'Select Quality')}
-                            productName={quantity.name}
-                            isProductOpen={quantity.open}
+                            height={quality.progress}
+                            onToggleSelector={() => onToggleSelector('quality', 'Select Quality')}
+                            productName={quality.name}
+                            isProductOpen={quality.open}
                             productList={qualities}
                             onProductSelect={onProductSelect}
                             buttonTitle='Create new Quantity'
-                            onCreateHandler={() => onCreateHandler('quantity')}
+                            onCreateHandler={() => onCreateHandler('quality')}
                         />
                         <View style={styles.modalInputContainerStyle}>
                             <Text>Input weight</Text>
@@ -358,7 +365,7 @@ const Buy = (props) => {
                         backgroundColor={green}
                         borderColor={green}
                         color={white}
-                        enabled onPress={onModalContainer}
+                        enabled={enabled} onPress={onModalContainer}
                     />
                 </View>
             </RNModal>

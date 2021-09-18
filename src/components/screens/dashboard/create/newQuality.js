@@ -1,52 +1,76 @@
 import React, { Suspense, lazy, useState } from 'react';
 import {
-    View, StyleSheet, Text, StatusBar, useWindowDimensions, ScrollView, TouchableOpacity
+    View, StyleSheet, Text, StatusBar, useWindowDimensions, FlatList, TouchableOpacity
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import Icons from 'react-native-vector-icons/MaterialIcons';
+import { useSelector, useDispatch } from 'react-redux';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 import { colors, images, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
+import { createQuality } from '../../../../store/actions';
 
-const { white, green, extraLightGreen, lightGreen, darkGray } = colors;
+const { white, green, extraLightGreen, lightGreen, darkGray, red } = colors;
 const Input = lazy(() => import('../../../common/input'));
 const Button = lazy(() => import('../../../common/button'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
 
-const quality = [
-    {id: '1', name: 'Quality1'},{id: '2', name: 'Quality2'},
-    {id: '3', name: 'Quality3'},{id: '4', name: 'Quality4'},
-    {id: '5', name: 'Quality5'},{id: '6', name: 'Quality6'},
-    {id: '7', name: 'Quality7'},{id: '8', name: 'Quality8'},
-    {id: '9', name: 'Quality9'},{id: '10', name: 'Quality10'},
-]
-
 const NewQuality = (props) => {
+    const dispatch = useDispatch();
     const { height, width } = useWindowDimensions();
 
     // state
-    const [state, setState] = useState({ modalVisible: false });
+    const [state, setState] = useState({ modalVisible: false, error: '' });
+
+    // redux
+    const {qualities, loading, product, subProduct} = useSelector(state => state.product);
+    console.log(product, subProduct);
+
+    const { handleChange, values, handleSubmit, errors, handleBlur, touched } = useFormik({
+        initialValues: { qualityName: '' },
+        validationSchema: Yup.object({
+            qualityName: Yup.string().required('Enter quality')
+        }),
+        onSubmit: values => {
+            setState({...state, modalVisible: true})
+        }
+    });
 
     const goBack = () => props.navigation.navigate('createnewsubproduct');
 
-    const onSaveQualityHandler = () => {
-        setState({...state, modalVisible: true})
-    }
-
     const closeModal = () => {
-        setState({...state, modalVisible: false })
+        setState({...state, modalVisible: false, error: '' })
     }
 
     const confirmHandler = () => {
         closeModal();
-        props.navigation.navigate('millingservice')
+        dispatch(createQuality({subproduct: subProduct, quality: values.qualityName},
+            () => {props.navigation.navigate('products')},
+            err => {console.log(err)}))
     }
+
+    const qualityComponent = ({item: {quality}}) => 
+        <TouchableOpacity activeOpacity={.8} 
+            style={[styles.newProductTextContainerStyle, {width}]}
+            onPress={() => {}}
+            >
+            <View style={{width: width * .8}}>
+                <Text style={styles.newProductTextStyle}>{quality}</Text>
+            </View>
+        </TouchableOpacity>
+
+    const emptyQualityComponent = () =>
+        <View style={styles.emptyProductContainerStyle}>
+            <Text style={styles.emptyProductTextStyle}>No Qualities added</Text>
+        </View>
 
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
+            <Spinner visible={loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
                 <View style={[styles.createNewProductHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
@@ -56,30 +80,25 @@ const NewQuality = (props) => {
                 </View>
                 <View style={[styles.productContainerStyle, {width}]}>
                     <Text style={styles.productListTitleTextStyle}>Quality List</Text>
-                    <View style={{height: height * .475}}>
-                    <ScrollView
-                        bounces={false}
-                        contentContainerStyle={[styles.scrollViewStyle]}
-                        >
-                        {quality.map(({id, name}) => 
-                            <TouchableOpacity key={id} activeOpacity={.8} style={[styles.newProductTextContainerStyle, {width}]}>
-                                <View style={{width: width * .8}}>
-                                    <Text style={styles.newProductTextStyle}>{name}</Text>
-                                </View>
-                            </TouchableOpacity>
-                        )}           
-                    </ScrollView>
+                    <View style={{height: height * .575}}>
+                        {qualities.length === 0 ? emptyQualityComponent() : 
+                        <FlatList
+                            data={qualities}
+                            key={item => item.id}
+                            renderItem={qualityComponent}
+                            contentContainerStyle={styles.scrollViewStyle}
+                        />
+                        }
                     </View>
                 </View>
                 <View style={[styles.inputContainerStyle, {width: width * .8}]}>
-                    <Input
-                        placeholder="Enter new quality"
-                        error={'none'}
-                        value={''}
-                        rightComponent={false}
-                        onChangeText={() => {}}
-                        onBlur={() => {}}
-                        touched={false}
+                <Input
+                        placeholder="Enter new sub product"
+                        error={errors.qualityName}
+                        value={values.qualityName}
+                        onChangeText={handleChange('qualityName')}
+                        onBlur={handleBlur('qualityName')}
+                        touched={touched.qualityName}
                     />
                     <Button
                         title='Save'
@@ -87,23 +106,23 @@ const NewQuality = (props) => {
                         borderColor={green}
                         color={white}
                         enabled
-                        onPress={onSaveQualityHandler}
+                        onPress={handleSubmit}
                     />
                     </View>
                     <RNModal visible={state.modalVisible} onRequestClose={closeModal} presentationStyle='overFullScreen' closeIconColor={white}>
-                        <View style={[styles.createQualityContainerStyle, {height: height * .35, width: width * .75}]}>
+                        <View style={[styles.createQualityContainerStyle, {width: width * .75}]}>
                             <Text style={styles.createQualityTextStyle}>Product Summary</Text>
                             <View style={styles.textContainerStyle}>
                                 <Text>Product</Text>
-                                <Text>Lorem ipsum</Text>
+                                <Text>{product}</Text>
                             </View>
                             <View style={styles.textContainerStyle}>
                                 <Text>Sub product</Text>
-                                <Text>Lorem ipsum</Text>
+                                <Text>{subProduct}</Text>
                             </View>
                             <View style={styles.textContainerStyle}>
                                 <Text>Quality</Text>
-                                <Text>Q1    </Text>
+                                <Text>{values.qualityName}</Text>
                             </View>
                             <View style={styles.buttonContainerStyle}>
                                 <Button
@@ -169,7 +188,7 @@ const styles = StyleSheet.create({
         backgroundColor: white,
         borderRadius: defaultSize,
         justifyContent: 'space-between',
-        paddingVertical: defaultSize * 1.5,
+        paddingVertical: defaultSize * 2,
         alignItems: 'center'
     },
     createQualityTextStyle: {
@@ -181,14 +200,22 @@ const styles = StyleSheet.create({
         width: '80%',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: defaultSize,
+        marginVertical: defaultSize * .75,
         paddingBottom: defaultSize * .35,
-        borderBottomWidth: .25,
+        borderBottomWidth: .5,
         borderBottomColor: darkGray
     },
     buttonContainerStyle: {
         width: '80%'
-    }
+    },
+    // 
+    emptyProductContainerStyle: {
+        alignItems: 'center'
+    },
+    emptyProductTextStyle: {
+        fontSize: defaultSize,
+        fontWeight: 'bold'
+    },
 });
 
 export default NewQuality;

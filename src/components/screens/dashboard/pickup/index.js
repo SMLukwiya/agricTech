@@ -3,34 +3,48 @@ import {
     View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
 import Icons from 'react-native-vector-icons/MaterialIcons';
+import { useDispatch, useSelector } from 'react-redux';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 import { colors, images, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
+import { createPickup } from '../../../../store/actions';
 
 const { white, green, lightBlue, darkGray, lightGray } = colors;
 const Button = lazy(() => import('../../../common/button'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
 
 const Pickup = (props) => {
+    const dispatch = useDispatch();
     const { height, width } = useWindowDimensions();
 
-    const [state, setState] = useState({modalVisible: false, pickupConfirmed: false})
+    const [state, setState] = useState({modalVisible: false, pickupConfirmed: false, pickupId: '', pickupName: ''})
+
+    // redux
+    const {customers} = useSelector(state => state.customer);
+    const {loading} = useSelector(state => state.pickup);
 
     const goBack = () => props.navigation.navigate('home');
 
-    const onSelectPickupHandler = () => {
-        setState({...state, modalVisible: true})
+    const onSelectPickupHandler = (id) => {
+        const selectedCustomer = customers.find(item => item.id === id)
+        setState({...state, modalVisible: true, pickupId: id, pickupName: selectedCustomer.name})
     }
 
     const closeModal = () => {
-        setState({ ...state, modalVisible: false });
+        setState({ ...state, modalVisible: false, pickupConfirmed: false });
     }
 
     const onConfirmPickup = () => {
-        setState({...state, pickupConfirmed: true});
+        closeModal();
+        setTimeout(() => {
+            dispatch(createPickup(state.pickupName,
+                () => {
+                    setState({...state, pickupConfirmed: true});
+                },
+                err => console.log(err)))
+        }, 200);
     }
 
     const selectionSuccessfulHandler = () => {
@@ -38,18 +52,18 @@ const Pickup = (props) => {
         props.navigation.navigate('home');
     }
 
-    const customerComponent = () => 
-        <TouchableOpacity activeOpacity={.8} style={styles.supplierContainerStyle} onPress={onSelectPickupHandler}>
+    const customerComponent = (id, name, phone, category) => 
+        <TouchableOpacity activeOpacity={.8} style={styles.supplierContainerStyle} onPress={() => onSelectPickupHandler(id)} key={id}>
             <View style={styles.supplierImageContainerStyle}>
                 <Image source={images.avatar} width='100%' height='100%' resizeMode='contain' />
             </View>
             <View style={styles.rightSupplierContainerStyle}>
                 <View>
-                    <Text style={styles.supplierNameTextStyle}>Abija Manfred</Text>
-                    <Text style={styles.supplierPhoneTextStyle}>0771123456</Text>
+                    <Text style={styles.supplierNameTextStyle}>{name}</Text>
+                    <Text style={styles.supplierPhoneTextStyle}>{phone}</Text>
                 </View>
                 <View style={styles.categoryContainerStyle}>
-                    <Text style={styles.categoryTextStyle}>Category</Text>
+                    <Text style={styles.categoryTextStyle}>{category}</Text>
                     <View style={styles.indicatorStyle} />
                 </View>
             </View>
@@ -58,7 +72,7 @@ const Pickup = (props) => {
     const selectionChosenComponent = () => 
         <View style={[styles.modalContainerStyle, {width: width * .8, height: height * .35}]}>
             <View>
-                <Text style={styles.modalTextStyle}>You have selected Abija Manfred</Text>
+                <Text style={styles.modalTextStyle}> You have selected {state.pickupName}</Text>
                 <Text style={styles.modalTextStyle}>An email will automatically be sent</Text>
             </View>
             <View style={styles.modalButtonContainerStyle}>
@@ -89,6 +103,7 @@ const Pickup = (props) => {
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
+            <Spinner visible={loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
                 <View style={[styles.supplierHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
@@ -99,7 +114,7 @@ const Pickup = (props) => {
                 <View style={[styles.supplierOverContainerStyle,{width: width * .8, height: height * .8}]}>
                     <Text style={styles.selectACustomerTextStyle}>Please select a customer</Text>
                     <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
-                        {customerComponent()}
+                        {customers.map(({id, name, phone, category}) => customerComponent(id, name, phone, category))}
                     </ScrollView>
                 </View>
             </SafeAreaView>

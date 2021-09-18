@@ -14,6 +14,8 @@
 		3A8E149215AD4C57479774DA /* libPods-metajuaApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EBC0378343705D86C9B01928 /* libPods-metajuaApp.a */; };
 		4EEBB93926DF785B00126D50 /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 4EEBB93726DF6B3400126D50 /* main.jsbundle */; };
 		4EEBB93D26E9FE9400126D50 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4EEBB93C26E9FE9400126D50 /* GoogleService-Info.plist */; };
+		4EEBB93F26F1DB9B00126D50 /* AppCenter-Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4EEBB93E26F1DB9B00126D50 /* AppCenter-Config.plist */; };
+		4EEBB94226F1DFC100126D50 /* swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EEBB94126F1DFC100126D50 /* swift.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		92C118434F74AD44205CEF91 /* libPods-metajuaApp-metajuaAppTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 21796840430BCD0D57654E60 /* libPods-metajuaApp-metajuaAppTests.a */; };
 /* End PBXBuildFile section */
@@ -42,6 +44,9 @@
 		3D2A8BE01B6BC1B4113C6176 /* Pods-metajuaApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-metajuaApp.release.xcconfig"; path = "Target Support Files/Pods-metajuaApp/Pods-metajuaApp.release.xcconfig"; sourceTree = "<group>"; };
 		4EEBB93726DF6B3400126D50 /* main.jsbundle */ = {isa = PBXFileReference; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
 		4EEBB93C26E9FE9400126D50 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		4EEBB93E26F1DB9B00126D50 /* AppCenter-Config.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AppCenter-Config.plist"; sourceTree = "<group>"; };
+		4EEBB94026F1DFC000126D50 /* metajuaApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "metajuaApp-Bridging-Header.h"; sourceTree = "<group>"; };
+		4EEBB94126F1DFC100126D50 /* swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = swift.swift; sourceTree = "<group>"; };
 		64BCAE0AA11E40EE2A8CFB5C /* Pods-metajuaApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-metajuaApp.debug.xcconfig"; path = "Target Support Files/Pods-metajuaApp/Pods-metajuaApp.debug.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = metajuaApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C3EA31E8F7B4FFC94384CE23 /* Pods-metajuaApp-metajuaAppTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-metajuaApp-metajuaAppTests.release.xcconfig"; path = "Target Support Files/Pods-metajuaApp-metajuaAppTests/Pods-metajuaApp-metajuaAppTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -131,6 +136,8 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				4EEBB94126F1DFC100126D50 /* swift.swift */,
+				4EEBB93E26F1DB9B00126D50 /* AppCenter-Config.plist */,
 				4EEBB93C26E9FE9400126D50 /* GoogleService-Info.plist */,
 				4EEBB93726DF6B3400126D50 /* main.jsbundle */,
 				13B07FAE1A68108700A75B9A /* metajuaApp */,
@@ -139,6 +146,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				3165C2EF30EEBFF2310E7465 /* Pods */,
+				4EEBB94026F1DFC000126D50 /* metajuaApp-Bridging-Header.h */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -214,7 +222,7 @@
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
 					13B07F861A680F5B00A75B9A = {
-						LastSwiftMigration = 1120;
+						LastSwiftMigration = 1250;
 					};
 				};
 			};
@@ -249,6 +257,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4EEBB93F26F1DB9B00126D50 /* AppCenter-Config.plist in Resources */,
 				4EEBB93D26E9FE9400126D50 /* GoogleService-Info.plist in Resources */,
 				4EEBB93926DF785B00126D50 /* main.jsbundle in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
@@ -433,6 +442,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
+				4EEBB94226F1DFC100126D50 /* swift.swift in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -452,6 +462,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C808030F6E3DF4E3F89E6EAF /* Pods-metajuaApp-metajuaAppTests.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -479,6 +490,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C3EA31E8F7B4FFC94384CE23 /* Pods-metajuaApp-metajuaAppTests.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				INFOPLIST_FILE = metajuaAppTests/Info.plist;
@@ -519,6 +531,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.metajua.metajua;
 				PRODUCT_NAME = metajuaApp;
+				SWIFT_OBJC_BRIDGING_HEADER = "metajuaApp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -544,6 +557,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.metajua.metajua;
 				PRODUCT_NAME = metajuaApp;
+				SWIFT_OBJC_BRIDGING_HEADER = "metajuaApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};

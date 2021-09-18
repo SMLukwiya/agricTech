@@ -1,18 +1,19 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import {
     View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, KeyboardAvoidingView, ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import Icons from 'react-native-vector-icons/MaterialIcons';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { useDispatch, useSelector } from 'react-redux';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import auth from '@react-native-firebase/auth';
+import { CommonActions } from '@react-navigation/native';
 
-import { colors, images, defaultSize } from '../../../config';
+import { colors, images, defaultSize, errorTextStyle } from '../../../config';
 import Fallback from '../../common/fallback';
-import {loginEmail} from '../../../store/actions';
+import {loginEmail, googleSignup, resetLoaders} from '../../../store/actions';
 
 const { white, green, blue, darkGray, lightGray } = colors;
 const Button = lazy(() => import('../../common/button'));
@@ -25,15 +26,28 @@ const Login = (props) => {
     // redux
     const reduxState = useSelector(state => state.user);
 
+    useEffect(() => {
+        // configure google sign in
+        GoogleSignin.configure({
+            webClientId: '400307057307-9l1g5d73rlgq4lp5klogrg9r5mhtbmpl.apps.googleusercontent.com'
+        });
+        dispatch(resetLoaders())
+    }, [])
+
     const { handleChange, values, handleSubmit, errors, handleBlur, touched } = useFormik({
         initialValues: { emailorphonenumber: '', password: '' },
         validationSchema: Yup.object({
-            emailorphonenumber: Yup.string().required('Email or phone number is required'),
+            emailorphonenumber: Yup.string().required('Email is required'),
             password: Yup.string().min(6, 'Must be atleast 6 characters').required('Password is required')
         }),
         onSubmit: values => {
             dispatch(loginEmail(values,
-                () => props.navigation.navigate('dashboard'),
+                () => 
+                    props.navigation.dispatch(CommonActions.reset({
+                    type: 'stack',
+                    index: 0,
+                    routes: [{name: 'dashboard'}]
+                })),
                 err => console.log(err)
             ));
         }
@@ -45,13 +59,21 @@ const Login = (props) => {
     const googleSigninHandler = async () => {
         try {
             await GoogleSignin.hasPlayServices();
-            const user = await GoogleSignin.signIn();
-            console.log('GOogle user ', user)
+            const {idToken, user: {email, id, name, phoneNumber}} = await GoogleSignin.signIn();
+            const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+            await auth().signInWithCredential(googleCredential);
+            await dispatch(googleSignup({idToken, email, uid: id, fullName: name, phone: phoneNumber}));
+
+            props.navigation.dispatch(CommonActions.reset({
+                type: 'stack',
+                index: 0,
+                routes: [{name: 'dashboard'}]
+            }))
         } catch (err) {
             if (err.code === statusCodes.SIGN_IN_CANCELLED) console.log('user cancalled sign in process')
             else if (err.code === statusCodes.IN_PROGRESS) console.log('sign in process still in progress')
             else if (err.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) console.log('Play services not available')
-            else console.log('Something went wrong')
+            else console.log(err)
         }
     }
 
@@ -89,6 +111,7 @@ const Login = (props) => {
                                 secureTextEntry={true}
                             />
                         </KeyboardAvoidingView>
+                        {!!reduxState.error && <Text style={errorTextStyle}>{reduxState.error}</Text>}
                         <View>
                             <Button
                                 title='Sign in'
@@ -110,13 +133,13 @@ const Login = (props) => {
                             enabled onPress={createAccountHandler}
                         />
                         <Text style={{textAlign: 'center'}}>Or</Text>
-                        <Button
+                        {/* {<Button
                             title='Continue with facebook'
                             backgroundColor={white}
                             borderColor={darkGray}
                             color={darkGray}
                             leftComponent={<Icons name='facebook' color={blue} size={25} />}
-                        />
+                        />} */}
                         <Button
                             title='Continue with Google'
                             backgroundColor={white}

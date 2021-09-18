@@ -17,9 +17,9 @@ const Input = (props) => {
             <View style={styles.textInputContainerStyle}>
                 {rightComponent && rightComponent}
                 <TextInput
-                    style={[styles.textInputStyle, {color: colorScheme === 'dark' ? white : darkGray}]}
+                    style={[styles.textInputStyle, {color: darkGray}]}
                     placeholder={placeholder}
-                    placeholderTextColor={colorScheme === 'dark' ? white : darkGray}
+                    placeholderTextColor={colorScheme === 'dark' ? darkGray : darkGray}
                     value={value}
                     onChangeText={onChangeText}
                     onBlur={onBlur}

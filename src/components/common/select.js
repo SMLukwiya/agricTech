@@ -18,9 +18,9 @@ const ProductComponent = (props) => {
             </TouchableOpacity>
             {isProductOpen && 
                 <View>
-                    {productList.map(({type, id, name}) => 
-                        <TouchableOpacity activeOpacity={.8} key={id} onPress={() => onProductSelect(type, id, name)}>
-                            <Text style={styles.productNameTextStyle}>{name}</Text>
+                    {productList.map(({type, id, product}) => 
+                        <TouchableOpacity activeOpacity={.8} key={id} onPress={() => onProductSelect(type, id, product)}>
+                            <Text style={styles.productNameTextStyle}>{product}</Text>
                         </TouchableOpacity>
                     )}
                     <TouchableOpacity style={styles.createNewProductContainerStyle} activeOpacity={.8} onPress={onCreateHandler}>

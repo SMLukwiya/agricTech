@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import {
-    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, FlatList, Platform
+    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, FlatList, Platform, Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -20,17 +20,19 @@ const Home = (props) => {
                 </TouchableOpacity>
         </View>
 
+    const dev = () => Alert.alert('This feature is under development')
+
     const menuItems = [
-        {id: 'one', title: 'Stock', image: images.stockIcon, onPress: () => props.navigation.navigate('stocks')},
+        {id: 'one', title: 'Stock', image: images.stockIcon, onPress: dev /*() => props.navigation.navigate('stocks')*/},
         {id: 'two', title: 'Buy', image: images.buyIcon, onPress: () => props.navigation.navigate('buy')},
         {id: 'three', title: 'Supplier', image: images.supplierIcon, onPress: () => props.navigation.navigate('suppliers')},
         {id: 'four', title: 'Customers', image: images.customerIcon, onPress: () => props.navigation.navigate('customers')},
         {id: 'five', title: 'Pick Up', image: images.pickupIcon, onPress: () => props.navigation.navigate('pickup')},
-        {id: 'six', title: 'Bills/Expenses', image: images.billsIcon},
-        {id: 'seven', title: 'Purchases', image: images.salesIcon},
-        {id: 'eight', title: 'Products', image: images.orderIcon},
-        {id: 'nine', title: 'Stock Milling', image: images.stockMillingIcon, onPress: () => props.navigation.navigate('stockmilling')},
-        {id: 'ten', title: 'Milling Service', image: images.millingServiceIcon, onPress: () => props.navigation.navigate('millingservice')}
+        {id: 'six', title: 'Bills/Expenses', image: images.billsIcon, onPress: dev},
+        {id: 'seven', title: 'Purchases', image: images.salesIcon, onPress: () => props.navigation.navigate('purchase')},
+        {id: 'eight', title: 'Products', image: images.orderIcon, onPress: () => props.navigation.navigate('products')},
+        {id: 'nine', title: 'Stock Milling', image: images.stockMillingIcon, onPress: dev/*() => props.navigation.navigate('stockmilling')*/},
+        {id: 'ten', title: 'Milling Service', image: images.millingServiceIcon, onPress: dev /*() => props.navigation.navigate('millingservice')*/}
     ];
 
     return (

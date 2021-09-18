@@ -4,13 +4,14 @@ import { createStackNavigator, TransitionPresets } from '@react-navigation/stack
 import homeScreen from '../../components/screens/dashboard/home';
 import StockScreen from '../../components/screens/dashboard/stocks';
 import BuyScreen from '../../components/screens/dashboard/buy';
+import SummaryScreen from '../../components/screens/dashboard/buy/summary';
+import PurchaseScreen from '../../components/screens/dashboard/buy/purchase';
 import SelectMillScreen from '../../components/screens/dashboard/selectMIll';
 import SetupMillScreen from '../../components/screens/dashboard/setupMill';
 import CreateNewProductScreen from '../../components/screens/dashboard/create/newProduct';
 import CreateNewSubProductScreen from '../../components/screens/dashboard/create/newSubProduct';
 import CreateNewQualityScreen from '../../components/screens/dashboard/create/newQuality';
 import MillingServiceScreen from '../../components/screens/dashboard/millingService';
-import SummaryScreen from '../../components/screens/dashboard/summary';
 import SupplierScreen from '../../components/screens/dashboard/supplier';
 import SupplierDetailScreen from '../../components/screens/dashboard/supplier/supplier';
 import AddSupplierScreen from '../../components/screens/dashboard/supplier/addSupplier';
@@ -23,6 +24,7 @@ import ProfileScreen from '../../components/screens/dashboard/profile';
 import AdvancedProfileScreen from '../../components/screens/dashboard/profile/advanced';
 import BatchSummaryScreen from '../../components/screens/dashboard/batchSummary';
 import MillingSummaryScreen from '../../components/screens/dashboard/stockMilling/summary';
+import ProductsScreen from '../../components/screens/dashboard/create/products';
 
 import HeaderRight from '../../components/common/headerLeft';
 
@@ -134,6 +136,17 @@ const homeStack = () => (
         <Stack.Screen
             name="summary"
             component={SummaryScreen}
+            options={() => ({
+                title: '',
+                ...TransitionPresets.FadeFromBottomAndroid,
+                headerTransparent: true,
+                headerLeft: () => null,
+                headerRight: () => null
+            })}
+        />
+        <Stack.Screen
+            name="purchase"
+            component={PurchaseScreen}
             options={() => ({
                 title: '',
                 ...TransitionPresets.FadeFromBottomAndroid,
@@ -266,6 +279,17 @@ const homeStack = () => (
         <Stack.Screen
             name="millingsummary"
             component={MillingSummaryScreen}
+            options={() => ({
+                title: '',
+                ...TransitionPresets.FadeFromBottomAndroid,
+                headerTransparent: true,
+                headerLeft: () => null,
+                headerRight: () => null
+            })}
+        />
+        <Stack.Screen
+            name="products"
+            component={ProductsScreen}
             options={() => ({
                 title: '',
                 ...TransitionPresets.FadeFromBottomAndroid,

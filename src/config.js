@@ -39,3 +39,12 @@ export const images = {
 }
 
 export const defaultSize = 16;
+
+export const baseUri = 'https://us-central1-agro-waste-mobile-app.cloudfunctions.net/';
+
+export const errorTextStyle = {
+    color: colors.red,
+    fontSize: defaultSize * .75,
+    textAlign: 'center',
+    paddingVertical: defaultSize * .2
+}

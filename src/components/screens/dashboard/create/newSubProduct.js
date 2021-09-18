@@ -1,39 +1,86 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import {
-    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, ScrollView, TouchableOpacity
+    View, StyleSheet, Text, StatusBar, useWindowDimensions, FlatList, TouchableOpacity
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import Icons from 'react-native-vector-icons/MaterialIcons';
+import { useSelector, useDispatch } from 'react-redux';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 import { colors, images, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
+import { createSubProduct } from '../../../../store/actions';
 
-const { white, green, extraLightGreen, lightGreen } = colors;
+const { white, green, extraLightGreen, lightGreen, red } = colors;
 const Input = lazy(() => import('../../../common/input'));
 const Button = lazy(() => import('../../../common/button'));
-
-const subproducts = [
-    {id: '1', name: 'Product1'},{id: '2', name: 'Product2'},
-    {id: '3', name: 'Product3'},{id: '4', name: 'Product4'},
-    {id: '5', name: 'Product5'},{id: '6', name: 'Product6'},
-    {id: '7', name: 'Product7'},{id: '8', name: 'Product8'},
-    {id: '9', name: 'Product9'},{id: '10', name: 'Product10'},
-]
+const RNModal = lazy(() => import('../../../common/rnModal'));
 
 const NewSubProduct = (props) => {
+    const dispatch = useDispatch();
     const { height, width } = useWindowDimensions();
 
-    const goBack = () => props.navigation.navigate('buy');
+    // state
+    const [state, setState] = useState({ modalVisible: false, error: '' });
 
-    const onSubProductSelectHandler = () => {
-        props.navigation.navigate('createnewquality')
+    // redux
+    const {subProducts, loading, product} = useSelector(state => state.product);
+
+    const { handleChange, values, handleSubmit, errors, handleBlur, touched } = useFormik({
+        initialValues: { subProductName: '' },
+        validationSchema: Yup.object({
+            subProductName: Yup.string().required('Enter sub product name')
+        }),
+        onSubmit: values => {
+            setState({...state, modalVisible: true})
+        }
+    });
+
+    const goBack = () => props.navigation.goBack();
+
+    const closeModal = () => {
+        setState({...state, modalVisible: false, error: '' })
     }
+
+    const onContinueHandler = () => {
+        closeModal();
+        setTimeout(() => {
+            dispatch(createSubProduct({product, subproduct: values.subProductName},
+                () => {props.navigation.navigate('products')},
+                err => {console.log(err)}))
+        }, 200);
+    }
+
+    const onCreateSubproductHandler = () => {
+        closeModal();
+        setTimeout(() => {
+            dispatch(createSubProduct({product, subproduct: values.subProductName},
+                () => {props.navigation.navigate('createnewquality')},
+                err => {console.log(err)}))
+        }, 200);
+    }
+
+    const subProductComponent = ({item: {product}}) => 
+        <TouchableOpacity activeOpacity={.8} 
+            style={[styles.newProductTextContainerStyle, {width}]}
+            onPress={() => {}}
+            >
+            <View style={{width: width * .8}}>
+                <Text style={styles.newProductTextStyle}>{product}</Text>
+            </View>
+        </TouchableOpacity>
+
+    const emptyProductComponent = () =>
+        <View style={styles.emptyProductContainerStyle}>
+            <Text style={styles.emptyProductTextStyle}>No Sub products added</Text>
+        </View>
 
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
+            <Spinner visible={loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
                 <View style={[styles.createNewProductHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
@@ -43,45 +90,67 @@ const NewSubProduct = (props) => {
                 </View>
                 <View style={[styles.productContainerStyle, {width}]}>
                     <Text style={styles.productListTitleTextStyle}>Sub product List</Text>
-                    <View style={{height: height * .475}}>
-                    <ScrollView
-                        bounces={false}
-                        contentContainerStyle={[styles.scrollViewStyle]}
-                        >
-                        {subproducts.map(({id, name}) => 
-                            <TouchableOpacity 
-                                key={id} activeOpacity={.8} 
-                                style={[styles.newProductTextContainerStyle, {width}]}
-                                onPress={onSubProductSelectHandler}
-                                >
-                                <View style={{width: width * .8}}>
-                                    <Text style={styles.newProductTextStyle}>{name}</Text>
-                                </View>
-                            </TouchableOpacity>
-                        )}           
-                    </ScrollView>
+                    <View style={{height: height * .575}}>
+                        {subProducts.length === 0 ? emptyProductComponent() : 
+                        <FlatList
+                            data={subProducts}
+                            key={item => item.id}
+                            renderItem={subProductComponent}
+                            contentContainerStyle={styles.scrollViewStyle}
+                        />
+                        }
                     </View>
                 </View>
                 <View style={[styles.inputContainerStyle, {width: width * .8}]}>
                     <Input
                         placeholder="Enter new sub product"
-                        error={'none'}
-                        value={''}
-                        rightComponent={false}
-                        onChangeText={() => {}}
-                        onBlur={() => {}}
-                        touched={false}
+                        error={errors.subProductName}
+                        value={values.subProductName}
+                        onChangeText={handleChange('subProductName')}
+                        onBlur={handleBlur('subProductName')}
+                        touched={touched.subProductName}
                     />
                     <Button
                         title='Continue'
                         backgroundColor={green}
                         borderColor={green}
                         color={white}
-                        enabled
-                        onPress={() => {}}
+                        enabled={values.subProductName !== ''}
+                        onPress={handleSubmit}
                     />
                     </View>
             </SafeAreaView>
+            <RNModal visible={state.modalVisible} onRequestClose={closeModal} presentationStyle='overFullScreen' closeIconColor={white}>
+                <View style={[styles.createQualityContainerStyle, {height: height * .375, width: width * .75}]}>
+                    <Text style={styles.createQualityTextStyle}>Create quality for product</Text>
+                    <View style={styles.buttonContainerStyle}>
+                        <Button
+                            title='Confirm and go back'
+                            backgroundColor={green}
+                            borderColor={green}
+                            color={white}
+                            enabled
+                            onPress={onContinueHandler}
+                        />
+                        <Button
+                            title='Confirm and create quality'
+                            backgroundColor={green}
+                            borderColor={green}
+                            color={white}
+                            enabled
+                            onPress={onCreateSubproductHandler}
+                        />
+                        <Button
+                            title='Modify'
+                            backgroundColor={red}
+                            borderColor={red}
+                            color={white}
+                            enabled
+                            onPress={closeModal}
+                        />
+                    </View>
+                </View>
+            </RNModal>
         </Suspense>
     )
 }
@@ -128,8 +197,30 @@ const styles = StyleSheet.create({
     newProductTextStyle: {
         fontSize: defaultSize * .8,
         paddingVertical: defaultSize * .8,
-        
-    }
+    },
+    emptyProductContainerStyle: {
+        alignItems: 'center'
+    },
+    emptyProductTextStyle: {
+        fontSize: defaultSize,
+        fontWeight: 'bold'
+    },
+    createQualityContainerStyle: {
+        backgroundColor: white,
+        borderRadius: defaultSize,
+        justifyContent: 'space-between',
+        paddingVertical: defaultSize * 1.5,
+        alignItems: 'center'
+    },
+    createQualityTextStyle: {
+        textAlign: 'center',
+        marginTop: defaultSize* 2.5,
+        fontSize: defaultSize * .85,
+        marginVertical: defaultSize
+    },
+    buttonContainerStyle: {
+        width: '80%'
+    },
 });
 
 export default NewSubProduct;

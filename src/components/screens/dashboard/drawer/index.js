@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import {
-    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, ScrollView
+    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CommonActions } from '@react-navigation/native';
@@ -21,7 +21,7 @@ const CustomDrawer = (props) => {
     // dummy items
     const items = [
         {id: 1, name: 'Monitor Stock', image: images.monitor, onPress:() => {}},
-        {id: 2, name: 'Profile', image: images.profile, onPress:() => props.navigation.navigate('profile')},
+        {id: 2, name: 'Profile', image: images.profile, onPress: () => Alert.alert('This feature is under development')/*props.navigation.navigate('profile')*/},
         {id: 3, name: 'Invite friends', image: images.friends, onPress:() => {}},
         {id: 4, name: 'Preferences', image: images.preference, onPress:() => {}},
         {id: 5, name: 'About', image: images.info, onPress:() => {}},

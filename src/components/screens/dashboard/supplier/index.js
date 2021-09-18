@@ -3,9 +3,8 @@ import {
     View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
 import Icons from 'react-native-vector-icons/MaterialIcons';
+import { useSelector } from 'react-redux';
 
 import { colors, images, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
@@ -16,6 +15,9 @@ const Button = lazy(() => import('../../../common/button'));
 const Suppliers = (props) => {
     const { height, width } = useWindowDimensions();
 
+    // redux
+    const {suppliers} = useSelector(state => state.supplier);
+
     const goBack = () => props.navigation.navigate('home');
 
     // add supplier
@@ -23,22 +25,22 @@ const Suppliers = (props) => {
         props.navigation.navigate('addsupplier')
     }
 
-    const onSelectSupplierHandler = () => {
-        props.navigation.navigate('supplierdetail');
+    const onSelectSupplierHandler = (id) => {
+        props.navigation.navigate('supplierdetail', {id});
     }
 
-    const supplierComponent = () => 
-        <TouchableOpacity activeOpacity={.8} style={styles.supplierContainerStyle} onPress={onSelectSupplierHandler}>
+    const supplierComponent = (id,imageUrl, name, phone, category) => 
+        <TouchableOpacity activeOpacity={.8} style={styles.supplierContainerStyle} onPress={() =>onSelectSupplierHandler(id)} key={id}>
             <View style={styles.supplierImageContainerStyle}>
-                <Image source={images.avatar} width='100%' height='100%' resizeMode='contain' />
+                <Image source={imageUrl ? {uri: imageUrl} : images.avatar} width='100%' height='100%' resizeMode='contain' />
             </View>
             <View style={styles.rightSupplierContainerStyle}>
                 <View>
-                    <Text style={styles.supplierNameTextStyle}>Abija Manfred</Text>
-                    <Text style={styles.supplierPhoneTextStyle}>0771123456</Text>
+                    <Text style={styles.supplierNameTextStyle}>{name}</Text>
+                    <Text style={styles.supplierPhoneTextStyle}>{phone}</Text>
                 </View>
                 <View style={styles.categoryContainerStyle}>
-                    <Text style={styles.categoryTextStyle}>Category</Text>
+                    <Text style={styles.categoryTextStyle}>{category}</Text>
                     <View style={styles.indicatorStyle} />
                 </View>
             </View>
@@ -56,7 +58,7 @@ const Suppliers = (props) => {
                 </View>
                 <View style={[styles.supplierOverContainerStyle,{width: width * .8, height: height * .785}]}>
                     <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
-                        {supplierComponent()}
+                        {suppliers.length === 0 ? <Text style={{fontSize: defaultSize, fontWeight: 'bold', textAlign: 'center'}}>No suppliers added</Text> : suppliers.map(({id, imageUrl, name, phone, category}) => supplierComponent(id, imageUrl, name, phone, category))}
                     </ScrollView>
                 </View>
                 <View style={[styles.buttonContainerStyle, {width: width * .8}]}>

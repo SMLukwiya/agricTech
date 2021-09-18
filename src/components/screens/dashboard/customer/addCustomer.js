@@ -6,9 +6,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import Icons from 'react-native-vector-icons/MaterialIcons';
+import { useSelector, useDispatch } from 'react-redux';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 import { colors, images, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
+import { createCustomer } from '../../../../store/actions'
 
 const { white, green, blue, darkGray } = colors;
 const Select = lazy(() => import('../../../common/select'));
@@ -29,7 +32,11 @@ if (Platform.OS === 'android') {
 const transition = LayoutAnimation.create(200, 'easeInEaseOut', 'scaleY');
 
 const AddCustomer = (props) => {
+    const dispatch = useDispatch();
     const { width } = useWindowDimensions();
+
+    // redux
+    const customerState = useSelector(state => state.customer);
 
     const [category, setCategory] = useState({id: 'none', progress: new Animated.Value(45), name: 'Category', open: false});
 
@@ -41,7 +48,12 @@ const AddCustomer = (props) => {
             email: Yup.string().email('Please enter valid email').required('Email is required')
         }),
         onSubmit: values => {
-            props.navigation.navigate('')
+            dispatch(createCustomer({values, category: category.name},
+                () => {
+                    props.navigation.navigate('customers')
+                },
+                err => console.log(err)
+            ))
         }
     });
 
@@ -67,9 +79,12 @@ const AddCustomer = (props) => {
         }).start()
     }
 
+    const enabled = category.name !== 'Category'
+
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
+            <Spinner visible={customerState.loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
                 <View style={[styles.supplierHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
@@ -128,7 +143,7 @@ const AddCustomer = (props) => {
                         backgroundColor={green}
                         borderColor={green}
                         color={white}
-                        enabled
+                        enabled={enabled}
                         onPress={handleSubmit}
                     />
                 </View>

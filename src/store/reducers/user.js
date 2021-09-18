@@ -1,9 +1,14 @@
-import { FastField } from 'formik';
 import { 
     USER_EMAIL_SIGNUP, USER_EMAIL_SIGNUP_FAILED, USER_EMAIL_SIGNUP_SUCCESSFUL,
     LOGIN_EMAIL, LOGIN_EMAIL_FAILED, LOGIN_EMAIL_SUCCESSFUL,
     LOGOUT, LOGOUT_FAILED, LOGOUT_SUCCESSFUL,
-    RESET_LOADERS
+    RESET_LOADERS,
+    USER_GOOGLE_LOGIN,
+    USER_GOOGLE_LOGIN_FAILED,
+    USER_GOOGLE_LOGIN_SUCCESSFUL,
+    USER_GOOGLE_SIGNUP_SUCCESSFUL,
+    USER_GOOGLE_SIGNUP,
+    USER_GOOGLE_SIGNUP_FAILED
 } from '../actions/types';
 
 const INITIAL_STATE = {
@@ -19,7 +24,8 @@ export default (state = INITIAL_STATE, action) => {
         case RESET_LOADERS:
             return {
                 ...state,
-                loading: false
+                loading: false,
+                error: ''
             }
 
         case USER_EMAIL_SIGNUP:
@@ -40,7 +46,30 @@ export default (state = INITIAL_STATE, action) => {
         case USER_EMAIL_SIGNUP_FAILED:
             return {
                 ...state,
-                loading: false
+                loading: false,
+                error: action.payload
+            }
+
+        case USER_GOOGLE_SIGNUP:
+            return {
+                ...state,
+                loading: true
+            }
+
+        case USER_GOOGLE_SIGNUP_SUCCESSFUL:
+            return {
+                ...state,
+                loading: false,
+                userID: action.payload.uid,
+                userEmail: action.payload.email,
+                userToken: action.payload.idToken
+            }
+
+        case USER_GOOGLE_SIGNUP_FAILED:
+            return {
+                ...state,
+                loading: false,
+                error: action.payload
             }
 
         case LOGIN_EMAIL:
@@ -60,7 +89,8 @@ export default (state = INITIAL_STATE, action) => {
 
         case LOGIN_EMAIL_FAILED:
             return {
-                loading: false
+                loading: false,
+                error: action.payload
             }
         
         case LOGOUT:
