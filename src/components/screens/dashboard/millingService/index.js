@@ -4,44 +4,18 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icons from 'react-native-vector-icons/MaterialIcons';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { colors, defaultSize } from '../../../config';
-import Fallback from '../../common/fallback';
+import { colors, defaultSize } from '../../../../config';
+import Fallback from '../../../common/fallback';
+import { saveMillData } from '../../../../store/actions';
+import dayjs from 'dayjs';
 
 const { white, green, darkGray, lightGray } = colors;
-const Button = lazy(() => import('../../common/button'));
-const Select = lazy(() => import('../../common/select'));
-const RNModal = lazy(() => import('../../common/rnModal'));
-const Input = lazy(() => import('../../common/input'));
-
-const products = [
-    {type: 'product', id: 'one', name: 'Coffee'},
-    {type: 'product', id: 'two', name: 'Maize'}
-]
-const subProducts = [
-    {type: 'subproduct', id: 'one', name: 'Coffee'},
-    {type: 'subproduct', id: 'two', name: 'Maize'}
-]
-
-const categories = [
-    {type: 'category', id: '1', name: 'Farmer'},
-    {type: 'category', id: '2', name: 'Trader'}
-]
-
-const suppliers = [
-    {type: 'supplier', id: 'one', name: 'Ben Kiwanuka'},
-    {type: 'supplier', id: 'two', name: 'Kizito Lule'}
-]
-
-const inputQualities = [
-    {type: 'inputquality', id: 1, name: 'Q1'},
-    {type: 'inputquality', id: 2, name: 'Q2'}
-]
-
-const outputQualities = [
-    {type: 'outputquality', id: 1, name: 'Q1'},
-    {type: 'outputquality', id: 2, name: 'Q2'}
-]
+const Button = lazy(() => import('../../../common/button'));
+const Select = lazy(() => import('../../../common/select'));
+const RNModal = lazy(() => import('../../../common/rnModal'));
+const Input = lazy(() => import('../../../common/input'));
 
 if (Platform.OS === 'android') {
     if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -52,7 +26,12 @@ if (Platform.OS === 'android') {
 const transition = LayoutAnimation.create(200, 'easeInEaseOut', 'scaleY');
 
 const MillingService = (props) => {
+    const dispatch = useDispatch();
     const { width, height } = useWindowDimensions();
+    
+    // redux
+    const {products, subProducts, categories, qualities} = useSelector(state => state.product);
+    const {suppliers} = useSelector(state => state.supplier);
 
     // state
     const [product, setProduct] = useState({id: 'none', progress: new Animated.Value(45) , name: 'Product', open: false});
@@ -75,7 +54,7 @@ const MillingService = (props) => {
     const [totalWeightInput, setTotalWeightInput] = useState({value: ''});
     const [totalWeightOutput, setTotalWeightOutput] = useState({value: ''});
     const [millingFee, setMillingFee] = useState({value: '0', error: ''});
-    const [totalPayable, setTotalPayable] = useState({value: ''});
+    const [totalPayable, setTotalPayable] = useState({value: '0'});
 
     const closeModal = () => {
         setModal({...modal, modalVisible: false})
@@ -109,14 +88,14 @@ const MillingService = (props) => {
     }
 
     const addTotalPayable = () => {
-        setTotalPayable({...totalPayable, value: `${parseInt(totalWeightInput.value === '' ? '0' : totalWeightInput.value) * parseInt(millingFee.value === '' ? '0' : millingFee.value)}`});
+        setTotalPayable({...totalPayable, value: `${(parseInt(totalWeightInput.value === '' ? '0' : totalWeightInput.value) + parseInt(totalWeightOutput.value === '' ? '0' : totalWeightOutput.value)) * parseInt(millingFee.value === '' ? '0' : millingFee.value)}`});
     }
 
     useEffect(() => {
         addTotalInputWeight();
         addTotalOutputWeight();
         addTotalPayable();
-    }, [defaultInputWeight.value, addedInputWeight.value, defaultOutputWeight.value, addedOutputWeight.value]);
+    }, [defaultInputWeight.value, addedInputWeight.value, defaultOutputWeight.value, addedOutputWeight.value, millingFee.value]);
 
     const onMillingServiceContinue = () => {
         setModal({...modal, modalVisible: !modal.modalVisible})
@@ -195,16 +174,9 @@ const MillingService = (props) => {
                 duration: 200,
                 useNativeDriver: false
             }).start()
-        } else if (type === 'inputquality') {
+        } else if (type === 'quality') {
             setInputQuality({...inputQuality, id: id === inputQuality.id ? '' : id, name, open: false });
             Animated.timing(inputQuality.progress, {
-                toValue: 45,
-                duration: 200,
-                useNativeDriver: false
-            }).start()
-        } else if (type === 'outputquality') {
-            setOutputQuality({...outputQuality, id: id === outputQuality.id ? '' : id, name, open: false });
-            Animated.timing(outputQuality.progress, {
                 toValue: 45,
                 duration: 200,
                 useNativeDriver: false
@@ -220,6 +192,16 @@ const MillingService = (props) => {
         
     }
 
+    // extract output quality selector temp
+    const onSelectOutputQuality = (type, id, name) => {
+        setOutputQuality({...outputQuality, id: id === outputQuality.id ? '' : id, name, open: false });
+            Animated.timing(outputQuality.progress, {
+                toValue: 45,
+                duration: 200,
+                useNativeDriver: false
+            }).start()
+    }
+
     const onCreateHandler = (type) => {
         props.navigation.navigate(type === 'product' ? 'createnewproduct' : type === 'subproduct' ? 'createnewsubproduct' : 'createnewsubproduct')
     }
@@ -228,10 +210,34 @@ const MillingService = (props) => {
         props.navigation.navigate('createnewquality');
     }
 
+    const saveData = () => {
+        dispatch(saveMillData({
+            date: dayjs().format('YYYY-DD-MM:H:M'),
+            product: product.name,
+            subProduct: subProduct.name,
+            category: category.name,
+            individual: supplier.name,
+            inputQuality: inputQuality.name,
+            inputQuantity1: defaultInputWeight.value,
+            inputQuantity2: addedInputWeight.value, 
+            totalInput: totalWeightInput.value, 
+            outputQuality: outputQuality.name, 
+            outputQuantity1: defaultOutputWeight.value, 
+            outputQuantity2: addedOutputWeight.value, 
+            totalOutput: totalWeightOutput.value,
+            pricePerUnit: millingFee.value,
+            totalPayable: totalPayable.value,
+        }))
+    }
+
     const onContinueHandler = () => {
         closeModal();
+        saveData();
         props.navigation.navigate('millingsummary')
     }
+
+    let enabled1 = product.name !== 'Product' && subProduct.name !== 'Sub Product' && category.name !== 'Category' && supplier.name !== 'Supplier';
+    let enabled = product.name !== 'Product' && subProduct.name !== 'Sub Product' && inputQuality.name !== 'Input Quality' && outputQuality.name !== 'Output Quality'
 
     return (
         <Suspense fallback={<Fallback />}>
@@ -248,7 +254,7 @@ const MillingService = (props) => {
                     <View>
                         <Select
                             height={product.progress}
-                            onToggleSelector={() => onToggleSelector('product', 'Your Product')}
+                            onToggleSelector={() => onToggleSelector('product', 'Product')}
                             productName={product.name}
                             isProductOpen={product.open}
                             productList={products}
@@ -261,7 +267,7 @@ const MillingService = (props) => {
                     <View>
                         <Select
                             height={subProduct.progress}
-                            onToggleSelector={() => onToggleSelector('subproduct', 'Your Sub Product')}
+                            onToggleSelector={() => onToggleSelector('subproduct', 'Sub Product')}
                             productName={subProduct.name}
                             isProductOpen={subProduct.open}
                             productList={subProducts}
@@ -287,7 +293,7 @@ const MillingService = (props) => {
                     <View>
                         <Select
                             height={supplier.progress}
-                            onToggleSelector={() => onToggleSelector('supplier', 'Your Supplier')}
+                            onToggleSelector={() => onToggleSelector('supplier', 'Supplier')}
                             productName={supplier.name}
                             isProductOpen={supplier.open}
                             productList={suppliers}
@@ -303,7 +309,8 @@ const MillingService = (props) => {
                         backgroundColor={green}
                         borderColor={green}
                         color={white}
-                        enabled onPress={onMillingServiceContinue}
+                        enabled={enabled1}
+                        onPress={onMillingServiceContinue}
                     />
                 </View>
             </SafeAreaView>
@@ -316,7 +323,7 @@ const MillingService = (props) => {
                             onToggleSelector={() => onToggleSelector('inputquality', 'Select Input Quality')}
                             productName={inputQuality.name}
                             isProductOpen={inputQuality.open}
-                            productList={inputQualities}
+                            productList={qualities}
                             onProductSelect={onProductSelect}
                             buttonTitle='Create new Input Quality'
                             onCreateHandler={() => onCreateHandler('inputQuality')}
@@ -368,8 +375,8 @@ const MillingService = (props) => {
                             onToggleSelector={() => onToggleSelector('outputquality', 'Select Output Quality')}
                             productName={outputQuality.name}
                             isProductOpen={outputQuality.open}
-                            productList={outputQualities}
-                            onProductSelect={onProductSelect}
+                            productList={qualities}
+                            onProductSelect={onSelectOutputQuality}
                             buttonTitle='Create new Output Quality'
                             onCreateHandler={() => onCreateHandler('outputQuality')}
                         />
@@ -446,7 +453,8 @@ const MillingService = (props) => {
                         backgroundColor={green}
                         borderColor={green}
                         color={white}
-                        enabled onPress={onContinueHandler}
+                        enabled={enabled}
+                        onPress={onContinueHandler}
                     />
                 </View>
             </RNModal>

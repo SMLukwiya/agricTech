@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useState } from 'react';
 import {
-    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, Animated
+    View, StyleSheet, Text, StatusBar, useWindowDimensions, Animated
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icons from 'react-native-vector-icons/MaterialIcons';
@@ -52,7 +52,7 @@ const Summary = (props) => {
                     }, 150);
                 },
                 (err) => {
-                    console.log('Err', err);
+                    console.log('Err ',err);
                 }
             ))
         }, 200);
@@ -113,7 +113,7 @@ const successComponent = () =>
                 <View style={{width: width * .8}}>
                     <View style={styles.summaryContainerStyle}>
                         <Text>Farmer</Text>
-                        <Text>{buyState.farmer}</Text>
+                        <Text>{buyState.individual}</Text>
                     </View>
                     <View style={styles.summaryContainerStyle}>
                         <Text>Product</Text>
@@ -128,14 +128,14 @@ const successComponent = () =>
                             <Text>Q1</Text>
                             <Text>{buyState.quantity1} Kg</Text>
                         </View>
-                        <Text>900UGX</Text>
+                        <Text>{buyState.pricePerUnit} UGX</Text>
                     </View>
                     <View style={styles.summaryContainerStyle}>
                         <View>
                             <Text>Q2</Text>
                             <Text>{buyState.quantity2} Kg</Text>
                         </View>
-                        <Text>500UGX</Text>
+                        <Text>{buyState.pricePerUnit} UGX</Text>
                     </View>
                     <View style={styles.summaryContainerStyle}>
                         <Text>Total Weight</Text>

@@ -2,13 +2,10 @@ import {
     USER_EMAIL_SIGNUP, USER_EMAIL_SIGNUP_FAILED, USER_EMAIL_SIGNUP_SUCCESSFUL,
     LOGIN_EMAIL, LOGIN_EMAIL_FAILED, LOGIN_EMAIL_SUCCESSFUL,
     LOGOUT, LOGOUT_FAILED, LOGOUT_SUCCESSFUL,
-    RESET_LOADERS,
-    USER_GOOGLE_LOGIN,
-    USER_GOOGLE_LOGIN_FAILED,
-    USER_GOOGLE_LOGIN_SUCCESSFUL,
-    USER_GOOGLE_SIGNUP_SUCCESSFUL,
-    USER_GOOGLE_SIGNUP,
-    USER_GOOGLE_SIGNUP_FAILED
+    RESET_LOADERS, UPDATE_USER,
+    USER_GOOGLE_LOGIN, USER_GOOGLE_LOGIN_FAILED, USER_GOOGLE_LOGIN_SUCCESSFUL,
+    USER_GOOGLE_SIGNUP_SUCCESSFUL, USER_GOOGLE_SIGNUP, USER_GOOGLE_SIGNUP_FAILED,
+    UPLOAD_AVATAR, UPLOAD_AVATAR_FAILED, UPLOAD_AVATAR_SUCCESSFUL
 } from '../actions/types';
 
 const INITIAL_STATE = {
@@ -16,7 +13,9 @@ const INITIAL_STATE = {
     userToken: '',
     userEmail: '',
     loading: false,
-    error: ''
+    error: '',
+    image: {},
+    user: {}
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -26,6 +25,14 @@ export default (state = INITIAL_STATE, action) => {
                 ...state,
                 loading: false,
                 error: ''
+            }
+
+        case UPDATE_USER:
+            return {
+                ...state,
+                user: {
+                    ...action.payload
+                }
             }
 
         case USER_EMAIL_SIGNUP:
@@ -99,6 +106,27 @@ export default (state = INITIAL_STATE, action) => {
                 userID: '',
                 userEmail: '',
                 userToken: ''
+            }
+
+        case UPLOAD_AVATAR:
+            return {
+                ...state,
+                loading: true
+            }
+
+        case UPLOAD_AVATAR_SUCCESSFUL:
+            return {
+                ...state,
+                loading: false,
+                image: {
+                    ...action.payload
+                }
+            }
+
+        case UPLOAD_AVATAR_FAILED:
+            return {
+                ...state,
+                loading: false
             }
 
         default:

@@ -5,12 +5,14 @@ import {
 } from './types';
 import {baseUri} from '../../config';
 
-export const createPickup = (customer, onSucess = () => {}, onFailure = () => {}) => {
+export const createPickup = (values, onSucess = () => {}, onFailure = () => {}) => {
+    const { customer, email, phone } = values;
+
     return async dispatch => {
         dispatch({ type: PICKUP })
 
         try {
-            await axios.post(`${baseUri}pickup-pickup`, { customer })
+            await axios.post(`${baseUri}pickup-pickup`, { customer, email, phone })
             dispatch({type: PICKUP_SUCCESSFUL});
             onSucess()
         } catch (err) {

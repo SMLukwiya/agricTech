@@ -3,50 +3,52 @@ import {
     View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, Animated
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 
 import { colors, images, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
 
-const { white, green, blue, darkGray, red } = colors;
+const { white, green, red, darkGray } = colors;
+const Select = lazy(() => import('../../../common/select'));
 const Button = lazy(() => import('../../../common/button'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
-const Select = lazy(() => import('../../../common/select'));
 
 const paymentMethods = [
     {id: 1, name: 'Cash'}
 ]
 
-const Stocks = (props) => {
+const MillingSummary = (props) => {
     const { height, width } = useWindowDimensions();
 
-    // state
-    const [modal, setModal] = useState(false);
     const [payment, setPaymentMethod] = useState({id: 'none', progress: new Animated.Value(45), name: 'Quanity', open: false, payment: 'pending'});
+    const [modal, setModal] = useState({modalVisible: false})
 
     const goBack = () => props.navigation.navigate('home');
 
-    const onModifyBatchMill = () => props.navigation.goBack();
+    const onContinuePaymentHandler = () => {
+        setModal({...modal, modalVisible: true})
+    } 
 
-    const onConfirmBatch = () => {
-        setModal(true);
-    }
-
-    const closeModal = () => setModal(false);
-
-    const onConfirmBatchClose = () => {
-        closeModal();
-        props.navigation.navigate('home');
+    // close modal
+    const closeModal = () => {
+        setModal({...modal, modalVisible: false})
     }
 
     const confirmPaymentHandler = () => {
         setPaymentMethod({...payment, payment: 'success'});
     }
 
+    const onClosePaymentModal = () => {
+        closeModal();
+        props.navigation.navigate('buy');
+    }
+
     const paymentComponent = () => 
     <>
         <View style={[styles.modalContainerStyle, {width: width * .75, height: height * .35}]}>
-        <Text style={styles.modalTextStyle}>Please confirm Cash Payment</Text>
+        <Text style={styles.cashTextStyle}>Please confirm Cash Payment</Text>
             <View style={[styles.buttonContainerStyle, {width: '80%'}]}>
                 <Button
                     title='Confirm payment'
@@ -62,14 +64,14 @@ const Stocks = (props) => {
     const successComponent = () => 
     <>
         <View style={[styles.modalContainerStyle, {width: width * .75, height: height * .35}]}>
-        <Text style={styles.modalTextStyle}>Confirmation Successful</Text>
+        <Text style={styles.cashTextStyle}>Confirmation Successful</Text>
             <View style={[styles.buttonContainerStyle, {width: '80%'}]}>
                 <Button
                     title='Close'
                     backgroundColor={green}
                     borderColor={green}
                     color={white}
-                    enabled onPress={onConfirmBatchClose}
+                    enabled onPress={onClosePaymentModal}
                 />
             </View>
         </View>
@@ -82,56 +84,47 @@ const Stocks = (props) => {
                 <View style={[styles.summaryHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
                     <View style={{width: '85%'}}>
-                        <Text style={styles.summaryHeaderTextStyle}>Batch Summary</Text>
+                        <Text style={styles.summaryHeaderTextStyle}>Summary</Text>
                     </View>
                 </View>
-                <View style={[styles.summaryContainerStyle, {width: width * .8}]}>
-                    <View style={styles.summaryComponentContainerStyle}>
-                        <Text>Date & Time</Text>
-                        <View style={styles.dateContainerStyle}>
-                            <Text style={styles.summaryTextStyle}>30/08/2021</Text>
-                            <Text style={styles.summaryDateTextStyle}>11:45</Text>
-                        </View>
+                <View style={{width: width * .8}}>
+                    <View style={styles.summaryContainerStyle}>
+                        <Text>Farmer</Text>
+                        <Text>John Mukoma</Text>
                     </View>
-                    <View style={styles.summaryComponentContainerStyle}>
-                        <Text>Mill</Text>
-                        <Text style={styles.summaryTextStyle}>Miller 1</Text>
-                    </View>
-                    <View style={styles.summaryComponentContainerStyle}>
+                    <View style={styles.summaryContainerStyle}>
                         <Text>Product</Text>
-                        <Text style={styles.summaryTextStyle}>Coffee, Parchment</Text>
+                        <Text>Coffee, Parchment</Text>
                     </View>
-                    <Text style={styles.summaryTotalTextTitleStyle}>Total Weight</Text>
-                    <Text>Input Weight</Text>
-                    <View style={styles.summaryComponentSimpleContainerStyle}>
+                    <View style={styles.summaryContainerStyle}>
+                        <Text>Weight</Text>
+                        <Text>Price per unit</Text>
+                    </View>
+                    <View style={styles.summaryContainerStyle}>
                         <Text>Q1</Text>
-                        <Text>00.00 kg</Text>
+                        <Text>900UGX</Text>
                     </View>
-                    <View style={styles.summaryComponentContainerStyle}>
-                        <Text style={styles.summaryTextStyle}>Total input</Text>
-                        <Text style={styles.summaryTextStyle}>.00 kg</Text>
+                    <View style={styles.summaryContainerStyle}>
+                        <Text>Q2</Text>
+                        <Text>500UGX</Text>
                     </View>
-                    <Text>Output Weight</Text>
-                    <View style={styles.summaryComponentSimpleContainerStyle}>
-                        <Text>Q1</Text>
-                        <Text>00.00 kg</Text>
+                    <View style={styles.summaryContainerStyle}>
+                        <Text>Total Weight</Text>
+                        <Text>1100 kgs</Text>
                     </View>
-                    <View style={styles.summaryComponentContainerStyle}>
-                        <Text style={styles.summaryTextStyle}>Total output</Text>
-                        <Text style={styles.summaryTextStyle}>.00 kg</Text>
-                    </View>
-                    <View style={styles.summaryComponentContainerStyle}>
-                        <Text style={styles.summaryTextStyle}>Total Payable</Text>
-                        <Text style={styles.summaryTextStyle}>.00 kg</Text>
+                    <View style={styles.summaryContainerStyle}>
+                        <Text>Total Amount</Text>
+                        <Text>870,000 UGX</Text>
                     </View>
                 </View>
+                
                 <View style={[styles.buttonContainerStyle, {width: width * .8}]}>
                     <Button
-                        title='Modify Batch Milling'
+                        title='Modify Transaction'
                         backgroundColor={red}
                         borderColor={red}
                         color={white}
-                        enabled onPress={onModifyBatchMill}
+                        enabled onPress={() => {}}
                     />
                 </View>
                 <View style={{width: width * .8, marginVertical: defaultSize}}>
@@ -149,16 +142,16 @@ const Stocks = (props) => {
                 </View>
                 <View style={[styles.buttonContainerStyle, {width: width * .8}]}>
                     <Button
-                        title='Confirm batch milling'
+                        title='Continue'
                         backgroundColor={green}
                         borderColor={green}
                         color={white}
-                        enabled onPress={onConfirmBatch}
+                        enabled onPress={onContinuePaymentHandler}
                     />
                 </View>
             </SafeAreaView>
-            <RNModal visible={modal} onRequestClose={closeModal} presentationStyle='overFullScreen' closeIconColor={white}>
-            {payment.payment === 'success' ? successComponent() : paymentComponent()}
+            <RNModal visible={modal.modalVisible} onRequestClose={closeModal} presentationStyle='overFullScreen' closeIconColor={white}>
+                {payment.payment === 'success' ? successComponent() : paymentComponent()}
             </RNModal>
         </Suspense>
     )
@@ -183,53 +176,13 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     summaryContainerStyle: {
-        marginTop: defaultSize * 1.5
-    },
-    summaryComponentContainerStyle: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         borderBottomColor: darkGray,
-        borderBottomWidth: 1,
-        paddingBottom: defaultSize * .75,
-        marginVertical: defaultSize * .75
-    },
-    dateContainerStyle: {
-        flexDirection: 'row',
-        alignItems: 'center'
-    },
-    summaryTextStyle: {
-        fontWeight: 'bold'
-    },
-    summaryDateTextStyle: {
-        fontWeight: 'bold',
-        marginLeft: defaultSize * .75
-    },
-    summaryTotalTextTitleStyle: {
-        fontWeight: 'bold',
-        marginVertical: defaultSize
-    },
-    summaryComponentSimpleContainerStyle: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between'
-    },
-    modalContainerStyle: {
-        backgroundColor: white,
-        borderRadius: defaultSize,
-        overflow: 'hidden',
-        paddingVertical: defaultSize,
-        alignItems: 'center',
-        justifyContent: 'space-between'
-    },
-    modalTextStyle: {
-        fontSize: defaultSize * .85,
-        marginVertical: defaultSize,
-        textAlign: 'center'
-    },
-    modalButtonContainerStyle: {
-        width: '80%',
-        marginTop: defaultSize * 2
+        borderBottomWidth: .5,
+        paddingVertical: defaultSize * .75,
+        marginVertical: defaultSize * .35
     },
     paymentTitleStyles: {
         fontSize: defaultSize * 1.15,
@@ -237,6 +190,18 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginBottom: defaultSize
     },
+    modalContainerStyle: {
+        justifyContent: 'space-between',
+        paddingVertical: defaultSize,
+        alignItems: 'center',
+        backgroundColor: white,
+        borderRadius: defaultSize,
+        overflow: 'hidden'
+    },
+    cashTextStyle: {
+        fontSize: defaultSize * .8,
+        marginTop: defaultSize * 2
+    }
 });
 
-export default Stocks;
+export default MillingSummary;

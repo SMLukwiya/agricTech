@@ -7,9 +7,12 @@ import Icons from 'react-native-vector-icons/MaterialIcons';
 import Icon from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import { useDispatch, useSelector } from 'react-redux';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 import { colors, images, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
+import { updateProfileImage } from '../../../../store/actions';
 
 const { white, green, red, lightGray, darkGray } = colors;
 const Button = lazy(() => import('../../../common/button'));
@@ -17,7 +20,11 @@ const Input = lazy(() => import('../../../common/input'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
 
 const Profile = (props) => {
+    const dispatch = useDispatch();
     const { height, width } = useWindowDimensions();
+
+    // redux
+    const userState = useSelector(state => state.user);
 
     // state
     const [state, setState] = useState({ 
@@ -76,7 +83,7 @@ const Profile = (props) => {
                     return console.log(`Operation cancelled with error code ${response.errorCode}`)
                 } else {
                     const imageSrc = response.assets[0];
-                    setState({ ...state, image: imageSrc, modal: {...state.modal, visible: false } });
+                    setState({ ...state, image: imageSrc, modal: {...state.modal, visible: false, type: 'save_image' } });
                 }
             })
         } else {
@@ -87,7 +94,10 @@ const Profile = (props) => {
                     return console.log(`Operation error code ${response.errorCode}`);
                 } else {
                     const imageSrc = response.assets[0];
-                    setState({ ...state, image: imageSrc, modal: {...state.modal, visible: false } });
+                    setState({ ...state, image: imageSrc, modal: {...state.modal, visible: false, type: 'save_image' } });
+                    setTimeout(() => {
+                        setState({...state, modal: {...state.modal, visible: true, type: 'save_image' } })
+                    }, 350);
                 }
             })
         }
@@ -111,6 +121,13 @@ const Profile = (props) => {
 
     const onChangeHandler = () => {
         
+    }
+
+    const saveAvatarHandler = () => {
+        closeModal();
+        dispatch(updateProfileImage(state.image, userState.userID,
+            () => {},
+            err => {console.log(err)}))
     }
 
     const ImageComponent = () =>
@@ -153,9 +170,22 @@ const Profile = (props) => {
             </View>
         </View>
 
+    const SaveImageComponent = () => 
+        <View style={[styles.saveImageButtonContainerStyle, {width: width * .8}]}>
+            <Button
+                title='Save Image'
+                backgroundColor={green}
+                borderColor={green}
+                color={white}
+                enabled
+                onPress={saveAvatarHandler} 
+            />
+        </View>
+
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
+            <Spinner visible={userState.loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
                 <View style={styles.profileCloseIconStyle}>
                     <Icons name='close' size={30} color={white} onPress={CloseProfile} />
@@ -163,7 +193,7 @@ const Profile = (props) => {
                 <View style={[styles.topBarStyle, {width}]}/>
                 <Image source={images.curve} style={[styles.imageCurveStyle, {width: width * 3.5, marginLeft: width * 0.055}]} resizeMode='cover' />
                 <TouchableOpacity activeOpacity={.8} style={[styles.avatarImageContainerStyle]} onPress={onChangeProfilePicHandler}>
-                    <Image source={state.image.uri ? {uri: state.image.uri} : images.avatar} style={styles.profileImageStyle} resizeMode='cover' />
+                    <Image source={userState.user.imageUrl ? {uri: userState.user.imageUrl} : images.avatar} style={styles.profileImageStyle} resizeMode='cover' />
                 </TouchableOpacity>
                 <View style={[styles.profileInfoContainer, {width: width * .8, height: height * .55}]}>
                     <View style={styles.profileTitleContainerStyle}>
@@ -213,15 +243,6 @@ const Profile = (props) => {
                                 </TouchableOpacity>
                             </View>
                         </View>
-                        <View style={[styles.buttonContainerStyle, {width: width * .8}]}>
-                            <Button
-                                title='Save'
-                                backgroundColor={green}
-                                borderColor={green}
-                                color={white}
-                                enabled onPress={() => {}}
-                            />
-                        </View>
                     </ScrollView>
                 </View>
                 <View style={[styles.buttonContainerStyle, {width: width * .8}]}>
@@ -245,7 +266,9 @@ const Profile = (props) => {
                     ProfileComponent('location') :
                     state.modal.type === 'gender' ?
                     ProfileComponent('gender') :
-                    ProfileComponent('password')
+                    state.modal.type === 'password' ?
+                    ProfileComponent('password') :
+                    SaveImageComponent()
                 }
             </RNModal>
         </Suspense>
@@ -360,6 +383,14 @@ const styles = StyleSheet.create({
     },
     profileChangeButtonContainerStyle: {
         marginTop: defaultSize * 2
+    },
+    // 
+    saveImageButtonContainerStyle: {
+        backgroundColor: white,
+        borderRadius: defaultSize,
+        paddingVertical: defaultSize * 2,
+        paddingHorizontal: defaultSize,
+        overflow: 'hidden'
     }
 })
 

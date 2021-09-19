@@ -1,14 +1,16 @@
 import {
-    FETCH_PRODUCTS, FETCH_SUBPRODUCTS, FETCH_QUALITIES,
+    FETCH_PRODUCTS, FETCH_SUBPRODUCTS, FETCH_QUALITIES, FETCH_CATEGORIES,
     CREATE_PRODUCT, CREATE_PRODUCT_SUCCESSFUL, CREATE_PRODUCT_FAILED,
     CREATE_SUBPRODUCT, CREATE_SUBPRODUCT_SUCCESSFUL, CREATE_SUBPRODUCT_FAILED,
-    CREATE_QUALITY, CREATE_QUALITY_SUCCESSFUL, CREATE_QUALITY_FAILED
+    CREATE_QUALITY, CREATE_QUALITY_SUCCESSFUL, CREATE_QUALITY_FAILED,
+    DELETE_PRODUCT, DELETE_PRODUCT_FAILED, DELETE_PRODUCT_SUCCESSFUL
 } from '../actions/types';
 
 const INITIAL_STATE = {
     products: [],
     subProducts: [],
     qualities: [],
+    categories: [],
     product: '',
     subProduct: '',
     quality: '',
@@ -33,6 +35,12 @@ export default (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 qualities: action.payload
+            }
+
+        case FETCH_CATEGORIES:
+            return {
+                ...state,
+                categories: action.payload
             }
 
         case CREATE_PRODUCT:
@@ -86,6 +94,24 @@ export default (state = INITIAL_STATE, action) => {
             }
 
         case CREATE_QUALITY_FAILED:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case DELETE_PRODUCT:
+            return {
+                ...state,
+                loading: true
+            }
+
+        case DELETE_PRODUCT_SUCCESSFUL:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case DELETE_PRODUCT_FAILED:
             return {
                 ...state,
                 loading: false

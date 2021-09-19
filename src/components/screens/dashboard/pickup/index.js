@@ -19,7 +19,7 @@ const Pickup = (props) => {
     const dispatch = useDispatch();
     const { height, width } = useWindowDimensions();
 
-    const [state, setState] = useState({modalVisible: false, pickupConfirmed: false, pickupId: '', pickupName: ''})
+    const [state, setState] = useState({modalVisible: false, pickupConfirmed: false, id: '', customer: '', email: '', phone: '' })
 
     // redux
     const {customers} = useSelector(state => state.customer);
@@ -29,7 +29,7 @@ const Pickup = (props) => {
 
     const onSelectPickupHandler = (id) => {
         const selectedCustomer = customers.find(item => item.id === id)
-        setState({...state, modalVisible: true, pickupId: id, pickupName: selectedCustomer.name})
+        setState({...state, modalVisible: true, id, customer: selectedCustomer.name, email: selectedCustomer.email, phone: selectedCustomer.phone})
     }
 
     const closeModal = () => {
@@ -37,9 +37,10 @@ const Pickup = (props) => {
     }
 
     const onConfirmPickup = () => {
+        const { customer, phone, email } = state;
         closeModal();
         setTimeout(() => {
-            dispatch(createPickup(state.pickupName,
+            dispatch(createPickup({customer, phone, email},
                 () => {
                     setState({...state, pickupConfirmed: true});
                 },
@@ -72,7 +73,7 @@ const Pickup = (props) => {
     const selectionChosenComponent = () => 
         <View style={[styles.modalContainerStyle, {width: width * .8, height: height * .35}]}>
             <View>
-                <Text style={styles.modalTextStyle}> You have selected {state.pickupName}</Text>
+                <Text style={styles.modalTextStyle}> You have selected {state.customer}</Text>
                 <Text style={styles.modalTextStyle}>An email will automatically be sent</Text>
             </View>
             <View style={styles.modalButtonContainerStyle}>

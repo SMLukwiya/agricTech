@@ -6,34 +6,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import Icons from 'react-native-vector-icons/MaterialIcons';
+import { useSelector, useDispatch } from 'react-redux';
+import dayjs from 'dayjs';
 
-import { colors, images, defaultSize } from '../../../config';
-import Fallback from '../../common/fallback';
+import { colors, images, defaultSize } from '../../../../config';
+import Fallback from '../../../common/fallback';
+import { saveBatchMillData } from '../../../../store/actions';
 
 const { white, green, blue, darkGray, lightGray } = colors;
-const Select = lazy(() => import('../../common/select'));
-const Button = lazy(() => import('../../common/button'));
-const RNModal = lazy(() => import('../../common/rnModal'));
-const Input = lazy(() => import('../../common/input'));
-
-const products = [
-    {type: 'product', id: 'one', name: 'Coffee'},
-    {type: 'product', id: 'two', name: 'Maize'}
-]
-const subProducts = [
-    {type: 'subproduct', id: 'one', name: 'Coffee'},
-    {type: 'subproduct', id: 'two', name: 'Maize'}
-]
-
-const inputQualities = [
-    {type: 'inputquality', id: 1, name: 'Q1'},
-    {type: 'inputquality', id: 2, name: 'Q2'}
-]
-
-const outputQualities = [
-    {type: 'quality', id: 1, name: 'Q1'},
-    {type: 'quality', id: 2, name: 'Q2'}
-]
+const Select = lazy(() => import('../../../common/select'));
+const Button = lazy(() => import('../../../common/button'));
+const RNModal = lazy(() => import('../../../common/rnModal'));
+const Input = lazy(() => import('../../../common/input'));
 
 if (Platform.OS === 'android') {
     if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -44,7 +28,11 @@ if (Platform.OS === 'android') {
 const transition = LayoutAnimation.create(200, 'easeInEaseOut', 'scaleY');
 
 const StockMilling = (props) => {
+    const dispatch = useDispatch();
     const { height, width } = useWindowDimensions();
+
+    // redux
+    const { products, subProducts, qualities } = useSelector(state => state.product)
 
     // state
     const [modal, setModal] = useState({modalVisible: false});
@@ -125,7 +113,7 @@ const StockMilling = (props) => {
                 duration: 200,
                 useNativeDriver: false
             }).start()
-        } else if (id === 'inputquality') {
+        } else if (id === 'quality') {
             setInputQuality({...inputQuality, open: !inputQuality.open, name });
             Animated.timing(inputQuality.progress, {
                 toValue: inputQuality.open ? 45 : 150,
@@ -159,16 +147,9 @@ const StockMilling = (props) => {
                 duration: 200,
                 useNativeDriver: false
             }).start()
-        } else if (type === 'inputquality') {
+        } else if (type === 'quality') {
             setInputQuality({...inputQuality, id: id === inputQuality.id ? '' : id, name, open: false });
             Animated.timing(inputQuality.progress, {
-                toValue: 45,
-                duration: 200,
-                useNativeDriver: false
-            }).start()
-        } else {
-            setOutputQuality({...outputQuality, id: id === outputQuality.id ? '' : id, name, open: false });
-            Animated.timing(outputQuality.progress, {
                 toValue: 45,
                 duration: 200,
                 useNativeDriver: false
@@ -176,16 +157,47 @@ const StockMilling = (props) => {
         }
     }
 
-    // continue
-    const onContinueHandler = () => {
-        closeModal();
-        props.navigation.navigate('batchsummary')
+    // seperate second input quality field for now
+    const selectQualityHandler = (type, id, name) => {
+        setOutputQuality({...outputQuality, id: id === outputQuality.id ? '' : id, name, open: false });
+            Animated.timing(outputQuality.progress, {
+                toValue: 45,
+                duration: 200,
+                useNativeDriver: false
+            }).start()
     }
 
     const onAddNewQualityHandler = () => {
         closeModal();
         props.navigation.navigate('createnewquality');
     }
+
+    // continue
+
+    const saveData = () => {
+        dispatch(saveBatchMillData({
+            date: dayjs().format('YYYY-DD-MM-H:M'),
+            product: product.name,
+            subProduct: subProduct.name,
+            inputQuality: inputQuality.name,
+            inputQuantity1: defaultInputWeight.value,
+            inputQuantity2: addedInputWeight.value, 
+            totalInput: totalWeightInput.value, 
+            outputQuality: outputQuality.name, 
+            outputQuantity1: defaultOutputWeight.value, 
+            outputQuantity2: addedOutputWeight.value, 
+            totalOutput: totalWeightOutput.value,
+        }))
+    }
+
+    const onContinueHandler = () => {
+        closeModal();
+        saveData();
+        props.navigation.navigate('batchsummary')
+    }
+    
+    let enabled1 = product.name !== 'Product' && subProduct.name !== 'Sub Product';
+    let enabled = product.name !== 'Product' && subProduct.name !== 'Sub Product' && inputQuality.name !== 'Input Quality' && outputQuality.name !== 'Output Quality'
 
     return (
         <Suspense fallback={<Fallback />}>
@@ -227,7 +239,8 @@ const StockMilling = (props) => {
                         backgroundColor={green}
                         borderColor={green}
                         color={white}
-                        enabled onPress={onStockMillingContinue}
+                        enabled={enabled1}
+                        onPress={onStockMillingContinue}
                     />
                 </View>
             </SafeAreaView>
@@ -237,10 +250,10 @@ const StockMilling = (props) => {
                     <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
                         <Select
                             height={inputQuality.progress}
-                            onToggleSelector={() => onToggleSelector('inputquality', 'Select Input Quality')}
+                            onToggleSelector={() => onToggleSelector('quality', 'Input Quality')}
                             productName={inputQuality.name}
                             isProductOpen={inputQuality.open}
-                            productList={inputQualities}
+                            productList={qualities}
                             onProductSelect={onProductSelect}
                             buttonTitle='Create new Input Quality'
                             onCreateHandler={() => onCreateHandler('inputQuality')}
@@ -283,16 +296,16 @@ const StockMilling = (props) => {
                         }
                         <Select
                             height={outputQuality.progress}
-                            onToggleSelector={() => onToggleSelector('outputquality', 'Select Output Quality')}
+                            onToggleSelector={() => onToggleSelector('outputquality', 'Output Quality')}
                             productName={outputQuality.name}
                             isProductOpen={outputQuality.open}
-                            productList={outputQualities}
-                            onProductSelect={onProductSelect}
+                            productList={qualities}
+                            onProductSelect={selectQualityHandler}
                             buttonTitle='Create new Output Quality'
                             onCreateHandler={() => onCreateHandler('outputQuality')}
                         />
                         <View style={styles.modalWeightContainerStyle}>
-                            <Text>Output fontWeight</Text>
+                            <Text>Output Weight</Text>
                             <View style={{width: '50%'}}>
                                 <Input
                                     value={defaultOutputWeight.value}
@@ -304,7 +317,7 @@ const StockMilling = (props) => {
                         </View>
                         {addedOutputWeight.visible &&
                             <View style={styles.modalWeightContainerStyle}>
-                                <Text>Output fontWeight</Text>
+                                <Text>Output Weight</Text>
                                 <View style={{width: '50%'}}>
                                     <Input
                                         value={addedOutputWeight.value}
@@ -353,7 +366,7 @@ const StockMilling = (props) => {
                         backgroundColor={green}
                         borderColor={green}
                         color={white}
-                        enabled onPress={onContinueHandler}
+                        enabled={enabled} onPress={onContinueHandler}
                     />
                 </View>
             </RNModal>

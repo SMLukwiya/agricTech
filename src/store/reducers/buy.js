@@ -1,18 +1,20 @@
 import {
     FETCH_PURCHASES,
-    SAVE_BUY_DATA, SAVE_BUY_METHOD,
+    SAVE_BUY_DATA, SAVE_BUY_METHOD, CLEAR_BUY_DATA,
     BUY, BUY_FAILED, BUY_SUCCESSFUL
 } from '../actions/types';
 
 const INITIAL_STATE = {
     purchases: [],
-    farmer: "",
+    date: "",
+    individual: "",
     category: "",
     product: "",
     subproduct: "",
     quality: "",
     quantity1: "",
     quantity2: "",
+    pricePerUnit: "",
     totalWeight: "",
     totalAmount: "",
     paymentMethod: "cash",
@@ -49,13 +51,15 @@ export default (state = INITIAL_STATE, action) => {
         case SAVE_BUY_DATA:
             return {
                 ...state,
-                farmer: action.payload.individual,
+                date: action.payload.date,
+                individual: action.payload.individual,
                 category: action.payload.category,
                 product: action.payload.product,
                 subproduct: action.payload.subProduct,
                 quality: action.payload.quality,
                 quantity1: action.payload.quantity1,
                 quantity2: action.payload.quantity2,
+                pricePerUnit: action.payload.pricePerUnit,
                 totalWeight: action.payload.totalWeight,
                 totalAmount: action.payload.totalAmount
             }
@@ -64,6 +68,24 @@ export default (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 paymentMethod: action.payload,
+            }
+
+        case CLEAR_BUY_DATA:
+            return {
+                ...state,
+                date: "",
+                individual: "",
+                category: "",
+                product: "",
+                subproduct: "",
+                quality: "",
+                quantity1: "",
+                quantity2: "",
+                pricePerUnit: "",
+                totalWeight: "",
+                totalAmount: "",
+                paymentMethod: "cash",
+                error: ""
             }
 
         default:

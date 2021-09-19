@@ -47,7 +47,7 @@ const NewSubProduct = (props) => {
     const onContinueHandler = () => {
         closeModal();
         setTimeout(() => {
-            dispatch(createSubProduct({product, subproduct: values.subProductName},
+            dispatch(createSubProduct({product, name: values.subProductName},
                 () => {props.navigation.navigate('products')},
                 err => {console.log(err)}))
         }, 200);
@@ -56,19 +56,19 @@ const NewSubProduct = (props) => {
     const onCreateSubproductHandler = () => {
         closeModal();
         setTimeout(() => {
-            dispatch(createSubProduct({product, subproduct: values.subProductName},
+            dispatch(createSubProduct({product, name: values.subProductName},
                 () => {props.navigation.navigate('createnewquality')},
                 err => {console.log(err)}))
         }, 200);
     }
 
-    const subProductComponent = ({item: {product}}) => 
+    const subProductComponent = ({item: {name}}) => 
         <TouchableOpacity activeOpacity={.8} 
             style={[styles.newProductTextContainerStyle, {width}]}
             onPress={() => {}}
             >
             <View style={{width: width * .8}}>
-                <Text style={styles.newProductTextStyle}>{product}</Text>
+                <Text style={styles.newProductTextStyle}>{name}</Text>
             </View>
         </TouchableOpacity>
 

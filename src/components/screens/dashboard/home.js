@@ -31,8 +31,8 @@ const Home = (props) => {
         {id: 'six', title: 'Bills/Expenses', image: images.billsIcon, onPress: dev},
         {id: 'seven', title: 'Purchases', image: images.salesIcon, onPress: () => props.navigation.navigate('purchase')},
         {id: 'eight', title: 'Products', image: images.orderIcon, onPress: () => props.navigation.navigate('products')},
-        {id: 'nine', title: 'Stock Milling', image: images.stockMillingIcon, onPress: dev/*() => props.navigation.navigate('stockmilling')*/},
-        {id: 'ten', title: 'Milling Service', image: images.millingServiceIcon, onPress: dev /*() => props.navigation.navigate('millingservice')*/}
+        {id: 'nine', title: 'Stock Milling', image: images.stockMillingIcon, onPress: () => props.navigation.navigate('stockmilling')},
+        {id: 'ten', title: 'Milling Services', image: images.millingServiceIcon, onPress: () => props.navigation.navigate('millingservice')}
     ];
 
     return (

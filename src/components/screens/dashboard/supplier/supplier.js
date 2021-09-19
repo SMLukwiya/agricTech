@@ -32,7 +32,7 @@ const Supplier = (props) => {
     const supplier = suppliers.find(item => item.id === id);
 
     const { handleChange, values, handleSubmit, errors, handleBlur, touched } = useFormik({
-        initialValues: { fullName: supplier.name, phoneNumber: supplier.phone, email: supplier.email, location: supplier.address, category: supplier.category, supplies: supplier.supplies },
+        initialValues: { fullName: supplier ? supplier.name : '', phoneNumber: supplier ? supplier.phone : '', email: supplier ? supplier.email : '', location: supplier ? supplier.address : '', category: supplier ? supplier.category : '', supplies: supplier ? supplier.supplies: '' },
         validationSchema: Yup.object({
             fullName: Yup.string().required('Name is required'),
             phoneNumber: Yup.number('Enter a valid phone number').min(10, 'Phone number must be 10 digits').required('Phone number is required'),
@@ -44,7 +44,7 @@ const Supplier = (props) => {
         onSubmit: values => {
             closeModal();
             setTimeout(() => {
-                dispatch(updateSupplier(supplier.uid, values,
+                dispatch(updateSupplier(supplier.id, values,
                     () => {},
                     err => setModal({...modal, error: err})))
             }, 200);
@@ -64,7 +64,7 @@ const Supplier = (props) => {
     }
 
     const deleteSupplierHandler = () => {
-        dispatch(deleteSupplier(supplier.uid,
+        dispatch(deleteSupplier(supplier.id,
             () => onGoBackHandler(),
             err => console.log(err)))
     }
@@ -160,7 +160,7 @@ const Supplier = (props) => {
                 <View style={[styles.profileCloseIconStyle, {width}]}>
                     <Icons name='arrow-back-ios' size={30} color={white} onPress={onGoBackHandler} style={{width: '7%'}} />
                     <View style={{justifyContent:'center', width: '80%'}}>
-                        <Text style={styles.customerHeaderTitleStyle}>{supplier.name}</Text>
+                        <Text style={styles.customerHeaderTitleStyle}>{supplier ? supplier.name : ''}</Text>
                     </View>
                 </View>
                 <View style={[styles.topBarStyle, {width}]}/>
@@ -173,42 +173,42 @@ const Supplier = (props) => {
                         <View>
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
-                                    <Text style={styles.privateProfileNameTextStyle}>{supplier.name}</Text>
+                                    <Text style={styles.privateProfileNameTextStyle}>{supplier ? supplier.name : ''}</Text>
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='phone-enabled' size={25} color={darkGray} />
-                                    <Text style={styles.privateProfileTextStyle}>{supplier.phone}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{supplier ? supplier.phone : ''}</Text>
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='mail' size={25} color={darkGray} />
-                                    <Text style={styles.privateProfileTextStyle}>{supplier.email}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{supplier ? supplier.email : ''}</Text>
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='location-on' size={25} color={darkGray} />
-                                    <Text style={styles.privateProfileTextStyle}>{supplier.address}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{supplier ? supplier.address : ''}</Text>
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='category' size={25} color={darkGray} />
-                                    <Text style={styles.privateProfileTextStyle}>{supplier.category}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{supplier ? supplier.category : ''}</Text>
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                 <Icons name='category' size={25} color={darkGray} />
-                                    <Text style={styles.privateProfileTextStyle}>{supplier.supplies}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{supplier ? supplier.supplies : ''}</Text>
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>

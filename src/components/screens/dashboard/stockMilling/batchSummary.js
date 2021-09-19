@@ -4,16 +4,23 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icons from 'react-native-vector-icons/MaterialIcons';
+import { useDispatch, useSelector } from 'react-redux';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 import { colors, images, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
+import { createBatchMill, clearBatchData } from '../../../../store/actions';
 
 const { white, green, blue, darkGray, red } = colors;
 const Button = lazy(() => import('../../../common/button'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
 
 const Stocks = (props) => {
+    const dispatch = useDispatch();
     const { width } = useWindowDimensions();
+
+    // redux
+    const batchState = useSelector(state => state.batchMill);
 
     // state
     const [modal, setModal] = useState(false)
@@ -23,19 +30,26 @@ const Stocks = (props) => {
     const onModifyBatchMill = () => props.navigation.goBack();
 
     const onConfirmBatch = () => {
-        setModal(true);
+        dispatch(createBatchMill(batchState,
+            () => {
+                setModal(true);
+            },
+            err => {console.log(err)}))
     }
 
-    const closeModal = () => setModal(false);
+    const closeModal = () => {
+        setModal(false)
+        props.navigation.navigate('home');
+    };
 
     const onConfirmBatchClose = () => {
         closeModal();
-        props.navigation.navigate('home');
     }
 
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
+            <Spinner visible={batchState.loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
                 <View style={[styles.summaryHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
@@ -47,36 +61,41 @@ const Stocks = (props) => {
                     <View style={styles.summaryComponentContainerStyle}>
                         <Text>Date & Time</Text>
                         <View style={styles.dateContainerStyle}>
-                            <Text style={styles.summaryTextStyle}>30/08/2021</Text>
-                            <Text style={styles.summaryDateTextStyle}>11:45</Text>
+                            <Text style={styles.summaryTextStyle}>{batchState.date}</Text>
                         </View>
                     </View>
                     <View style={styles.summaryComponentContainerStyle}>
                         <Text>Mill</Text>
-                        <Text style={styles.summaryTextStyle}>Miller 1</Text>
+                        <Text style={styles.summaryTextStyle}>{batchState.mill}</Text>
                     </View>
                     <View style={styles.summaryComponentContainerStyle}>
                         <Text>Product</Text>
-                        <Text style={styles.summaryTextStyle}>Coffee, Parchment</Text>
+                        <Text style={styles.summaryTextStyle}>{batchState.product}, {batchState.subProduct} </Text>
                     </View>
                     <Text style={styles.summaryTotalTextTitleStyle}>Total Weight</Text>
                     <Text>Input Weight</Text>
                     <View style={styles.summaryComponentSimpleContainerStyle}>
-                        <Text>Q1</Text>
-                        <Text>00.00 kg</Text>
+                        <Text>{batchState.inputQuality}</Text>
+                        <View>
+                            <Text>{batchState.inputQuantity1}kg</Text>
+                            <Text>{batchState.inputQuantity2}kg</Text>
+                        </View>
                     </View>
                     <View style={styles.summaryComponentContainerStyle}>
                         <Text style={styles.summaryTextStyle}>Total input</Text>
-                        <Text style={styles.summaryTextStyle}>.00 kg</Text>
+                        <Text style={styles.summaryTextStyle}>{batchState.totalInput}kg</Text>
                     </View>
                     <Text>Output Weight</Text>
                     <View style={styles.summaryComponentSimpleContainerStyle}>
-                        <Text>Q1</Text>
-                        <Text>00.00 kg</Text>
+                        <Text>{batchState.outputQuality}</Text>
+                        <View>
+                            <Text>{batchState.outputQuantity1}kg</Text>
+                            <Text>{batchState.outputQuantity2}kg</Text>
+                        </View>
                     </View>
                     <View style={styles.summaryComponentContainerStyle}>
                         <Text style={styles.summaryTextStyle}>Total output</Text>
-                        <Text style={styles.summaryTextStyle}>.00 kg</Text>
+                        <Text style={styles.summaryTextStyle}>{batchState.totalOutput}kg</Text>
                     </View>
                 </View>
                 <View style={[styles.buttonContainerStyle, {width: width * .8}]}>

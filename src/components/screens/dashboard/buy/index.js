@@ -5,6 +5,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 import { useSelector, useDispatch } from 'react-redux';
+import dayjs from 'dayjs';
 
 import { colors, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
@@ -15,11 +16,6 @@ const Button = lazy(() => import('../../../common/button'));
 const Select = lazy(() => import('../../../common/select'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
 const Input = lazy(() => import('../../../common/input'));
-
-const categories = [
-    {type: 'category', id: 1, name: 'Farmer'},
-    {type: 'category', id: 2, name: 'Trader'}
-]
 
 if (Platform.OS === 'android') {
     if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -34,7 +30,7 @@ const Buy = (props) => {
     const { width, height } = useWindowDimensions();
 
     // redux
-    const {products, subProducts, qualities} = useSelector(state => state.product);
+    const {products, subProducts, qualities, categories} = useSelector(state => state.product);
     const {suppliers} = useSelector(state => state.supplier)
 
     // state
@@ -141,7 +137,7 @@ const Buy = (props) => {
 
     const onCreateHandler = (type) => {
         closeModal()
-        props.navigation.navigate(type === 'product' ? 'createnewproduct' : type === 'subproduct' ? 'createnewsubproduct' : 'createnewquality')
+        props.navigation.navigate(type === 'product' ? 'createnewproduct' : type === 'subproduct' ? 'createnewsubproduct' : type === 'supplier' ? 'addsupplier' : 'createnewquality')
     }
 
     // close modal
@@ -191,6 +187,7 @@ const Buy = (props) => {
 
     const saveDataHandler = () => {
         dispatch(saveBuyData({
+            date: dayjs().format('YYYY-DD-MM-H:m'),
             product: product.name,
             subProduct: subProduct.name,
             category: category.name,
@@ -198,6 +195,7 @@ const Buy = (props) => {
             quality: quality.name,
             quantity1: defaultWeight.value,
             quantity2: weighInput.value,
+            pricePerUnit: pricePerUnit.value,
             totalWeight: totalWeight.value,
             totalAmount: totalPayable.value
         }))
@@ -265,7 +263,7 @@ const Buy = (props) => {
                             isProductOpen={supplier.open}
                             productList={suppliers}
                             onProductSelect={onProductSelect}
-                            buttonTitle='Create new product'
+                            buttonTitle='Create new supplier'
                             onCreateHandler={() => onCreateHandler('supplier')}
                         />
                     </View>

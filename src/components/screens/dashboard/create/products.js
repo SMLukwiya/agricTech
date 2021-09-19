@@ -3,20 +3,20 @@ import {
     View, StyleSheet, Text, StatusBar, useWindowDimensions, FlatList
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 import FeatherIcon from 'react-native-vector-icons/Feather';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
 import { colors, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
+import { deleteProduct } from '../../../../store/actions';
 
 const { white, green, darkGray, red } = colors;
 const Button = lazy(() => import('../../../common/button'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
 
 const Products = (props) => {
+    const dispatch = useDispatch();
     const { height, width } = useWindowDimensions();
 
     // state
@@ -32,7 +32,7 @@ const Products = (props) => {
     }
 
     const onEditHandler = (id) => {
-        setState({...state, modalVisible: true, productID: id, name: products.find(item => item.id === id).product});
+        setState({...state, modalVisible: true, productID: id, name: products.find(item => item.id === id).name});
     }
 
     const addProductHandler = () => {
@@ -40,12 +40,15 @@ const Products = (props) => {
     }
 
     const onDeleteProductHandler = () => {
-        closeModal()
+        closeModal();
+        dispatch(deleteProduct(state.productID,
+            () => {},
+            err => {console.log(err)}))
     }
 
-    const productName = ({item: {id, product}}) =>
+    const productName = ({item: {id, name}}) =>
         <View style={styles.productContainerStyle}>
-            <Text style={styles.productNameStyle}>{product}</Text>
+            <Text style={styles.productNameStyle}>{name}</Text>
             <FeatherIcon name='edit' size={20} color={green} onPress={() => onEditHandler(id)} />
         </View>
 

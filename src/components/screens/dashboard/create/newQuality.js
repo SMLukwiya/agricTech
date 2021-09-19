@@ -47,18 +47,18 @@ const NewQuality = (props) => {
 
     const confirmHandler = () => {
         closeModal();
-        dispatch(createQuality({subproduct: subProduct, quality: values.qualityName},
+        dispatch(createQuality({subproduct: subProduct, name: values.qualityName},
             () => {props.navigation.navigate('products')},
             err => {console.log(err)}))
     }
 
-    const qualityComponent = ({item: {quality}}) => 
+    const qualityComponent = ({item: {name}}) => 
         <TouchableOpacity activeOpacity={.8} 
             style={[styles.newProductTextContainerStyle, {width}]}
             onPress={() => {}}
             >
             <View style={{width: width * .8}}>
-                <Text style={styles.newProductTextStyle}>{quality}</Text>
+                <Text style={styles.newProductTextStyle}>{name}</Text>
             </View>
         </TouchableOpacity>
 

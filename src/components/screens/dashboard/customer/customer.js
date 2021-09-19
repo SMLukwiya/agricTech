@@ -32,19 +32,19 @@ const Customer = (props) => {
     const customer = customers.find(item => item.id === id);
 
     const { handleChange, values, handleSubmit, errors, handleBlur, touched } = useFormik({
-        initialValues: { fullName: customer.name, phoneNumber: customer.phone, email: customer.email, location: customer.address, category: customer.category, supplies: customer.supplies },
+        initialValues: { fullName: customer ? customer.name : '', phoneNumber: customer ? customer.phone : '', email: customer ? customer.email : '', location: customer ? customer.address : '', category: customer ? customer.category : '', supplies: customer ? customer.supplies : '' },
         validationSchema: Yup.object({
             fullName: Yup.string().required('Name is required'),
             phoneNumber: Yup.number('Enter a valid phone number').min(10, 'Phone number must be 10 digits').required('Phone number is required'),
             email: Yup.string().email('Enter valid email address').required('Email is required'),
-            location: Yup.string().required('Password is required'),
+            location: Yup.string().required('Location is required'),
             category: Yup.string().required('Enter Supplier Category'),
             supplies: Yup.string().required('Enter Supplier supplies')
         }),
         onSubmit: values => {
             closeModal();
             setTimeout(() => {
-                dispatch(updateCustomer(customer.uid, values,
+                dispatch(updateCustomer(customer.id, values,
                     () => {},
                     err => setModal({...modal, error: err})))
             }, 200);
@@ -64,7 +64,7 @@ const Customer = (props) => {
     }
 
     const deleteCustomerHandler = () => {
-        dispatch(deleteCustomer(customer.uid,
+        dispatch(deleteCustomer(customer.id,
             () => onGoBackHandler(),
             err => console.log(err)))
     }
@@ -156,7 +156,7 @@ const Customer = (props) => {
                 <View style={[styles.profileCloseIconStyle, {width}]}>
                     <Icons name='arrow-back-ios' size={30} color={white} onPress={onGoBackHandler} style={{width: '5%'}} />
                     <View style={{justifyContent:'center', width: '80%'}}>
-                        <Text style={styles.customerHeaderTitleStyle}>{customer.name}</Text>
+                        <Text style={styles.customerHeaderTitleStyle}>{customer ? customer.name : ''}</Text>
                     </View>
                 </View>
                 <View style={[styles.topBarStyle, {width}]}/>
@@ -169,42 +169,42 @@ const Customer = (props) => {
                         <View>
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.privateProfileNameTextStyle}>
-                                    <Text style={styles.privateProfileTextStyle}>{customer.name}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{customer ? customer.name : ''}</Text>
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='phone-enabled' size={25} color={darkGray} />
-                                    <Text style={styles.privateProfileTextStyle}>{customer.phone}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{customer ? customer.phone : ''}</Text>
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='mail' size={25} color={darkGray} />
-                                    <Text style={styles.privateProfileTextStyle}>{customer.email}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{customer ? customer.email : ''}</Text>
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='location-on' size={25} color={darkGray} />
-                                    <Text style={styles.privateProfileTextStyle}>{customer.address}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{customer ? customer.address : ''}</Text>
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='category' size={25} color={darkGray} />
-                                    <Text style={styles.privateProfileTextStyle}>{customer.category}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{customer ? customer.category : ''}</Text>
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='category' size={25} color={darkGray} />
-                                    <Text style={styles.privateProfileTextStyle}>{customer.supplies}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{customer ? customer.supplies : ''}</Text>
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>

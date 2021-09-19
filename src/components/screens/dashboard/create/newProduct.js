@@ -62,13 +62,13 @@ const NewProduct = (props) => {
         }, 200);
     }
 
-    const productComponent = ({item: {product}}) => 
+    const productComponent = ({item: {name}}) => 
         <TouchableOpacity activeOpacity={.8} 
             style={[styles.newProductTextContainerStyle, {width}]}
             onPress={() => {}}
             >
             <View style={{width: width * .8}}>
-                <Text style={styles.newProductTextStyle}>{product}</Text>
+                <Text style={styles.newProductTextStyle}>{name}</Text>
             </View>
         </TouchableOpacity>
 

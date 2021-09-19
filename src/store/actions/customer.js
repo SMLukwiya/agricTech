@@ -70,15 +70,10 @@ export const deleteCustomer = (uid, onSuccess = () => {}, onFailure = () => {}) 
             await axios.post(`${baseUri}customer-deleteCustomer`, {
                 uid
             });
-            dispatch({
-                type: DELETE_CUSTOMER_SUCCESSFUL
-            });
+            dispatch({type: DELETE_CUSTOMER_SUCCESSFUL});
             onSuccess();
         } catch (err) {
-            console.log(err)
-            dispatch({
-                type: DELETE_CUSTOMER_FAILED
-            });
+            dispatch({type: DELETE_CUSTOMER_FAILED});
             onFailure(err);
         }
     }

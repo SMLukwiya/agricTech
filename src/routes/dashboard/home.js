@@ -11,7 +11,6 @@ import SetupMillScreen from '../../components/screens/dashboard/setupMill';
 import CreateNewProductScreen from '../../components/screens/dashboard/create/newProduct';
 import CreateNewSubProductScreen from '../../components/screens/dashboard/create/newSubProduct';
 import CreateNewQualityScreen from '../../components/screens/dashboard/create/newQuality';
-import MillingServiceScreen from '../../components/screens/dashboard/millingService';
 import SupplierScreen from '../../components/screens/dashboard/supplier';
 import SupplierDetailScreen from '../../components/screens/dashboard/supplier/supplier';
 import AddSupplierScreen from '../../components/screens/dashboard/supplier/addSupplier';
@@ -20,10 +19,11 @@ import CustomerDetailScreen from '../../components/screens/dashboard/customer/cu
 import AddCustomerScreen from '../../components/screens/dashboard/customer/addCustomer';
 import PickupScreen from '../../components/screens/dashboard/pickup';
 import StockMillingScreen from '../../components/screens/dashboard/stockMilling';
+import BatchSummaryScreen from '../../components/screens/dashboard/stockMilling/batchSummary';
 import ProfileScreen from '../../components/screens/dashboard/profile';
 import AdvancedProfileScreen from '../../components/screens/dashboard/profile/advanced';
-import BatchSummaryScreen from '../../components/screens/dashboard/batchSummary';
-import MillingSummaryScreen from '../../components/screens/dashboard/stockMilling/summary';
+import MillingServiceScreen from '../../components/screens/dashboard/millingService';
+import MillingSummaryScreen from '../../components/screens/dashboard/millingService/summary';
 import ProductsScreen from '../../components/screens/dashboard/create/products';
 
 import HeaderRight from '../../components/common/headerLeft';

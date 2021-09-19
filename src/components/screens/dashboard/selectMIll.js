@@ -5,12 +5,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 import firestore from '@react-native-firebase/firestore';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { colors, images, defaultSize } from '../../../config';
 import Fallback from '../../common/fallback';
 import { 
-    fetchSuppliers, fetchCustomers, fetchPurchases, fetchProducts, fetchSubproducts, fetchQualities 
+    fetchSuppliers, fetchCustomers, fetchPurchases, fetchProducts, fetchSubproducts, fetchQualities , fetchCategories,
+    updateUser
 } from '../../../store/actions';
 
 const { white, green, blue, darkGray } = colors;
@@ -20,12 +21,26 @@ const SelectMill = (props) => {
     const dispatch = useDispatch();
     const { width } = useWindowDimensions();
 
+    const user = useSelector(state => state.user);
+
     const onSelectMillHandler = () => {
         props.navigation.navigate('home');
     }
 
     const onsetupNewMillHandler = () => {
         props.navigation.navigate('setupmill');
+    }
+
+    // update User
+    const updateUserProfile = () => {
+        firestore()
+            .collection('users')
+            .doc(user.userID)
+            .onSnapshot(querySnapshot => {
+                dispatch(updateUser({...querySnapshot._data}));
+            }, err => {
+                console.log('user error ', err)
+            })
     }
 
     // suppliers
@@ -112,7 +127,19 @@ const SelectMill = (props) => {
                 console.log('Products error ', err)
             })
 
-
+    // categories
+    const updateCategories = () =>
+        firestore()
+            .collection('categories')
+            .onSnapshot(querySnapshot => {
+                let categories = [];
+                querySnapshot.forEach(doc => {
+                    categories.push({id: doc.id, ...doc.data(), type: 'category'})
+                })
+                dispatch(fetchCategories(categories))
+            }, err => {
+                console.log('Category error ', err)
+            })
 
     useEffect(() => {
         updateSuppliers();
@@ -121,6 +148,8 @@ const SelectMill = (props) => {
         updateProducts();
         updateSubproducts();
         updateQualities();
+        updateCategories();
+        updateUserProfile();
     })
 
     const millComponent = () => 

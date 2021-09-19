@@ -3,19 +3,19 @@ import axios from 'axios';
 import {
     FETCH_PURCHASES,
     BUY, BUY_SUCCESSFUL, BUY_FAILED, 
-    SAVE_BUY_DATA, SAVE_BUY_METHOD 
+    SAVE_BUY_DATA, SAVE_BUY_METHOD, CLEAR_BUY_DATA
 } from './types'
 import {baseUri} from '../../config'
 
 export const buy = (values, onSuccess = () => {}, onFailure = () =>{}) => {
-    const { farmer ,category,product, subproduct, quantity1, quantity2, totalWeight, totalAmount, paymentMethod } = values;
+    const { date, individual , category, product, subproduct, quality, quantity1, quantity2, pricePerUnit, totalWeight, totalAmount, paymentMethod } = values;
 
     return async dispatch => {
         dispatch({type: BUY});
 
         try {
             await axios.post(`${baseUri}buy-buyAgro`, {
-                farmer ,category,product, subproduct, quantity1, quantity2, totalWeight, totalAmount, paymentMethod
+                date, individual , category, product, subproduct, quality, quantity1, quantity2, pricePerUnit, totalWeight, totalAmount, paymentMethod
             });
 
             dispatch({type: BUY_SUCCESSFUL});
@@ -46,4 +46,8 @@ export const fetchPurchases = (value) => {
         type: FETCH_PURCHASES,
         payload: value
     }
+}
+
+export const clearBuyState = () => {
+    return {type: CLEAR_BUY_DATA}
 }
