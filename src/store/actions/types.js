@@ -94,3 +94,26 @@ export const CLEAR_MILL_DATA = 'clear_mill_data';
 export const UPLOAD_AVATAR = 'upload_avatar';
 export const UPLOAD_AVATAR_SUCCESSFUL = 'upload_avatar_successful';
 export const UPLOAD_AVATAR_FAILED = 'upload_avatar_failed';
+
+export const UPDATE_USER_INFO = 'update_user_info';
+export const UPDATE_USER_INFO_SUCCESSFUL = 'update_user_info_successful';
+export const UPDATE_USER_INFO_FAILED = 'update_user_info_failed';
+
+export const UPDATE_PASSWORD = 'update_password';
+export const UPDATE_PASSWORD_SUCCESSFUL = 'update_password_successful';
+export const UPDATE_PASSWORD_FAILED = 'update_password_failed';
+
+export const SETUP_MILL = 'setup_mill';
+export const SETUP_MILL_SUCCESSFUL = 'setup_mill_successful';
+export const SETUP_MILL_FAILED = 'setup_mill_failed';
+export const UPDATE_MILL = 'update_mill';
+export const SET_SELECTED_MILL = 'set_selected_mill';
+
+export const UPDATE_MILL_INFO = 'update_mill_info';
+export const UPDATE_MILL_INFO_SUCCESSFUL = 'update_mill_info_successful';
+export const UPDATE_MILL_INFO_FAILED = 'update_mill_info_failed';
+
+export const ADD_MILL_LOCATION = 'add_mill_location';
+export const ADD_MILL_LOCATION_SUCCESSFUL = 'add_mill_location_successful';
+export const ADD_MILL_LOCATION_FAILED = 'add_mill_location_failed';
+export const UPDATE_LOCATION = 'update_location';

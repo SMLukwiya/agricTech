@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useState } from 'react';
 import {
-    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, ScrollView, PermissionsAndroid, Platform
+    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, ScrollView, PermissionsAndroid, Platform, KeyboardAvoidingView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icons from 'react-native-vector-icons/MaterialIcons';
@@ -9,10 +9,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { useDispatch, useSelector } from 'react-redux';
 import Spinner from 'react-native-loading-spinner-overlay';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 
 import { colors, images, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
-import { updateProfileImage } from '../../../../store/actions';
+import { updateProfileImage, updateUserInfo, updatePassword } from '../../../../store/actions';
 
 const { white, green, red, lightGray, darkGray } = colors;
 const Button = lazy(() => import('../../../common/button'));
@@ -25,17 +27,37 @@ const Profile = (props) => {
 
     // redux
     const userState = useSelector(state => state.user);
+    const {user} = userState;
 
     // state
     const [state, setState] = useState({ 
         image: {},
-        name: { value : 'John Mukoma'},
-        phone: {value: '+256702496123'},
-        location: {value: 'Wandegeya'},
-        gender: {value: 'Male'},
-        password: {value: ''},
-        modal: {visible: false, type: ''}
+        modal: {visible: false, type: '', error: ''},
+        password: {value: '', error: ''}
     })
+
+    const { handleChange, values, handleSubmit, errors, handleBlur, touched } = useFormik({
+        initialValues: { fullName: user ? user.fullName : '', about: user ? user.about : '', phone: user ? user.phone : '', location: user ? user.location : '', gender: user ? user.gender : '', password: '' },
+        validationSchema: Yup.object({
+            fullName: Yup.string().required('Name is required'),
+            about: Yup.string().required('About Information is required'),
+            phone: Yup.number('Enter a valid phone number').min(10, 'Phone number must be 10 digits').required('Phone number is required'),
+            location: Yup.string().required('Location is required'),
+            gender: Yup.string().required('Gender Category'),
+            password: Yup.string().min(6, 'Minimum of 6 characters').required('Enter new password')
+        }),
+        onSubmit: values => {
+            closeModal();
+            setTimeout(() => {
+                dispatch(updateUserInfo(userState.userID, values,
+                    () => {},
+                    err => {
+                        console.log(err)
+                        setState({...state, modal: {...state.modal, visible: true, type: 'error', error: err}})
+                    }))
+            }, 200);
+        }
+    });
 
     const CloseProfile = () => props.navigation.navigate('home');
 
@@ -115,19 +137,31 @@ const Profile = (props) => {
         setState({...state, modal: {...state.modal, visible: true, type }})
     }
 
-    const onChangeText = (value, type) => {
-        setState({...state, [type]: {...state[type], value}});
-    }
-
-    const onChangeHandler = () => {
-        
-    }
-
     const saveAvatarHandler = () => {
         closeModal();
         dispatch(updateProfileImage(state.image, userState.userID,
             () => {},
             err => {console.log(err)}))
+    }
+
+    const onChangePasswordHandler = (value) => {
+        setState({...state, password: {...state.password, value}})
+    }
+
+    const updateUserPassword = () => {
+        if (state.password.value.length < 6) return setState({...state, password: {...state.password, error: 'Minimum character is 6'}})
+        closeModal();
+        setTimeout(() => {
+            dispatch(updatePassword(userState.userID, state.password.value,
+                () => {
+                    setState({...state, password: {...state.password, error: '', value: ''}})
+                },
+                err => {console.log(err)} ))
+        }, 200);
+    }
+
+    const onAdvancedHandler = () => {
+        props.navigation.navigate('advancedprofile')
     }
 
     const ImageComponent = () =>
@@ -148,27 +182,66 @@ const Profile = (props) => {
             />
         </View>
 
-    const ProfileComponent = (type) => 
-        <View style={[styles.changeProfileContainerStyle, {width}]}>
-            <Text>Change {type}</Text>
-            <View style={{width: width * .8}}>
-                <Input
-                    placeholder=""
-                    onChangeText={(value) => onChangeText(value, type)}
-                    value={state[type].value}
-                    error=''
-                />
-            </View>
-            <View style={[styles.profileChangeButtonContainerStyle, {width: width * .6}]}>
+    const ProfileComponent = () => 
+    <View  style={[styles.modalContainerStyle, {width: width * .8}]}>
+        <KeyboardAvoidingView >
+            <Input
+                placeholder="Full Name"
+                error={errors.fullName}
+                value={values.fullName}
+                rightComponent={false}
+                onChangeText={handleChange('fullName')}
+                onBlur={handleBlur('fullName')}
+                touched={touched.fullName}
+            />
+            <Input
+                placeholder="About"
+                error={errors.about}
+                value={values.about}
+                rightComponent={false}
+                onChangeText={handleChange('about')}
+                onBlur={handleBlur('about')}
+                touched={touched.about}
+            />
+            <Input
+                placeholder="Phone Number"
+                error={errors.phone}
+                value={values.phone}
+                rightComponent={false}
+                onChangeText={handleChange('phone')}
+                onBlur={handleBlur('phone')}
+                touched={touched.phone}
+            />
+            <Input
+                placeholder="Location"
+                error={errors.location}
+                value={values.location}
+                rightComponent={false}
+                onChangeText={handleChange('location')}
+                onBlur={handleBlur('location')}
+                touched={touched.location}
+            />
+            <Input
+                placeholder="Gender"
+                error={errors.gender}
+                value={values.gender}
+                rightComponent={false}
+                onChangeText={handleChange('gender')}
+                onBlur={handleBlur('gender')}
+                touched={touched.gender}
+            />
+        
+            <View style={styles.modalButtonContainerStyle}>
                 <Button
-                    title='Save'
+                    title='Save changes'
                     backgroundColor={green}
                     borderColor={green}
                     color={white}
-                    enabled onPress={() => {}}
+                    enabled onPress={handleSubmit}
                 />
             </View>
-        </View>
+        </KeyboardAvoidingView>
+    </View>
 
     const SaveImageComponent = () => 
         <View style={[styles.saveImageButtonContainerStyle, {width: width * .8}]}>
@@ -179,6 +252,27 @@ const Profile = (props) => {
                 color={white}
                 enabled
                 onPress={saveAvatarHandler} 
+            />
+        </View>
+
+    const PasswordComponent = () => 
+        <View style={[styles.saveImageButtonContainerStyle, {width: width * .8}]}>
+            <Input
+                placeholder="New Password"
+                error={state.password.error}
+                value={state.password.value}
+                rightComponent={false}
+                onChangeText={onChangePasswordHandler}
+                onBlur={() => {}}
+                touched={true}
+            />
+            <Button
+                title='Save'
+                backgroundColor={green}
+                borderColor={green}
+                color={white}
+                enabled={state.password.value}
+                onPress={updateUserPassword} 
             />
         </View>
 
@@ -193,47 +287,47 @@ const Profile = (props) => {
                 <View style={[styles.topBarStyle, {width}]}/>
                 <Image source={images.curve} style={[styles.imageCurveStyle, {width: width * 3.5, marginLeft: width * 0.055}]} resizeMode='cover' />
                 <TouchableOpacity activeOpacity={.8} style={[styles.avatarImageContainerStyle]} onPress={onChangeProfilePicHandler}>
-                    <Image source={userState.user.imageUrl ? {uri: userState.user.imageUrl} : images.avatar} style={styles.profileImageStyle} resizeMode='cover' />
+                    <Image source={user.imageUrl ? {uri: user.imageUrl} : images.avatar} style={styles.profileImageStyle} resizeMode='cover' />
                 </TouchableOpacity>
                 <View style={[styles.profileInfoContainer, {width: width * .8, height: height * .55}]}>
                     <View style={styles.profileTitleContainerStyle}>
-                        <Text style={styles.profileNameStyle}>{state.name.value}</Text>
-                        <Icon name='edit' size={20} color={green} onPress={() => onChangeProfileInfo('name')} />
+                        <Text style={styles.profileNameStyle}>{user.fullName}</Text>
+                        <Icon name='edit' size={20} color={green} onPress={() => onChangeProfileInfo('info')} />
                     </View>
                     <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
                         <View>
                             <Text style={styles.profileAboutTitleTextStyle}>ABOUT</Text>
-                            <Text style={styles.profileDescriptionTextStyle}>Lorem ipsum dolor sit amet elit. Integer et fringilla felis, id mauris. Nullam iaculis quam a justo porta</Text>
+                            <Text style={styles.profileDescriptionTextStyle}>{user.about}</Text>
                         </View>
                         <View>
                             <Text style={styles.profileAboutTitleTextStyle}>PRIVATE INFORMATION</Text>
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='mail' size={25} color={darkGray} />
-                                    <Text style={styles.privateProfileTextStyle}>{state.name.value}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{user.fullName}</Text>
                                 </View>
-                                <Icon name='edit' size={20} color={green} onPress={() => onChangeProfileInfo('phone')} />
+                                <Icon name='edit' size={20} color={green} onPress={() => onChangeProfileInfo('info')} />
                             </View>
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='phone-enabled' size={25} color={darkGray} />
-                                    <Text style={styles.privateProfileTextStyle}>{state.phone.value}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{user.phone}</Text>
                                 </View>
                                 <Icon name='edit' size={20} color={green} />
                             </View>
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='location-on' size={25} color={darkGray} />
-                                    <Text style={styles.privateProfileTextStyle}>{state.location.value}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{user.location}</Text>
                                 </View>
-                                <Icon name='edit' size={20} color={green} onPress={() => onChangeProfileInfo('location')} />
+                                <Icon name='edit' size={20} color={green} onPress={() => onChangeProfileInfo('info')} />
                             </View>
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Ionicons name='ios-male-female-outline' size={25} color={darkGray} />
-                                    <Text style={styles.privateProfileTextStyle}>{state.gender.value}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{user.gender}</Text>
                                 </View>
-                                <Icon name='edit' size={20} color={green} onPress={() => onChangeProfileInfo('gender')} />
+                                <Icon name='edit' size={20} color={green} onPress={() => onChangeProfileInfo('info')} />
                             </View>
                             <View style={styles.profileChangePasswordTextStyle}>
                                 <Text style={styles.profileChangeTitleTextStyle}>CHANGE PASSWORD</Text>
@@ -251,23 +345,17 @@ const Profile = (props) => {
                         backgroundColor={white}
                         borderColor={green}
                         color={green}
-                        enabled onPress={() => {}}
+                        enabled onPress={onAdvancedHandler}
                     />
                 </View>
             </SafeAreaView>
             <RNModal visible={state.modal.visible} onRequestClose={closeModal} presentationStyle='overFullScreen' closeIconColor={white}>
                 {state.modal.type === 'image' ?
                     ImageComponent() :
-                    state.modal.type === 'name' ?
+                    state.modal.type === 'info' ?
                     ProfileComponent('name') :
-                    state.modal.type === 'phone' ?
-                    ProfileComponent('phone') :
-                    state.modal.type === 'location' ?
-                    ProfileComponent('location') :
-                    state.modal.type === 'gender' ?
-                    ProfileComponent('gender') :
                     state.modal.type === 'password' ?
-                    ProfileComponent('password') :
+                    PasswordComponent() :
                     SaveImageComponent()
                 }
             </RNModal>
@@ -390,6 +478,14 @@ const styles = StyleSheet.create({
         borderRadius: defaultSize,
         paddingVertical: defaultSize * 2,
         paddingHorizontal: defaultSize,
+        overflow: 'hidden'
+    },
+    // 
+    modalContainerStyle: {
+        backgroundColor: white,
+        paddingVertical: defaultSize,
+        paddingHorizontal: defaultSize,
+        borderRadius: defaultSize,
         overflow: 'hidden'
     }
 })

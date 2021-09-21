@@ -5,7 +5,9 @@ import {
     RESET_LOADERS, UPDATE_USER,
     USER_GOOGLE_LOGIN, USER_GOOGLE_LOGIN_FAILED, USER_GOOGLE_LOGIN_SUCCESSFUL,
     USER_GOOGLE_SIGNUP_SUCCESSFUL, USER_GOOGLE_SIGNUP, USER_GOOGLE_SIGNUP_FAILED,
-    UPLOAD_AVATAR, UPLOAD_AVATAR_FAILED, UPLOAD_AVATAR_SUCCESSFUL
+    UPLOAD_AVATAR, UPLOAD_AVATAR_FAILED, UPLOAD_AVATAR_SUCCESSFUL,
+    UPDATE_USER_INFO, UPDATE_USER_INFO_SUCCESSFUL, UPDATE_USER_INFO_FAILED,
+    UPDATE_PASSWORD, UPDATE_PASSWORD_FAILED, UPDATE_PASSWORD_SUCCESSFUL
 } from '../actions/types';
 
 const INITIAL_STATE = {
@@ -124,6 +126,42 @@ export default (state = INITIAL_STATE, action) => {
             }
 
         case UPLOAD_AVATAR_FAILED:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case UPDATE_USER_INFO:
+            return {
+                ...state,
+                loading: true
+            }
+
+        case UPDATE_USER_INFO_SUCCESSFUL:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case UPDATE_USER_INFO_FAILED:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case UPDATE_PASSWORD:
+            return {
+                ...state,
+                loading: true
+            }
+
+        case UPDATE_PASSWORD_SUCCESSFUL:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case UPDATE_PASSWORD_FAILED:
             return {
                 ...state,
                 loading: false

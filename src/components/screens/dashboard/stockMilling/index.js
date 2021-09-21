@@ -33,6 +33,7 @@ const StockMilling = (props) => {
 
     // redux
     const { products, subProducts, qualities } = useSelector(state => state.product)
+    const {selectedMill} = useSelector(state => state.miller);
 
     // state
     const [modal, setModal] = useState({modalVisible: false});
@@ -179,6 +180,7 @@ const StockMilling = (props) => {
             date: dayjs().format('YYYY-DD-MM-H:M'),
             product: product.name,
             subProduct: subProduct.name,
+            mill: selectedMill.name,
             inputQuality: inputQuality.name,
             inputQuantity1: defaultInputWeight.value,
             inputQuantity2: addedInputWeight.value, 

@@ -32,6 +32,7 @@ const MillingService = (props) => {
     // redux
     const {products, subProducts, categories, qualities} = useSelector(state => state.product);
     const {suppliers} = useSelector(state => state.supplier);
+    const { selectedMill} = useSelector(state => state.miller);
 
     // state
     const [product, setProduct] = useState({id: 'none', progress: new Animated.Value(45) , name: 'Product', open: false});
@@ -217,6 +218,7 @@ const MillingService = (props) => {
             subProduct: subProduct.name,
             category: category.name,
             individual: supplier.name,
+            mill: selectedMill.name,
             inputQuality: inputQuality.name,
             inputQuantity1: defaultInputWeight.value,
             inputQuantity2: addedInputWeight.value, 

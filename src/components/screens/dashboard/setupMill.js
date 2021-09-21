@@ -6,26 +6,37 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import Icons from 'react-native-vector-icons/MaterialIcons';
+import { useDispatch, useSelector } from 'react-redux';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 import { colors, images, defaultSize } from '../../../config';
 import Fallback from '../../common/fallback';
+import { setupMill } from '../../../store/actions';
 
-const { white, green, blue, darkGray } = colors;
+const { white, green, blue, } = colors;
 const Input = lazy(() => import('../../common/input'));
 const Button = lazy(() => import('../../common/button'));
 
 const SetupMill = (props) => {
+    const dispatch = useDispatch();
     const { width } = useWindowDimensions();
 
+    // redux
+    const {loading} = useSelector(state => state.miller)
+
     const { handleChange, values, handleSubmit, errors, handleBlur, touched } = useFormik({
-        initialValues: { millName: '', millLocation: '', millCapacity: '' },
+        initialValues: { name: '', location: '', capacity: '' },
         validationSchema: Yup.object({
-            millName: Yup.string().required('Name of the mill is required'),
-            millLocation: Yup.string().required('Location of mill is required'),
-            millCapacity: Yup.string().required('Capacity of mill is required')
+            name: Yup.string().required('Name of the mill is required'),
+            location: Yup.string().required('Location of mill is required'),
+            capacity: Yup.string().required('Capacity of mill is required')
         }),
         onSubmit: values => {
-            props.navigation.navigate('selectmill')
+            dispatch(setupMill(values,
+                () => {
+                    props.navigation.navigate('selectmill');
+                },
+                err => {console.log(err)}))
         }
     });
 
@@ -34,6 +45,7 @@ const SetupMill = (props) => {
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
+            <Spinner visible={loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
                 <View style={[styles.setupMillHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
@@ -45,30 +57,30 @@ const SetupMill = (props) => {
                     <KeyboardAvoidingView>
                         <Input
                             placeholder="Name of mill"
-                            error={errors.millName}
-                            value={values.millName}
+                            error={errors.name}
+                            value={values.name}
                             rightComponent={false}
-                            onChangeText={handleChange('millName')}
-                            onBlur={handleBlur('millName')}
-                            touched={touched.millName}
+                            onChangeText={handleChange('name')}
+                            onBlur={handleBlur('name')}
+                            touched={touched.name}
                         />
                         <Input
                             placeholder="Location of mill"
-                            error={errors.millLocation}
-                            value={values.millLocation}
+                            error={errors.location}
+                            value={values.location}
                             rightComponent={false}
-                            onChangeText={handleChange('millLocation')}
-                            onBlur={handleBlur('millLocation')}
-                            touched={touched.millLocation}
+                            onChangeText={handleChange('location')}
+                            onBlur={handleBlur('location')}
+                            touched={touched.location}
                         />
                         <Input
                             placeholder="Mill capacity"
-                            error={errors.millCapacity}
-                            value={values.millCapacity}
+                            error={errors.capacity}
+                            value={values.capacity}
                             rightComponent={false}
-                            onChangeText={handleChange('millCapacity')}
-                            onBlur={handleBlur('millCapacity')}
-                            touched={touched.millCapacity}
+                            onChangeText={handleChange('capacity')}
+                            onBlur={handleBlur('capacity')}
+                            touched={touched.capacity}
                         />
                      </KeyboardAvoidingView>
                 </View>

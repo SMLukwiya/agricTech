@@ -10,10 +10,11 @@ import {
     USER_GOOGLE_LOGIN, USER_GOOGLE_LOGIN_FAILED, USER_GOOGLE_LOGIN_SUCCESSFUL,
     LOGOUT,LOGOUT_SUCCESSFUL, LOGOUT_FAILED,
     RESET_LOADERS, UPDATE_USER,
-    UPLOAD_AVATAR, UPLOAD_AVATAR_FAILED, UPLOAD_AVATAR_SUCCESSFUL
+    UPLOAD_AVATAR, UPLOAD_AVATAR_FAILED, UPLOAD_AVATAR_SUCCESSFUL,
+    UPDATE_USER_INFO, UPDATE_USER_INFO_SUCCESSFUL, UPDATE_USER_INFO_FAILED,
+    UPDATE_PASSWORD, UPDATE_PASSWORD_FAILED, UPDATE_PASSWORD_SUCCESSFUL
  } from './types';
 import {baseUri} from '../../config';
-import { ref } from 'yup';
 
  export const resetLoaders = () => {
      return ({type: RESET_LOADERS});
@@ -139,6 +140,44 @@ export const updateProfileImage = (image, uid, onSuccess = () => {}, onFailure =
         } catch (err) {
             dispatch({type: UPLOAD_AVATAR_FAILED})
             onFailure(err);
+        }
+    }
+}
+
+export const updateUserInfo = (uid, values, onSuccess = () => {}, onFailure = () => {}) => {
+    const { fullName, phone, location, gender, about } = values;
+
+    return async dispatch => {
+        dispatch({type: UPDATE_USER_INFO});
+
+        try {
+            const response = await axios.post(`${baseUri}users-updateProfile`, {
+                uid, fullName, phone, location, gender, about
+            })
+            dispatch({
+                type: UPDATE_USER_INFO_SUCCESSFUL
+            })
+            onSuccess();
+        } catch (err) {
+            dispatch({type: UPDATE_USER_INFO_FAILED});
+            onFailure(err);
+        }
+    }
+}
+
+export const updatePassword = (uid, password, onSuccess = () => {}, onFailure = () => {}) => {
+    return async dispatch => {
+        dispatch({type: UPDATE_PASSWORD});
+
+        try {
+            const response = await axios.post(`${baseUri}users-changePassword`, {
+                uid, password
+            });
+            dispatch({type: UPDATE_PASSWORD_SUCCESSFUL});
+            onSuccess();
+        } catch (err) {
+            dispatch({type: UPDATE_PASSWORD_FAILED});
+            onFailure(err)
         }
     }
 }

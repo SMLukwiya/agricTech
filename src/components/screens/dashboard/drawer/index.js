@@ -5,7 +5,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CommonActions } from '@react-navigation/native';
 import Icons from 'react-native-vector-icons/MaterialIcons';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 
 import { colors, images, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
@@ -17,6 +17,9 @@ const Button = lazy(() => import('../../../common/button'));
 const CustomDrawer = (props) => {
     const { width } = useWindowDimensions();
     const dispatch = useDispatch();
+
+    // redux
+    const {user} = useSelector(state => state.user);
 
     // dummy items
     const items = [
@@ -63,10 +66,10 @@ const CustomDrawer = (props) => {
                 <View style={[styles.topBarStyle, {width}]}/>
                 <Image source={images.curve} style={[styles.imageCurveStyle, {width: width * 3.5, marginLeft: width * 0.055}]} resizeMode='cover' />
                 <View style={[styles.avatarImageContainerStyle, {marginRight: -width * .5}]}>
-                    <Image source={images.avatar} height='100%' width='100%' resizeMode='stretch' />
+                    <Image source={user.imageUrl ? {uri: user.imageUrl} : images.avatar}  style={styles.imageStyle} resizeMode='cover' />
                 </View>
                 <View>
-                    <Text style={styles.profileTitleStyle}>John Mukoma</Text>
+                    <Text style={styles.profileTitleStyle}>{user.fullName}</Text>
                     <View style={{width: width * .8, marginTop: defaultSize}}>
                         {items.map(({id, name, image, onPress}) => profileComponent(id, name, image, onPress))}
                     </View>
@@ -132,6 +135,10 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: green,
         marginTop: -defaultSize * 7.5,
+    },
+    imageStyle: {
+        height: '100%',
+        width: '100%'
     },
     profileTitleStyle: {
         fontSize: defaultSize * 1.2,

@@ -7,9 +7,10 @@ import pickup from './pickup';
 import product from './product';
 import batchMill from './batchMill';
 import millingService from './milingService';
+import miller from './millers';
 
 const rootReducer = combineReducers({
-    user, buy, supplier, customer, pickup, product, batchMill, millingService
+    user, buy, supplier, customer, pickup, product, batchMill, millingService, miller
 });
 
 export default rootReducer;
