@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useState, useEffect } from 'react';
 import {
-    View, StyleSheet, Text, StatusBar, useWindowDimensions, Animated, UIManager, LayoutAnimation, ScrollView, TouchableOpacity, KeyboardAvoidingView
+    View, StyleSheet, Text, StatusBar, useWindowDimensions, Animated, UIManager, LayoutAnimation, ScrollView, TouchableOpacity, Alert, KeyboardAvoidingView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFormik } from 'formik';
@@ -9,11 +9,11 @@ import Icons from 'react-native-vector-icons/MaterialIcons';
 import { useSelector, useDispatch } from 'react-redux';
 import dayjs from 'dayjs';
 
-import { colors, images, defaultSize } from '../../../../config';
+import { colors, defaultSize, formatNumber, formatDecNumber } from '../../../../config';
 import Fallback from '../../../common/fallback';
-import { saveBatchMillData } from '../../../../store/actions';
+import { saveBatchMillData, saveBatchQualityData, setProductName, setSubProductName, setInputQualityName } from '../../../../store/actions';
 
-const { white, green, blue, darkGray, lightGray } = colors;
+const { white, green, darkGray, lightGray } = colors;
 const Select = lazy(() => import('../../../common/select'));
 const Button = lazy(() => import('../../../common/button'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
@@ -32,8 +32,12 @@ const StockMilling = (props) => {
     const { height, width } = useWindowDimensions();
 
     // redux
-    const { products, subProducts, qualities } = useSelector(state => state.product)
+    const { products, subProducts, qualities, outputQualities } = useSelector(state => state.product)
     const {selectedMill} = useSelector(state => state.miller);
+    const remote = useSelector(state => state.remoteConfigs);
+    const {
+        inputWeightTextLabel, outputWeightTextLabel
+    } = remote.values
 
     // state
     const [modal, setModal] = useState({modalVisible: false});
@@ -43,12 +47,12 @@ const StockMilling = (props) => {
     const [outputQuality, setOutputQuality] = useState({id: 'none', progress: new Animated.Value(45), name: 'Output Quality', open: false});
 
     // input
-    const [defaultInputWeight, setDefaultInputWeight] = useState({value: '0', error: ''});
-    const [addedInputWeight, setAddedInputWeight] = useState({visible: false, value: '0', error: ''});
+    const [defaultInputWeight, setDefaultInputWeight] = useState({value: '', decValue: '', error: ''});
+    const [addedInputWeight, setAddedInputWeight] = useState({inputs: {}, inputCount: 0, total: ''});
 
     // output
-    const [defaultOutputWeight, setDefaultOutputWeight] = useState({value: '0', error: ''});
-    const [addedOutputWeight, setAddedOutputWeight] = useState({visible: false, value: '0', error: ''});
+    const [defaultOutputWeight, setDefaultOutputWeight] = useState({value: '', decValue: '', error: ''});
+    const [addedOutputWeight, setAddedOutputWeight] = useState({inputs: {}, inputCount: 0, total: ''});
 
     const [totalWeightInput, setTotalWeightInput] = useState({value: ''});
     const [totalWeightOutput, setTotalWeightOutput] = useState({value: ''});
@@ -64,37 +68,142 @@ const StockMilling = (props) => {
     }
 
     const onChangeText = (value, type) => {
-        if (type === 'defaultInput') setDefaultInputWeight({...defaultInputWeight, value})
-        else if (type === 'addedInput') setAddedInputWeight({...addedInputWeight, value})
-        else if (type === 'defaultOutput') setDefaultOutputWeight({...defaultOutputWeight, value})
-        else setAddedOutputWeight({...addedOutputWeight, value})
+        if (type === 'defaultInput') setDefaultInputWeight({...defaultInputWeight, value, decValue: value})
+        else if (type === 'defaultOutput') setDefaultOutputWeight({...defaultOutputWeight, value, decValue: value})
     }
 
-    const onAddWeightInputHandler = (type) => {
-        if (type === 'addInputWeight') {
-            setAddedInputWeight({...addedInputWeight, visible: true});
-        } else {
-            setAddedOutputWeight({...addedOutputWeight, visible: true});
+    // add input weight dynamically
+    const onAddWeightInputHandler = () => {
+        let id = `${addedInputWeight.inputCount}`;
+        let newInputs = { ...addedInputWeight.inputs};
+            newInputs[id] = {
+            value: '', decValue: ''
         }
+
+        setAddedInputWeight({
+            ...addedInputWeight, 
+            inputs: newInputs, 
+            inputCount: addedInputWeight.inputCount+1
+        })
     }
 
-    // total  input weight
-    const addTotalInputWeight = () => {
-        setTotalWeightInput({...totalWeightInput, value: `${parseInt(defaultInputWeight.value === '' ? '0' : defaultInputWeight.value) + parseInt(addedInputWeight.value === '' ? '0' : addedInputWeight.value)}`})
-    }
-    // total  output weight
-    const addTotalOutputWeight = () => {
-        setTotalWeightOutput({...totalWeightOutput, value: `${parseInt(defaultOutputWeight.value === '' ? '0' : defaultOutputWeight.value) + parseInt(addedOutputWeight.value === '' ? '0' : addedOutputWeight.value)}`})
+    // dynamic input array
+    let inputArray = [];
+    for (key in addedInputWeight.inputs) {
+        inputArray.push({id: key, ...addedInputWeight.inputs[key]})
     }
 
-    useEffect(() => {
-        addTotalInputWeight();
-        addTotalOutputWeight();
-    }, [defaultInputWeight.value, addedInputWeight.value, defaultOutputWeight.value, addedOutputWeight.value]);
+    // change the value of dynamic input dynamically
+    const changeAddedInputText = (id, value) => {
+        setAddedInputWeight({
+            ...addedInputWeight,
+            inputs: {
+                ...addedInputWeight.inputs,
+                [id]: {
+                    ...addedInputWeight.inputs[id],
+                    value: value,
+                    decValue: value
+                }
+            },
+            total: `${(parseInt(addedInputWeight.total === '' ? '0' : addedInputWeight.total) - parseInt(addedInputWeight.inputs[id].value === '' ? '0' : addedInputWeight.inputs[id].value)) + parseInt(value === '' ? '0' : value)}` // check for empty strings and asign 0
+        })
+    }
+
+    // format dynamic input values toLocaleString 2 decimal places
+    const formatDynamicInputValues = (id) => {
+        setAddedInputWeight({
+            ...addedInputWeight,
+            inputs: {
+                ...addedInputWeight.inputs,
+                [id]: {
+                    ...addedInputWeight.inputs[id],
+                    decValue: formatDecNumber(addedInputWeight.inputs[id].value)
+                }
+            }
+        })
+    }
+
+    // add output inputs dynamically
+    const onAddWeightOutputHandler = () => {
+        let id = `${addedOutputWeight.inputCount}`;
+        let newInputs = { ...addedOutputWeight.inputs};
+            newInputs[id] = {
+            value: '', decValue: ''
+        }
+
+        setAddedOutputWeight({
+            ...addedOutputWeight, 
+            inputs: newInputs, 
+            inputCount: addedOutputWeight.inputCount+1
+        })
+    }
+
+    let outputArray = [];
+    for (key in addedOutputWeight.inputs) {
+        outputArray.push({id: key, ...addedOutputWeight.inputs[key]})
+    }
+    
+    // change the value of dynamic output dynamically
+    const changeAddedOutputText = (id, value) => {
+        setAddedOutputWeight({
+            ...addedOutputWeight,
+            inputs: {
+                ...addedOutputWeight.inputs,
+                [id]: {
+                    ...addedOutputWeight.inputs[id],
+                    value: value,
+                    decValue: value
+                }
+            },
+            total: `${(parseInt(addedOutputWeight.total === '' ? '0' : addedOutputWeight.total) - parseInt(addedOutputWeight.inputs[id].value === '' ? '0' : addedOutputWeight.inputs[id].value)) + parseInt(value === '' ? '0' : value)}` // check for empty strings and asign 0
+        })
+    }
+
+    // format dynamic output values toLocaleString 2 decimal places
+    const formatDynamicOutputValues = (id) => {
+        setAddedOutputWeight({
+            ...addedOutputWeight,
+            inputs: {
+                ...addedOutputWeight.inputs,
+                [id]: {
+                    ...addedOutputWeight.inputs[id],
+                    decValue: formatDecNumber(addedOutputWeight.inputs[id].value)
+                }
+            }
+        })
+    }
+
+    // clear quality information
+    const clearQualityInformation = () => {
+        setInputQuality({...inputQuality, name: 'Quality'});
+        setOutputQuality({...outputQuality, name: 'Output Quality'})
+        setDefaultInputWeight({value: '', decValue: ''})
+        setDefaultOutputWeight({value: '', decValue: ''})
+        setAddedInputWeight({...addedInputWeight, inputs: {}, inputCount: 0, total: ''})
+        setAddedOutputWeight({...addedOutputWeight, inputs: {}, inputCount: 0, total: ''})
+        setTotalWeightInput({value: ''})
+        setTotalWeightOutput({value: ''})
+    }
 
     const onCreateHandler = (type) => {
         closeModal();
-        props.navigation.navigate(type === 'product' ? 'createnewproduct' : type === 'subproduct' ? 'createnewsubproduct' : 'createnewquality')
+        if (type === 'product') {
+            props.navigation.navigate('createnewproduct')
+        } else if (type === 'subproduct') {
+            if (product.name === 'Product') return Alert.alert('Please select a product');
+            dispatch(setProductName(product.name));
+            props.navigation.navigate('createnewsubproduct')
+        } else if (type === 'inputQuality') {
+            dispatch(setProductName(product.name));
+            dispatch(setSubProductName(subProduct.name));
+            props.navigation.navigate('createnewquality')
+        } else {
+            if (inputQuality.name === 'Input Quality') return Alert.alert('Please select an input quality');
+            dispatch(setProductName(product.name));
+            dispatch(setSubProductName(subProduct.name));
+            dispatch(setInputQualityName(quality.name));
+            props.navigation.navigate('createnewoutputquality')
+        }
     }
 
     // toggle product
@@ -155,39 +264,47 @@ const StockMilling = (props) => {
                 duration: 200,
                 useNativeDriver: false
             }).start()
-        }
-    }
-
-    // seperate second input quality field for now
-    const selectQualityHandler = (type, id, name) => {
-        setOutputQuality({...outputQuality, id: id === outputQuality.id ? '' : id, name, open: false });
+        } else {
+            setOutputQuality({...outputQuality, id: id === outputQuality.id ? '' : id, name, open: false });
             Animated.timing(outputQuality.progress, {
                 toValue: 45,
                 duration: 200,
                 useNativeDriver: false
             }).start()
+        }
+    }
+
+    // save quality information per product and add more
+    const saveQualityHandler = () => {
+        dispatch(saveBatchQualityData({
+            inputQuality: inputQuality.name, 
+            totalInput: totalWeightInput.value,
+            outputQuality: outputQuality.name,
+            totalOutput: totalWeightOutput.value,
+        }));
+        setTimeout(() => {
+            clearQualityInformation();
+        }, 50);
+        setTimeout(() => {
+            setModal({...modal, modalVisible: true})
+        }, 100);
     }
 
     const onAddNewQualityHandler = () => {
         closeModal();
-        props.navigation.navigate('createnewquality');
+        saveQualityHandler();
     }
 
     // continue
-
     const saveData = () => {
         dispatch(saveBatchMillData({
-            date: dayjs().format('YYYY-DD-MM-H:M'),
+            date: dayjs().format('YYYY-DD-MM:H:M'),
             product: product.name,
             subProduct: subProduct.name,
             mill: selectedMill.name,
-            inputQuality: inputQuality.name,
-            inputQuantity1: defaultInputWeight.value,
-            inputQuantity2: addedInputWeight.value, 
-            totalInput: totalWeightInput.value, 
-            outputQuality: outputQuality.name, 
-            outputQuantity1: defaultOutputWeight.value, 
-            outputQuantity2: addedOutputWeight.value, 
+            inputQuality: inputQuality.name, 
+            totalInput: totalWeightInput.value,
+            outputQuality: outputQuality.name,
             totalOutput: totalWeightOutput.value,
         }))
     }
@@ -197,6 +314,27 @@ const StockMilling = (props) => {
         saveData();
         props.navigation.navigate('batchsummary')
     }
+
+    // total  input weight
+    const addTotalInputWeight = () => {
+        setTotalWeightInput({
+            ...totalWeightInput, 
+            value: `${parseInt(defaultInputWeight.value === '' ? '0' : defaultInputWeight.value) + parseInt(addedInputWeight.total === '' ? '0' : addedInputWeight.total)}`
+        })
+    }
+
+    // total  output weight
+    const addTotalOutputWeight = () => {
+        setTotalWeightOutput({
+            ...totalWeightOutput, 
+            value: `${parseInt(defaultOutputWeight.value === '' ? '0' : defaultOutputWeight.value) + parseInt(addedOutputWeight.total === '' ? '0' : addedOutputWeight.total)}`
+        })
+    }
+
+    useEffect(() => {
+        addTotalInputWeight();
+        addTotalOutputWeight();
+    }, [defaultInputWeight.value, addedInputWeight.total, defaultOutputWeight.value, addedOutputWeight.total]);
     
     let enabled1 = product.name !== 'Product' && subProduct.name !== 'Sub Product';
     let enabled = product.name !== 'Product' && subProduct.name !== 'Sub Product' && inputQuality.name !== 'Input Quality' && outputQuality.name !== 'Output Quality'
@@ -212,28 +350,30 @@ const StockMilling = (props) => {
                     </View>
                 </View>
                 <View style={[styles.stockSelectContainerStyle, {width: width * .8}]}>
-                    <Text style={styles.stockMillingTextStyle}>Select a product from your stocks</Text>
-                    <Select
-                        height={product.progress}
-                        onToggleSelector={() => onToggleSelector('product', 'Select Product')}
-                        productName={product.name}
-                        isProductOpen={product.open}
-                        productList={products}
-                        onProductSelect={onProductSelect}
-                        buttonTitle='Create new Product'
-                        onCreateHandler={() => onCreateHandler('product')}
-                    />
-                    <Text style={styles.stockMillingTextStyle}>Select Sub product from your stock</Text>
-                    <Select
-                        height={subProduct.progress}
-                        onToggleSelector={() => onToggleSelector('subproduct', 'Select Sub product')}
-                        productName={subProduct.name}
-                        isProductOpen={subProduct.open}
-                        productList={subProducts}
-                        onProductSelect={onProductSelect}
-                        buttonTitle='Create new Sub product'
-                        onCreateHandler={() => onCreateHandler('subProduct')}
-                    />
+                    <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
+                        <Text style={styles.stockMillingTextStyle}>Select a product from your stocks</Text>
+                        <Select
+                            height={product.progress}
+                            onToggleSelector={() => onToggleSelector('product', 'Product')}
+                            productName={product.name}
+                            isProductOpen={product.open}
+                            productList={products}
+                            onProductSelect={onProductSelect}
+                            buttonTitle='Create new Product'
+                            onCreateHandler={() => onCreateHandler('product')}
+                        />
+                        <Text style={styles.stockMillingTextStyle}>Select Sub product from your stock</Text>
+                        <Select
+                            height={subProduct.progress}
+                            onToggleSelector={() => onToggleSelector('subproduct', 'Sub Product')}
+                            productName={subProduct.name}
+                            isProductOpen={subProduct.open}
+                            productList={product.name !== 'Product' ? subProducts.filter(item => item.product === product.name) : subProducts}
+                            onProductSelect={onProductSelect}
+                            buttonTitle='Create new Sub product'
+                            onCreateHandler={() => onCreateHandler('subproduct')}
+                        />
+                    </ScrollView>
                 </View>
                 <View style={[styles.buttonContainerStyle, {width: width * .8}]}>
                     <Button
@@ -255,43 +395,49 @@ const StockMilling = (props) => {
                             onToggleSelector={() => onToggleSelector('quality', 'Input Quality')}
                             productName={inputQuality.name}
                             isProductOpen={inputQuality.open}
-                            productList={qualities}
+                            productList={subProduct.name !== 'Sub Product' ? qualities.filter(item => item.subproduct === subProduct.name) : qualities}
                             onProductSelect={onProductSelect}
                             buttonTitle='Create new Input Quality'
                             onCreateHandler={() => onCreateHandler('inputQuality')}
                         />
                         <View style={styles.modalWeightContainerStyle}>
                             <Text>Input weight</Text>
-                            <View style={{width: '50%'}}>
+                            <KeyboardAvoidingView style={styles.modalViewStyle}>
                                 <Input
-                                    value={defaultInputWeight.value}
+                                    value={defaultInputWeight.decValue}
                                     error={defaultInputWeight.error}
                                     onChangeText={(value) => onChangeText(value, 'defaultInput')}
                                     keyboardType='number-pad'
+                                    textAlign='right'
+                                    onBlur={() => setDefaultInputWeight({...defaultInputWeight, decValue: formatDecNumber(defaultInputWeight.decValue)})}
                                 />
-                            </View>
+                            </KeyboardAvoidingView>
                         </View>
-                        {addedInputWeight.visible && 
-                            <View style={styles.modalWeightContainerStyle}>
-                                <Text>Input weight</Text>
-                                <View style={{width: '50%'}}>
-                                    <Input
-                                        value={addedInputWeight.value}
-                                        error={addedInputWeight.error}
-                                        onChangeText={(value) => onChangeText(value, 'addedInput')}
+                        {
+                            inputArray.map(({id, value, decValue}) => 
+                            <View style={styles.modalInputContainerStyle} key={id}>
+                                <Text>{inputWeightTextLabel}</Text>
+                                <KeyboardAvoidingView style={styles.modalViewStyle}>
+                                    <Input 
+                                        key={id}
+                                        error={'some'}
+                                        value={decValue}
+                                        onChangeText={(value) => changeAddedInputText(id, value)}
                                         keyboardType='number-pad'
+                                        textAlign='right'
+                                        onBlur={() => formatDynamicInputValues(id)}
                                     />
-                                </View>
+                                </KeyboardAvoidingView>
                             </View>
-                        }
-                        {!addedInputWeight.visible &&
+                        )}
+                        {addedInputWeight.inputCount < 50 &&
                             <View style={styles.modalButtonIndicatorContainerStyle}>
                                 <Button
                                     title='Add weight input'
                                     backgroundColor={white}
                                     borderColor={lightGray}
                                     color={darkGray}
-                                    enabled onPress={() => onAddWeightInputHandler('addInputWeight')}
+                                    enabled onPress={onAddWeightInputHandler}
                                     rightComponent={<Icons name='add' size={25} color={green} />}
                                 />
                             </View>
@@ -301,43 +447,49 @@ const StockMilling = (props) => {
                             onToggleSelector={() => onToggleSelector('outputquality', 'Output Quality')}
                             productName={outputQuality.name}
                             isProductOpen={outputQuality.open}
-                            productList={qualities}
-                            onProductSelect={selectQualityHandler}
+                            productList={inputQuality.name !== 'InputQuality' ? outputQualities.filter(item => item.quality === inputQuality.name) : outputQualities}
+                            onProductSelect={onProductSelect}
                             buttonTitle='Create new Output Quality'
                             onCreateHandler={() => onCreateHandler('outputQuality')}
                         />
                         <View style={styles.modalWeightContainerStyle}>
                             <Text>Output Weight</Text>
-                            <View style={{width: '50%'}}>
+                            <KeyboardAvoidingView style={styles.modalViewStyle}>
                                 <Input
-                                    value={defaultOutputWeight.value}
-                                    error={defaultOutputWeight.value}
+                                    value={defaultOutputWeight.decValue}
+                                    error={'error'}
                                     onChangeText={(value) => onChangeText(value, 'defaultOutput')}
                                     keyboardType='number-pad'
+                                    textAlign='right'
+                                    onBlur={() => setDefaultOutputWeight({...defaultOutputWeight, decValue: formatDecNumber(defaultOutputWeight.decValue)})}
                                 />
-                            </View>
+                            </KeyboardAvoidingView>
                         </View>
-                        {addedOutputWeight.visible &&
-                            <View style={styles.modalWeightContainerStyle}>
-                                <Text>Output Weight</Text>
-                                <View style={{width: '50%'}}>
-                                    <Input
-                                        value={addedOutputWeight.value}
-                                        error={addedOutputWeight.value}
-                                        onChangeText={(value) => onChangeText(value, 'addedOutput')}
+                        {
+                            outputArray.map(({id, value, decValue}) => 
+                            <View style={styles.modalInputContainerStyle} key={id}>
+                                <Text>{outputWeightTextLabel}</Text>
+                                <KeyboardAvoidingView style={styles.modalViewStyle}>
+                                    <Input 
+                                        key={id}
+                                        error={'error'}
+                                        value={decValue}
+                                        onChangeText={(value) => changeAddedOutputText(id, value)}
                                         keyboardType='number-pad'
+                                        textAlign='right'
+                                        onBlur={() => formatDynamicOutputValues(id)}
                                     />
-                                </View>
+                                </KeyboardAvoidingView>
                             </View>
-                        }
-                        {!addedOutputWeight.visible && 
+                        )}
+                        {addedOutputWeight.inputCount < 50 && 
                             <View style={styles.modalButtonIndicatorContainerStyle}>
                                 <Button
                                     title='Add weight input'
                                     backgroundColor={white}
                                     borderColor={lightGray}
                                     color={darkGray}
-                                    enabled onPress={() => onAddWeightInputHandler('addOnputWeight')}
+                                    enabled onPress={onAddWeightOutputHandler}
                                     rightComponent={<Icons name='add' size={25} color={green} />}
                                 />
                             </View>
@@ -345,13 +497,13 @@ const StockMilling = (props) => {
                         <View style={styles.totalWeightContainerStyle}>
                             <Text>Total input weight</Text>
                             <View style={styles.totalWeightTextContainerStyle}>
-                                <Text>{totalWeightInput.value}</Text>
+                                <Text>{formatDecNumber(totalWeightInput.value)}</Text>
                             </View>
                         </View>
                         <View style={styles.totalWeightContainerStyle}>
                             <Text>Total output weight</Text>
                             <View style={styles.totalWeightTextContainerStyle}>
-                                <Text>{totalWeightOutput.value}</Text>
+                                <Text>{formatDecNumber(totalWeightOutput.value)}</Text>
                             </View>
                         </View>
                     </ScrollView>
@@ -425,6 +577,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-around'
     },
+    modalInputContainerStyle: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-around'
+    },
+    modalViewStyle: {
+        width: '50%',
+        marginHorizontal: defaultSize,
+    },
     modalButtonIndicatorContainerStyle: {
         marginVertical: defaultSize * .5
     },
@@ -444,7 +605,7 @@ const styles = StyleSheet.create({
         borderColor: green,
         borderRadius: defaultSize,
         overflow: 'hidden',
-        alignItems: 'flex-start',
+        alignItems: 'flex-end',
         justifyContent: 'center',
         paddingHorizontal: defaultSize
     },

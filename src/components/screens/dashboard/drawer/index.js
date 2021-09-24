@@ -66,10 +66,10 @@ const CustomDrawer = (props) => {
                 <View style={[styles.topBarStyle, {width}]}/>
                 <Image source={images.curve} style={[styles.imageCurveStyle, {width: width * 3.5, marginLeft: width * 0.055}]} resizeMode='cover' />
                 <View style={[styles.avatarImageContainerStyle, {marginRight: -width * .5}]}>
-                    <Image source={user.imageUrl ? {uri: user.imageUrl} : images.avatar}  style={styles.imageStyle} resizeMode='cover' />
+                    <Image source={user ? {uri: user.imageUrl} : images.avatar}  style={styles.imageStyle} resizeMode='cover' />
                 </View>
                 <View>
-                    <Text style={styles.profileTitleStyle}>{user.fullName}</Text>
+                    <Text style={styles.profileTitleStyle}>{user ? user.fullName: ''}</Text>
                     <View style={{width: width * .8, marginTop: defaultSize}}>
                         {items.map(({id, name, image, onPress}) => profileComponent(id, name, image, onPress))}
                     </View>

@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect, useDebugValue } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import {
     View, StyleSheet, Text, StatusBar, useWindowDimensions, TouchableOpacity, FlatList
 } from 'react-native';
@@ -7,14 +7,14 @@ import Icons from 'react-native-vector-icons/MaterialIcons';
 import firestore from '@react-native-firebase/firestore';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { colors, images, defaultSize } from '../../../config';
+import { colors, defaultSize } from '../../../config';
 import Fallback from '../../common/fallback';
 import { 
     fetchSuppliers, fetchCustomers, fetchPurchases, fetchProducts, fetchSubproducts, fetchQualities , fetchCategories,
-    updateUser, updateMill, setSelectedMill, updateLocations
+    updateUser, updateMill, setSelectedMill, updateLocations, updateGender, fetchOutputQualities
 } from '../../../store/actions';
 
-const { white, green, blue, darkGray, red } = colors;
+const { white, green, darkGray } = colors;
 
 
 const SelectMill = (props) => {
@@ -23,6 +23,8 @@ const SelectMill = (props) => {
 
     const user = useSelector(state => state.user);
     const {millers} = useSelector(state => state.miller);
+    const remote = useSelector(state => state.remoteConfigs);
+    const {setupMillLabel, setupMillDescriptionLabel, selectMillTextLabel} = remote.values;
 
     const onSelectMillHandler = (id, name, capacity, location) => {
         dispatch(setSelectedMill({id, name, capacity, location}));
@@ -131,6 +133,19 @@ const SelectMill = (props) => {
                 console.log('Products error ', err)
             })
 
+    const updateOutputQualities = () =>
+            firestore()
+                .collection('outputQualities')
+                .onSnapshot(querySnapshot => {
+                    let qualities = [];
+                    querySnapshot.forEach(doc => {
+                        qualities.push({id: doc.id, ...doc.data(), type: 'outputQuality'})
+                    })
+                    dispatch(fetchOutputQualities(qualities))
+                }, err => {
+                    console.log('Output quality err ', err)
+                })
+
     // categories
     const updateCategories = () =>
         firestore()
@@ -173,6 +188,20 @@ const SelectMill = (props) => {
                 console.log('Miller error ', err)
             })
 
+        // locations
+    const fetchGender = () =>
+    firestore()
+        .collection('gender')
+        .onSnapshot(querySnapshot => {
+            let gender = [];
+            querySnapshot.forEach(doc => {
+                gender.push({id: doc.id, ...doc.data(), type: 'gender'})
+            })
+            dispatch(updateGender(gender))
+        }, err => {
+            console.log('Gender error ', err)
+        })
+
     useEffect(() => {
         updateSuppliers();
         updateCustomer();
@@ -184,6 +213,8 @@ const SelectMill = (props) => {
         updateUserProfile();
         updateMillers();
         fetchLocations();
+        fetchGender();
+        updateOutputQualities();
     }, [])
 
     const millComponent = ({item: {id, name, location, capacity}}) => 
@@ -195,8 +226,8 @@ const SelectMill = (props) => {
     const setupMillComponent = () => 
         <TouchableOpacity activeOpacity={.8} onPress={onsetupNewMillHandler} style={styles.setupNewMillContainerStyle}>
             <View>
-                <Text style={styles.setupMillTitleHeaderStyle}>Setup new Mill</Text>
-                <Text style={styles.setupMillComponentTextStyle}>Lorem Ipsum</Text>
+                <Text style={styles.setupMillTitleHeaderStyle}>{setupMillLabel}</Text>
+                <Text style={styles.setupMillComponentTextStyle}>{setupMillDescriptionLabel}</Text>
             </View>
             <Icons name='add-circle' size={35} color={green} />
         </TouchableOpacity>
@@ -207,17 +238,20 @@ const SelectMill = (props) => {
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
                 <View style={[styles.selectMillHeaderStyle, {width: width * .8}]}>
                     <View style={{width: '100%'}}>
-                        <Text style={styles.selectMillHeaderTextStyle}>Select Mill</Text>
+                        <Text style={styles.selectMillHeaderTextStyle}>{selectMillTextLabel}</Text>
                     </View>
                 </View>
                 <View style={[styles.millContainerStyle, {width: width * .8}]}>
                     {setupMillComponent()}
-                    <FlatList
-                        data={millers}
-                        keyExtractor={item => item.id}
-                        renderItem={millComponent}
-                        contentContainerStyle={{}}
-                    />
+                    <View style={{height: height * .65}}>
+                        <FlatList
+                            data={millers}
+                            keyExtractor={item => item.id}
+                            renderItem={millComponent}
+                            contentContainerStyle={{}}
+                            showsVerticalScrollIndicator={false}
+                        />
+                    </View>
                 </View>
                 
             </SafeAreaView>

@@ -11,6 +11,7 @@ import SetupMillScreen from '../../components/screens/dashboard/setupMill';
 import CreateNewProductScreen from '../../components/screens/dashboard/create/newProduct';
 import CreateNewSubProductScreen from '../../components/screens/dashboard/create/newSubProduct';
 import CreateNewQualityScreen from '../../components/screens/dashboard/create/newQuality';
+import CreateNewOutputQualityScreen from '../../components/screens/dashboard/create/newOutputQuality';
 import SupplierScreen from '../../components/screens/dashboard/supplier';
 import SupplierDetailScreen from '../../components/screens/dashboard/supplier/supplier';
 import AddSupplierScreen from '../../components/screens/dashboard/supplier/addSupplier';
@@ -114,6 +115,17 @@ const homeStack = () => (
         <Stack.Screen
             name="createnewquality"
             component={CreateNewQualityScreen}
+            options={() => ({
+                title: '',
+                ...TransitionPresets.FadeFromBottomAndroid,
+                headerTransparent: true,
+                headerLeft: () => null,
+                headerRight: () => null
+            })}
+        />
+        <Stack.Screen
+            name="createnewoutputquality"
+            component={CreateNewOutputQualityScreen}
             options={() => ({
                 title: '',
                 ...TransitionPresets.FadeFromBottomAndroid,

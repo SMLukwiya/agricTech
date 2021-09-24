@@ -1,5 +1,5 @@
 import React from 'react';
-import { Animated, TouchableOpacity, Text, View, StyleSheet, Platform} from 'react-native';
+import { Animated, TouchableOpacity, Text, View, StyleSheet, Platform, ScrollView} from 'react-native';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -17,17 +17,17 @@ const ProductComponent = (props) => {
                 <Ionicons name='caret-down-sharp' size={25} color={green} />
             </TouchableOpacity>
             {isProductOpen && 
-                <View>
+                <ScrollView bounces={false}>
                     {productList.map(({type, id, name}) => 
                         <TouchableOpacity activeOpacity={.8} key={id} onPress={() => onProductSelect(type, id, name)}>
                             <Text style={styles.productNameTextStyle}>{name}</Text>
                         </TouchableOpacity>
                     )}
-                    {/* {<TouchableOpacity style={styles.createNewProductContainerStyle} activeOpacity={.8} onPress={onCreateHandler}>
+                    { productList.length && productList[0].type === 'category' || productList.length && productList[0].type === 'gender' ? <React.Fragment /> : <TouchableOpacity style={styles.createNewProductContainerStyle} activeOpacity={.8} onPress={onCreateHandler}>
                         <Text style={styles.createNewProductTextstyle}>{buttonTitle}</Text>
                         <Icons name='add' size={25} color={green} />
-                    </TouchableOpacity>} */}
-                </View>
+                    </TouchableOpacity>}
+                </ScrollView>
             }
         </Animated.View>
     )

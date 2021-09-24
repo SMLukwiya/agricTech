@@ -26,7 +26,7 @@ export const images = {
     orderIcon: require('./assets/images/orderIcon.png'),
     stockMillingIcon: require('./assets/images/stockMillIcon.png'),
     millingServiceIcon: require('./assets/images/millingServiceIcon.png'),
-    avatar: require('./assets/images/photo.jpg'),
+    avatar: require('./assets/images/photo.png'),
     curve: require('./assets/images/curve.png'),
     monitor: require('./assets/images/monitor.png'),
     profile: require('./assets/images/profile.png'),
@@ -47,4 +47,12 @@ export const errorTextStyle = {
     fontSize: defaultSize * .75,
     textAlign: 'center',
     paddingVertical: defaultSize * .2
+}
+
+export const formatNumber = (num) => {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+export const formatDecNumber = (num) => {
+    return formatNumber((Math.round(num * 100) / 100).toFixed(2))
 }

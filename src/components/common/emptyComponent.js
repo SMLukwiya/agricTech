@@ -3,6 +3,8 @@ import {
     View, Text, StyleSheet
 } from 'react-native';
 
+import { defaultSize } from '../../config'
+
 const Empty = (props) =>
         <View style={styles.emptyProductContainerStyle}>
             <Text style={styles.emptyProductTextStyle}>{props.title}</Text>

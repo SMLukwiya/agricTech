@@ -2,7 +2,8 @@ import {
     FETCH_CUSTOMERS,
     CREATE_CUSTOMER, CREATE_CUSTOMER_FAILED, CREATE_CUSTOMER_SUCCESSFUL,
     UPDATE_CUSTOMER, UPDATE_CUSTOMER_FAILED, UPDATE_CUSTOMER_SUCCESSFUL,
-    DELETE_CUSTOMER, DELETE_CUSTOMER_FAILED, DELETE_CUSTOMER_SUCCESSFUL
+    DELETE_CUSTOMER, DELETE_CUSTOMER_FAILED, DELETE_CUSTOMER_SUCCESSFUL,
+    UPDATE_CUSTOMER_AVATAR, UPDATE_CUSTOMER_AVATAR_FAILED, UPDATE_CUSTOMER_AVATAR_SUCCESSFUL
 } from '../actions/types';
 
 const INITIAL_STATE = {
@@ -67,6 +68,24 @@ export default (state = INITIAL_STATE, action) => {
             }
 
         case DELETE_CUSTOMER_FAILED:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case UPDATE_CUSTOMER_AVATAR:
+            return {
+                ...state,
+                loading: true
+            }
+
+        case UPDATE_CUSTOMER_AVATAR_SUCCESSFUL:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case UPDATE_CUSTOMER_AVATAR_FAILED:
             return {
                 ...state,
                 loading: false

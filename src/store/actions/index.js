@@ -7,3 +7,4 @@ export * from './product';
 export * from './batchMill';
 export * from './millingService';
 export * from './millers';
+export * from './variable';

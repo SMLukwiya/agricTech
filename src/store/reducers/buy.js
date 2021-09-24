@@ -1,7 +1,7 @@
 import {
     FETCH_PURCHASES,
     SAVE_BUY_DATA, SAVE_BUY_METHOD, CLEAR_BUY_DATA,
-    BUY, BUY_FAILED, BUY_SUCCESSFUL
+    BUY, BUY_FAILED, BUY_SUCCESSFUL, SAVE_BUY_QUALITY
 } from '../actions/types';
 
 const INITIAL_STATE = {
@@ -11,10 +11,7 @@ const INITIAL_STATE = {
     category: "",
     product: "",
     subproduct: "",
-    quality: "",
-    quantity1: "",
-    quantity2: "",
-    pricePerUnit: "",
+    qualities: {},
     totalWeight: "",
     totalAmount: "",
     paymentMethod: "cash",
@@ -49,6 +46,12 @@ export default (state = INITIAL_STATE, action) => {
             }
 
         case SAVE_BUY_DATA:
+            let newQualities = {...state.qualities}
+            newQualities[action.payload.quality] = {
+                totalWeight: action.payload.totalWeight,
+                pricePerUnit: action.payload.pricePerUnit,
+                totalAmount: action.payload.totalAmount
+            }
             return {
                 ...state,
                 date: action.payload.date,
@@ -56,12 +59,24 @@ export default (state = INITIAL_STATE, action) => {
                 category: action.payload.category,
                 product: action.payload.product,
                 subproduct: action.payload.subProduct,
-                quality: action.payload.quality,
-                quantity1: action.payload.quantity1,
-                quantity2: action.payload.quantity2,
-                pricePerUnit: action.payload.pricePerUnit,
+                qualities: newQualities,
+                totalWeight: `${parseInt(state.totalWeight === '' ? '0' : state.totalWeight) + parseInt(action.payload.totalWeight)}`,
+                totalAmount: `${parseInt(state.totalAmount === '' ? '0' : state.totalAmount) + parseInt(action.payload.totalAmount)}`
+            }
+
+        case SAVE_BUY_QUALITY:
+            let newQualitiesPerProduct = {...state.qualities}
+            newQualitiesPerProduct[action.payload.quality] = {
                 totalWeight: action.payload.totalWeight,
+                pricePerUnit: action.payload.pricePerUnit,
                 totalAmount: action.payload.totalAmount
+            }
+            console.log('Total ', action.payload.totalAmount)
+            return {
+                ...state,
+                qualities: newQualitiesPerProduct,
+                totalWeight: `${parseInt(state.totalWeight === '' ? '0' : state.totalWeight) + parseInt(action.payload.totalWeight)}`,
+                totalAmount: `${parseInt(state.totalAmount === '' ? '0' : state.totalAmount) + parseInt(action.payload.totalAmount)}`
             }
 
         case SAVE_BUY_METHOD:
@@ -78,10 +93,7 @@ export default (state = INITIAL_STATE, action) => {
                 category: "",
                 product: "",
                 subproduct: "",
-                quality: "",
-                quantity1: "",
-                quantity2: "",
-                pricePerUnit: "",
+                qualities: "",
                 totalWeight: "",
                 totalAmount: "",
                 paymentMethod: "cash",

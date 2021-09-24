@@ -2,13 +2,21 @@ import axios from 'axios'
 
 import {
     SAVE_BATCHMILL_DATA, CLEAR_BATCHMILL_DATA,
-    CREATE_BATCH_MILL, CREATE_BATCH_MILL_FAILED, CREATE_BATCH_MILL_SUCCESSFUL
+    CREATE_BATCH_MILL, CREATE_BATCH_MILL_FAILED, CREATE_BATCH_MILL_SUCCESSFUL,
+    SAVE_BATCHMILL_QUALITY_DATA
 } from './types';
 import { baseUri } from '../../config'
 
 export const saveBatchMillData = (values) => {
     return {
         type: SAVE_BATCHMILL_DATA,
+        payload: values
+    }
+}
+
+export const saveBatchQualityData = (values) => {
+    return {
+        type: SAVE_BATCHMILL_QUALITY_DATA,
         payload: values
     }
 }

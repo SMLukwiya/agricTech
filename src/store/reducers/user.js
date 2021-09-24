@@ -7,7 +7,8 @@ import {
     USER_GOOGLE_SIGNUP_SUCCESSFUL, USER_GOOGLE_SIGNUP, USER_GOOGLE_SIGNUP_FAILED,
     UPLOAD_AVATAR, UPLOAD_AVATAR_FAILED, UPLOAD_AVATAR_SUCCESSFUL,
     UPDATE_USER_INFO, UPDATE_USER_INFO_SUCCESSFUL, UPDATE_USER_INFO_FAILED,
-    UPDATE_PASSWORD, UPDATE_PASSWORD_FAILED, UPDATE_PASSWORD_SUCCESSFUL
+    UPDATE_PASSWORD, UPDATE_PASSWORD_FAILED, UPDATE_PASSWORD_SUCCESSFUL,
+    UPDATE_GENDER
 } from '../actions/types';
 
 const INITIAL_STATE = {
@@ -17,7 +18,8 @@ const INITIAL_STATE = {
     loading: false,
     error: '',
     image: {},
-    user: {}
+    user: {},
+    gender: []
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -165,6 +167,12 @@ export default (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 loading: false
+            }
+
+        case UPDATE_GENDER: 
+            return {
+                ...state,
+                gender: action.payload
             }
 
         default:

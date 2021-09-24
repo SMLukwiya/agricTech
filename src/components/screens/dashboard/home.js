@@ -3,6 +3,7 @@ import {
     View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, FlatList, Platform, Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSelector } from 'react-redux';
 
 import { colors, images, defaultSize } from '../../../config';
 import Fallback from '../../common/fallback';
@@ -11,6 +12,10 @@ const { white, green, blue, darkGray, lightGray } = colors;
 
 const Home = (props) => {
     const { width } = useWindowDimensions();
+
+    // redux
+    const remote = useSelector(state => state.remoteConfigs);
+    const { whatDoYouWantToDoTextLabel } = remote.values;
 
     const menuItemComponent = (title, image, onPress) => 
         <View style={styles.cardContainerStyle}>
@@ -22,24 +27,24 @@ const Home = (props) => {
 
     const dev = () => Alert.alert('This feature is under development')
 
-    const menuItems = [
-        {id: 'one', title: 'Stock', image: images.stockIcon, onPress: dev /*() => props.navigation.navigate('stocks')*/},
-        {id: 'two', title: 'Buy', image: images.buyIcon, onPress: () => props.navigation.navigate('buy')},
-        {id: 'three', title: 'Supplier', image: images.supplierIcon, onPress: () => props.navigation.navigate('suppliers')},
-        {id: 'four', title: 'Customers', image: images.customerIcon, onPress: () => props.navigation.navigate('customers')},
-        {id: 'five', title: 'Pick Up', image: images.pickupIcon, onPress: () => props.navigation.navigate('pickup')},
-        {id: 'six', title: 'Bills/Expenses', image: images.billsIcon, onPress: dev},
-        {id: 'seven', title: 'Purchases', image: images.salesIcon, onPress: () => props.navigation.navigate('purchase')},
-        {id: 'eight', title: 'Products', image: images.orderIcon, onPress: () => props.navigation.navigate('products')},
-        {id: 'nine', title: 'Stock Milling', image: images.stockMillingIcon, onPress: () => props.navigation.navigate('stockmilling')},
-        {id: 'ten', title: 'Milling Services', image: images.millingServiceIcon, onPress: () => props.navigation.navigate('millingservice')}
+    let menuItems = [
+        {id: 'one', title: 'Stock', image: images.stockIcon, onPress: dev /*() => props.navigation.navigate('stocks')*/, order: 1},
+        {id: 'two', title: 'Buy', image: images.buyIcon, onPress: () => props.navigation.navigate('buy'), order: 2},
+        {id: 'three', title: 'Supplier', image: images.supplierIcon, onPress: () => props.navigation.navigate('suppliers'), order: 3},
+        {id: 'four', title: 'Customers', image: images.customerIcon, onPress: () => props.navigation.navigate('customers'), order: 4},
+        {id: 'five', title: 'Pick Up', image: images.pickupIcon, onPress: () => props.navigation.navigate('pickup'), order: 5},
+        {id: 'seven', title: 'Transaction History', image: images.salesIcon, onPress: () => props.navigation.navigate('purchase'), order: 6},
+        {id: 'eight', title: 'Products', image: images.orderIcon, onPress: () => props.navigation.navigate('products'), order: 7},
+        {id: 'nine', title: 'Stock Milling', image: images.stockMillingIcon, onPress: () => props.navigation.navigate('stockmilling'), order: 8},
+        {id: 'ten', title: 'Milling Services', image: images.millingServiceIcon, onPress: () => props.navigation.navigate('millingservice'), order: 9},
+        {id: 'six', title: 'Bills/Expenses', image: images.billsIcon, onPress: dev, order: 10}
     ];
 
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
-                <Text style={styles.headerTitleStyle}>What do you want to do?</Text>
+                <Text style={styles.headerTitleStyle}>{whatDoYouWantToDoTextLabel}</Text>
                 <FlatList 
                     keyExtractor={item => item.id}
                     data={menuItems}

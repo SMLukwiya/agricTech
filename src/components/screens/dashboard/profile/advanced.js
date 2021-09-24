@@ -74,7 +74,7 @@ const Stocks = (props) => {
     }
 
     const onAddLocationHandler = () => {
-        setState({...state, modal: {...state.modal, visible: true, type: 'location'}});
+        props.navigation.navigate('setupmill')
     }
 
     const addLocation = () => {

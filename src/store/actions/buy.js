@@ -2,7 +2,7 @@ import axios from 'axios';
 
 import {
     FETCH_PURCHASES,
-    BUY, BUY_SUCCESSFUL, BUY_FAILED, 
+    BUY, BUY_SUCCESSFUL, BUY_FAILED, SAVE_BUY_QUALITY,
     SAVE_BUY_DATA, SAVE_BUY_METHOD, CLEAR_BUY_DATA
 } from './types'
 import {baseUri} from '../../config'
@@ -24,6 +24,13 @@ export const buy = (values, onSuccess = () => {}, onFailure = () =>{}) => {
             dispatch({type: BUY_FAILED});
             onFailure(err)
         }
+    }
+}
+
+export const saveBuyQuality = (values) => {
+    return {
+        type: SAVE_BUY_QUALITY,
+        payload: values
     }
 }
 

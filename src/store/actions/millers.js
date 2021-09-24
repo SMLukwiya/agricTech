@@ -29,7 +29,7 @@ export const updateLocations = (value) => {
     }
 }
 
-export const setupMill = (values, onSuccess = () => {}, onFailure = () => {}) => {
+export const setupMill = (values, userID,  onSuccess = () => {}, onFailure = () => {}) => {
     const { name, location, capacity } = values;
 
     return async dispatch => {
@@ -37,7 +37,7 @@ export const setupMill = (values, onSuccess = () => {}, onFailure = () => {}) =>
 
         try {
             const response = await axios.post(`${baseUri}milling-setupMill`, {
-                name, location, capacity
+                name, location, capacity, userID
             });
             dispatch({type: SETUP_MILL_SUCCESSFUL})
             onSuccess();

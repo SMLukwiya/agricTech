@@ -7,7 +7,7 @@ import { colors, defaultSize } from '../../config'
 const { white, darkGray } = colors;
 
 const Input = (props) => {
-    const { placeholder, error, value, rightComponent, onChangeText, onBlur, touched, keyboardType, secureTextEntry } = props;
+    const { placeholder, error, value, rightComponent, onChangeText, onBlur, touched, keyboardType, secureTextEntry, textAlign } = props;
 
     // check user theme
     const colorScheme = Appearance.getColorScheme();
@@ -17,7 +17,7 @@ const Input = (props) => {
             <View style={styles.textInputContainerStyle}>
                 {rightComponent && rightComponent}
                 <TextInput
-                    style={[styles.textInputStyle, {color: darkGray}]}
+                    style={[styles.textInputStyle, {color: darkGray, textAlign: textAlign}]}
                     placeholder={placeholder}
                     placeholderTextColor={colorScheme === 'dark' ? darkGray : darkGray}
                     value={value}

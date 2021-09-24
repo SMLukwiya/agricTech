@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, useState } from 'react';
 import {
-    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, ScrollView, PermissionsAndroid, Platform, KeyboardAvoidingView
+    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, ScrollView, 
+    PermissionsAndroid, Platform, KeyboardAvoidingView, Animated, LayoutAnimation, UIManager, Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icons from 'react-native-vector-icons/MaterialIcons';
@@ -20,6 +21,15 @@ const { white, green, red, lightGray, darkGray } = colors;
 const Button = lazy(() => import('../../../common/button'));
 const Input = lazy(() => import('../../../common/input'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
+const Select = lazy(() => import('../../../common/select'));
+
+if (Platform.OS === 'android') {
+    if (UIManager.setLayoutAnimationEnabledExperimental) {
+        UIManager.setLayoutAnimationEnabledExperimental(true);
+    }
+}
+
+const transition = LayoutAnimation.create(200, 'easeInEaseOut', 'scaleY');
 
 const Profile = (props) => {
     const dispatch = useDispatch();
@@ -27,7 +37,7 @@ const Profile = (props) => {
 
     // redux
     const userState = useSelector(state => state.user);
-    const {user} = userState;
+    const {user, gender} = userState;
 
     // state
     const [state, setState] = useState({ 
@@ -36,24 +46,25 @@ const Profile = (props) => {
         password: {value: '', error: ''}
     })
 
+    const [userGender, setGender] = useState({progress: new Animated.Value(45), name: 'Gender', open: false});
+
     const { handleChange, values, handleSubmit, errors, handleBlur, touched } = useFormik({
-        initialValues: { fullName: user ? user.fullName : '', about: user ? user.about : '', phone: user ? user.phone : '', location: user ? user.location : '', gender: user ? user.gender : '', password: '' },
+        initialValues: { fullName: user ? user.fullName : '', about: user ? user.about : '', phone: user ? user.phone : '', location: user ? user.location : '' },
         validationSchema: Yup.object({
             fullName: Yup.string().required('Name is required'),
             about: Yup.string().required('About Information is required'),
             phone: Yup.number('Enter a valid phone number').min(10, 'Phone number must be 10 digits').required('Phone number is required'),
-            location: Yup.string().required('Location is required'),
-            gender: Yup.string().required('Gender Category'),
-            password: Yup.string().min(6, 'Minimum of 6 characters').required('Enter new password')
+            location: Yup.string().required('Location is required')
         }),
         onSubmit: values => {
+            if (userGender.name === 'Gender') return Alert.alert('Select gender')
             closeModal();
             setTimeout(() => {
-                dispatch(updateUserInfo(userState.userID, values,
+                dispatch(updateUserInfo(userState.userID, {...values, gender: userGender.name},
                     () => {},
                     err => {
                         console.log(err)
-                        setState({...state, modal: {...state.modal, visible: true, type: 'error', error: err}})
+                        // setState({...state, modal: {...state.modal, visible: true, type: 'error', error: err}})
                     }))
             }, 200);
         }
@@ -106,6 +117,9 @@ const Profile = (props) => {
                 } else {
                     const imageSrc = response.assets[0];
                     setState({ ...state, image: imageSrc, modal: {...state.modal, visible: false, type: 'save_image' } });
+                    setTimeout(() => {
+                        setState({...state, modal: {...state.modal, visible: true, type: 'save_image' } })
+                    }, 350);
                 }
             })
         } else {
@@ -126,7 +140,13 @@ const Profile = (props) => {
     }
 
     const onChangeProfilePicHandler = (type) => {
-        if ('granted' === PermissionsAndroid.RESULTS.GRANTED) {
+        const granted = PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA, {
+            title: 'Camera Permissions',
+            message: 'Metajua would like to access camera for better experience',
+            buttonPositive: 'Okay',
+            buttonNegative: 'No'
+        });
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
             setState({...state, modal: {...state.modal, visible: true, type: 'image'}});
         } else {
             requsetCameraPermissions();
@@ -160,8 +180,30 @@ const Profile = (props) => {
         }, 200);
     }
 
+    // move to advanced profile
     const onAdvancedHandler = () => {
         props.navigation.navigate('advancedprofile')
+    }
+
+    // open gender select
+    const onToggleGenderSelect = () => {
+        LayoutAnimation.configureNext(transition);
+        setGender({...userGender, open: !userGender.open });
+        Animated.timing(userGender.progress, {
+            toValue: userGender.open ? 45 : 150,
+            duration: 200,
+            useNativeDriver: false
+        }).start()
+    }
+
+    const onSelectGender = (type, id, name) => {
+        LayoutAnimation.configureNext(transition);
+        setGender({...userGender, name, open: false });
+        Animated.timing(userGender.progress, {
+            toValue: 45,
+            duration: 200,
+            useNativeDriver: false
+        }).start()
     }
 
     const ImageComponent = () =>
@@ -221,14 +263,15 @@ const Profile = (props) => {
                 onBlur={handleBlur('location')}
                 touched={touched.location}
             />
-            <Input
-                placeholder="Gender"
-                error={errors.gender}
-                value={values.gender}
-                rightComponent={false}
-                onChangeText={handleChange('gender')}
-                onBlur={handleBlur('gender')}
-                touched={touched.gender}
+            <Select
+                height={userGender.progress}
+                onToggleSelector={onToggleGenderSelect}
+                productName={userGender.name}
+                isProductOpen={userGender.open}
+                productList={gender}
+                onProductSelect={onSelectGender}
+                buttonTitle='Select Gender'
+                onCreateHandler={() => {}}
             />
         
             <View style={styles.modalButtonContainerStyle}>
@@ -350,14 +393,18 @@ const Profile = (props) => {
                 </View>
             </SafeAreaView>
             <RNModal visible={state.modal.visible} onRequestClose={closeModal} presentationStyle='overFullScreen' closeIconColor={white}>
-                {state.modal.type === 'image' ?
-                    ImageComponent() :
-                    state.modal.type === 'info' ?
-                    ProfileComponent('name') :
-                    state.modal.type === 'password' ?
-                    PasswordComponent() :
-                    SaveImageComponent()
-                }
+                <View style={{height: height * .65}}>
+                    <ScrollView>
+                        {state.modal.type === 'image' ?
+                            ImageComponent() :
+                            state.modal.type === 'info' ?
+                            ProfileComponent('name') :
+                            state.modal.type === 'password' ?
+                            PasswordComponent() :
+                            SaveImageComponent()
+                        }
+                    </ScrollView>
+                </View>
             </RNModal>
         </Suspense>
     )

@@ -1,15 +1,15 @@
 import React, { Suspense, lazy, useState, useEffect } from 'react';
 import {
-    View, StyleSheet, Text, StatusBar, useWindowDimensions, Animated, LayoutAnimation, UIManager, Platform, ScrollView, TouchableOpacity, KeyboardAvoidingView
+    View, StyleSheet, Text, StatusBar, useWindowDimensions, Animated, LayoutAnimation, UIManager, Platform, ScrollView, TouchableOpacity, KeyboardAvoidingView, Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 import { useSelector, useDispatch } from 'react-redux';
 import dayjs from 'dayjs';
 
-import { colors, defaultSize } from '../../../../config';
+import { colors, defaultSize, formatNumber } from '../../../../config';
 import Fallback from '../../../common/fallback';
-import { saveBuyData } from '../../../../store/actions';
+import { saveBuyData, saveBuyQuality, setProductName, setSubProductName } from '../../../../store/actions';
 
 const { white, green, lightGray, darkGray } = colors;
 const Button = lazy(() => import('../../../common/button'));
@@ -32,6 +32,13 @@ const Buy = (props) => {
     // redux
     const {products, subProducts, qualities, categories} = useSelector(state => state.product);
     const {suppliers} = useSelector(state => state.supplier)
+    const remote = useSelector(state => state.remoteConfigs);
+    const { 
+        buyTextLabel, selectProductTextLabel, selectSubProductTextLabel, selectCustomerSupplierCategoryTextLabel,
+        selectsupplierTextLabel, productDetailTextLabel, inputWeightTextLabel,
+        continueButtonTextLabel, addWeightInputTextLabel, totalWeightTextLabel, pricePerUnitTextLabel,
+        totalPayableTextLabel, addNewQualityTextLabel
+    } = remote.values;
 
     // state
     const [product, setProduct] = useState({id: 'none', progress: new Animated.Value(45) , name: 'Product', open: false});
@@ -40,9 +47,9 @@ const Buy = (props) => {
     const [supplier, setSupplier] = useState({id: 'none', progress: new Animated.Value(45), name: 'Supplier', open: false});
     const [quality, setQuality] = useState({id: 'none', progress: new Animated.Value(45), name: 'Quality', open: false});
     // input
-    const [defaultWeight, setDefaultWeight] = useState({value: '0', error: ''});
-    const [weighInput, setWeightInput] = useState({visible: false, value: '0', error: ''});
-    const [pricePerUnit, setPricePerUnit] = useState({value: '0', error: ''});
+    const [defaultWeight, setDefaultWeight] = useState({value: '', decValue: '', error: ''});
+    const [weighInput, setWeightInput] = useState({inputs: {}, inputCount: 0, total: ''});
+    const [pricePerUnit, setPricePerUnit] = useState({value: '', error: ''});
 
     const [totalWeight, setTotalWeight] = useState({value: ''});
     const [totalPayable, setTotalPayable] = useState({value: ''});
@@ -93,57 +100,90 @@ const Buy = (props) => {
         
     }
 
+    const closeProduct = () => {
+        Animated.timing(product.progress, {
+            toValue: 45,
+            duration: 200,
+            useNativeDriver: false
+        }).start()
+    }
+
+    const closeSubProduct = () => {
+        Animated.timing(subProduct.progress, {
+            toValue: 45,
+            duration: 200,
+            useNativeDriver: false
+        }).start()
+    }
+
+    const closeQuality = () => {
+        Animated.timing(quality.progress, {
+            toValue: 45,
+            duration: 200,
+            useNativeDriver: false
+        }).start()
+    }
+
+    const closeCategory = () => {
+        Animated.timing(category.progress, {
+            toValue: 45,
+            duration: 200,
+            useNativeDriver: false
+        }).start()
+    }
+
+    const closeSupplier = () => {
+        Animated.timing(supplier.progress, {
+            toValue: 45,
+            duration: 200,
+            useNativeDriver: false
+        }).start()
+    }
+
     // select product
     const onProductSelect = (type, id, name) => {
         LayoutAnimation.configureNext(transition);
         if (type === 'product') {
             setProduct({...product, id: id === product.id ? '' : id, name, open: false });
-            Animated.timing(product.progress, {
-                toValue: 45,
-                duration: 200,
-                useNativeDriver: false
-            }).start()
+            closeProduct()
         } else if (type === 'subproduct') {
             setSubProduct({...subProduct, id: id === subProduct.id ? '' : id, name, open: false });
-            Animated.timing(subProduct.progress, {
-                toValue: 45,
-                duration: 200,
-                useNativeDriver: false
-            }).start()
+            closeSubProduct()
         } else if (type === 'supplier') {
             setSupplier({...supplier, id: id === supplier.id ? '' : id, name, open: false });
-            Animated.timing(supplier.progress, {
-                toValue: 45,
-                duration: 200,
-                useNativeDriver: false
-            }).start()
+            closeSupplier()
         } else if (type === 'category') {
             setCategory({...category, id: id === category.id ? '' : id, name, open: false });
-            Animated.timing(category.progress, {
-                toValue: 45,
-                duration: 200,
-                useNativeDriver: false
-            }).start()
+            closeCategory()
         } else {
             setQuality({...quality, id: id === quality.id ? '' : id, name, open: false });
-            Animated.timing(quality.progress, {
-                toValue: 45,
-                duration: 200,
-                useNativeDriver: false
-            }).start()
+            closeQuality()
         }
         
     }
 
     const onCreateHandler = (type) => {
-        closeModal()
-        props.navigation.navigate(type === 'product' ? 'createnewproduct' : type === 'subproduct' ? 'createnewsubproduct' : type === 'supplier' ? 'addsupplier' : 'createnewquality')
+        closeModal();
+        if (type === 'product') {
+            props.navigation.navigate('createnewproduct')
+        } else if (type === 'subproduct') {
+            if (product.name === 'Product') return Alert.alert('Please select a product')
+            dispatch(setProductName(product.name));
+            closeSubProduct()
+            props.navigation.navigate('createnewsubproduct')
+        } else if (type === 'quality') {
+            dispatch(setProductName(product.name));
+            dispatch(setSubProductName(subProduct.name));
+            props.navigation.navigate('createnewquality')
+        } else {
+            props.navigation.navigate('addsupplier')
+        }
+        // props.navigation.navigate(type === 'product' ? 'createnewproduct' : type === 'subproduct' ? 'createnewsubproduct' : type === 'supplier' ? 'addsupplier' : 'createnewquality')
     }
 
     // close modal
     const closeModal = () => {
         setModal({ ...modal, modalVisible: false });
-        setWeightInput({...weighInput, visible: false, value: ''})
     }
 
     const onBuyHandler = () => {
@@ -156,51 +196,129 @@ const Buy = (props) => {
         props.navigation.navigate('summary')
     }
 
-    const onAddNewQualityHandler = () => {
-        closeModal();
-        props.navigation.navigate('createnewquality');
+    // add inputs dynamically
+    const onAddWeightInputHandler = () => {
+        let id = `${weighInput.inputCount}`;
+        let newInputs = { ...weighInput.inputs};
+            newInputs[id] = {
+            value: '', decValue: ''
+        }
+
+        setWeightInput({
+            ...weighInput, 
+            inputs: newInputs, 
+            inputCount: weighInput.inputCount+1
+        })
     }
 
-    const onAddWeightInputHandler = () => {
-        setWeightInput({...weighInput, visible: true})
+    let inputArray = [];
+    for (key in weighInput.inputs) {
+        inputArray.push({id: key, ...weighInput.inputs[key]})
     }
 
     const onChangeText = (type, value) => {
-        if (type === 'default') setDefaultWeight({...defaultWeight, value})
-        else if (type === 'weighted') setWeightInput({...weighInput, value})
+        if (type === 'default') setDefaultWeight({...defaultWeight, value, decValue: value})
         else setPricePerUnit({...pricePerUnit, value})
     }
 
-    // total weight
+    // change the value of dynamic input dynamically
+    const changeAddedInputText = (id, value) => {
+        setWeightInput({
+            ...weighInput,
+            inputs: {
+                ...weighInput.inputs,
+                [id]: {
+                    ...weighInput.inputs[id],
+                    value: value,
+                    decValue: value
+                }
+            },
+            total: `${(parseInt(weighInput.total === '' ? '0' : weighInput.total) - parseInt(weighInput.inputs[id].value === '' ? '0' : weighInput.inputs[id].value)) + parseInt(value === '' ? '0' : value)}` // check for empty strings and asign 0
+        })
+    }
+
+    // format dynamic input values toLocaleString 2 decimal places
+    const formatDynamicInputValues = (id) => {
+        setWeightInput({
+            ...weighInput,
+            inputs: {
+                ...weighInput.inputs,
+                [id]: {
+                    ...weighInput.inputs[id],
+                    decValue: formatNumber((Math.round(weighInput.inputs[id].value * 100) / 100).toFixed(2))
+                }
+            }
+        })
+    }
+
+    // calculate total weight
     const addWeightHandler = () => {
-        setTotalWeight({...totalWeight, value: `${parseInt(defaultWeight.value === '' ? '0' : defaultWeight.value) + parseInt(weighInput.value === '' ? '0' : weighInput.value)}`})
+        setTotalWeight({
+            ...totalWeight, 
+            value: `${parseInt(defaultWeight.value === '' ? '0' : defaultWeight.value) + parseInt(weighInput.total === '' ? '0' : weighInput.total)}`
+        })
     }
 
     const addTotalHandler = () => {
-        setTotalPayable({...totalPayable, value: `${parseInt(totalWeight.value === '' ? '0' : totalWeight.value) * parseInt(pricePerUnit.value === '' ? '0' : pricePerUnit.value)}`})
+        setTotalPayable({
+            ...totalPayable, 
+            value: `${parseInt(totalWeight.value === '' ? '0' : totalWeight.value) * parseInt(pricePerUnit.value === '' ? '0' : pricePerUnit.value)}`
+        })
     }
 
     useEffect(() => {
         addWeightHandler();
         addTotalHandler();
-    }, [defaultWeight.value, weighInput.value, pricePerUnit.value])
+    }, [defaultWeight.value, weighInput.value, pricePerUnit.value, weighInput.total])
 
+    // clear quality information
+    const clearQualityInformation = () => {
+        setQuality({...quality, name: 'Quality'});
+        setDefaultWeight({...defaultWeight, value: '', decValue: ''})
+        setTotalWeight({...totalWeight, value: ''})
+        setPricePerUnit({...pricePerUnit, value: ''})
+        setTotalPayable({...totalPayable, value: ''})
+        setWeightInput({...weighInput, inputs: {}, inputCount: 0, total: ''})
+    }
+
+    // save quality information and add more
+    const saveQualityHandler = () => {
+        dispatch(saveBuyQuality({
+            quality: quality.name,
+            totalWeight: totalWeight.value,
+            pricePerUnit: pricePerUnit.value,
+            totalAmount: totalPayable.value
+        }));
+        closeModal();
+        setTimeout(() => {
+            clearQualityInformation();
+        }, 50);
+        setTimeout(() => {
+            setModal({...modal, modalVisible: true})
+        }, 100);
+    }
+
+    // add new quality information
+    const onAddNewQualityHandler = () => {
+        saveQualityHandler();
+    }
+
+    // save quality plus products
     const saveDataHandler = () => {
         dispatch(saveBuyData({
-            date: dayjs().format('YYYY-DD-MM-H:m'),
+            date: dayjs(),
             product: product.name,
             subProduct: subProduct.name,
             category: category.name,
             individual: supplier.name,
             quality: quality.name,
-            quantity1: defaultWeight.value,
-            quantity2: weighInput.value,
-            pricePerUnit: pricePerUnit.value,
             totalWeight: totalWeight.value,
+            pricePerUnit: pricePerUnit.value,
             totalAmount: totalPayable.value
         }))
-
     }
+
+    let enabled1 = product.name !== 'Product' && subProduct.name !== 'Sub Product' && category.name !== 'Category' && supplier.name !== 'Supplier';
 
     let enabled = product.name !== 'Product' && subProduct.name !== 'Sub Product' && category.name !== 'Category' && supplier.name !== 'Supplier' && quality.name !== 'Quality'
 
@@ -211,11 +329,12 @@ const Buy = (props) => {
                 <View style={[styles.buyHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
                     <View style={{width: '85%'}}>
-                        <Text style={styles.buyHeaderTextStyle}>Buy</Text>
+                        <Text style={styles.buyHeaderTextStyle}>{buyTextLabel}</Text>
                     </View>
                 </View>
-                <View style={[styles.buyContainerStyle, {width: width * .8}]}>
-                    <Text style={styles.selectProductItemTextStyle}>Please select a product</Text>
+                <View style={[styles.buyContainerStyle, {width: width * .8, height: height * .75}]}>
+                    <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
+                    <Text style={styles.selectProductItemTextStyle}>{selectProductTextLabel}</Text>
                     <View>
                         <Select
                             height={product.progress}
@@ -228,20 +347,20 @@ const Buy = (props) => {
                             onCreateHandler={() => onCreateHandler('product')}
                         />
                     </View>
-                    <Text style={styles.selectProductItemTextStyle}>Please select a Sub product</Text>
+                    <Text style={styles.selectProductItemTextStyle}>{selectSubProductTextLabel}</Text>
                     <View>
                         <Select
                             height={subProduct.progress}
                             onToggleSelector={() => onToggleSelector('subproduct', 'Sub Product')}
                             productName={subProduct.name}
                             isProductOpen={subProduct.open}
-                            productList={subProducts}
+                            productList={product.name !== 'Product' ? subProducts.filter(item => item.product === product.name) : subProducts}
                             onProductSelect={onProductSelect}
                             buttonTitle='Create new Sub product'
                             onCreateHandler={() => onCreateHandler('subproduct')}
                         />
                     </View>
-                    <Text style={styles.selectProductItemTextStyle}>Please select a customer/supplier category</Text>
+                    <Text style={styles.selectProductItemTextStyle}>{selectCustomerSupplierCategoryTextLabel}</Text>
                     <View>
                         <Select
                             height={category.progress}
@@ -254,7 +373,7 @@ const Buy = (props) => {
                             onCreateHandler={() => onCreateHandler('subproduct')}
                         />
                     </View>
-                    <Text style={styles.selectProductItemTextStyle}>Please select a supplier</Text>
+                    <Text style={styles.selectProductItemTextStyle}>{selectsupplierTextLabel}</Text>
                     <View>
                         <Select
                             height={supplier.progress}
@@ -267,19 +386,20 @@ const Buy = (props) => {
                             onCreateHandler={() => onCreateHandler('supplier')}
                         />
                     </View>
+                    </ScrollView>
                 </View>
                 <View style={[styles.buttonContainerStyle, {width: width * .8}]}>
                     <Button
-                        title='continue'
+                        title={continueButtonTextLabel}
                         backgroundColor={green}
                         borderColor={green}
                         color={white}
-                        enabled onPress={onBuyHandler}
+                        enabled={enabled1} onPress={onBuyHandler}
                     />
                 </View>
             </SafeAreaView>
             <RNModal visible={modal.modalVisible} onRequestClose={closeModal} presentationStyle='overFullScreen' closeIconColor={white}>
-                <Text style={styles.productDetailsTitleText}>Product Details</Text>
+                <Text style={styles.productDetailsTitleText}>{productDetailTextLabel}</Text>
                 <View style={[styles.modalContainerStyle, {height: height * .55, width: width * .8}]}>
                     <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
                         <Select
@@ -293,32 +413,38 @@ const Buy = (props) => {
                             onCreateHandler={() => onCreateHandler('quality')}
                         />
                         <View style={styles.modalInputContainerStyle}>
-                            <Text>Input weight</Text>
+                            <Text>{inputWeightTextLabel}</Text>
                             <KeyboardAvoidingView style={styles.modalViewStyle}>
                                 <Input 
                                     error={defaultWeight.error}
-                                    value={defaultWeight.value}
+                                    value={defaultWeight.decValue}
                                     onChangeText={(value) => onChangeText('default', value)}
                                     keyboardType='number-pad'
+                                    textAlign='right'
+                                    onBlur={() => setDefaultWeight({...defaultWeight, decValue: formatNumber((Math.round(defaultWeight.value * 100) / 100).toFixed(2))})}
                                 />
                             </KeyboardAvoidingView>
                         </View>
-                        {weighInput.visible &&
-                            <View style={styles.modalInputContainerStyle}>
-                                <Text>Input weight</Text>
+                        {
+                            inputArray.map(({id, value, decValue}) => 
+                            <View style={styles.modalInputContainerStyle} key={id}>
+                                <Text>{inputWeightTextLabel}</Text>
                                 <KeyboardAvoidingView style={styles.modalViewStyle}>
                                     <Input 
-                                        error={weighInput.error}
-                                        value={weighInput.value}
-                                        onChangeText={value => onChangeText('weighted', value)}
+                                        key={id}
+                                        error={'some'}
+                                        value={decValue}
+                                        onChangeText={(value) => changeAddedInputText(id, value)}
                                         keyboardType='number-pad'
+                                        textAlign='right'
+                                        onBlur={() => formatDynamicInputValues(id)}
                                     />
                                 </KeyboardAvoidingView>
                             </View>
-                        }
-                        {!weighInput.visible && <View>
+                        )}
+                        {weighInput.inputCount < 50 && <View>
                             <Button
-                                title='Add weight input'
+                                title={addWeightInputTextLabel}
                                 backgroundColor={white}
                                 borderColor={darkGray}
                                 color={darkGray}
@@ -327,26 +453,27 @@ const Buy = (props) => {
                             />
                         </View>}
                         <View style={styles.modalInputContainerStyle}>
-                            <Text style={styles.modalTextBoldStyle}>Total weight</Text>
+                            <Text style={styles.modalTextBoldStyle}>{totalWeightTextLabel}</Text>
                             <View style={styles.totalWeightmodalViewStyle}>
-                                <Text>{totalWeight.value}</Text>
+                                <Text style={styles.modalTextStyle}>{formatNumber(totalWeight.value)}</Text>
                             </View>
                         </View>
                         <View style={styles.modalInputContainerStyle}>
-                            <Text>Price per unit</Text>
+                            <Text>{pricePerUnitTextLabel}</Text>
                             <KeyboardAvoidingView style={styles.modalViewStyle}>
                                 <Input 
                                     error={pricePerUnit.error}
                                     value={pricePerUnit.value}
                                     onChangeText={value => onChangeText('', value)}
                                     keyboardType='number-pad'
+                                    textAlign='right'
                                 />
                             </KeyboardAvoidingView>
                         </View>
                         <View style={styles.modalInputContainerStyle}>
-                            <Text style={styles.modalTextBoldStyle}>Total Payable</Text>
+                            <Text style={styles.modalTextBoldStyle}>{totalPayableTextLabel}</Text>
                             <View style={styles.totalWeightmodalViewStyle}>
-                                <Text>{totalPayable.value}</Text>
+                                <Text>{formatNumber(totalPayable.value)}</Text>
                             </View>
                         </View>
                     </ScrollView>                  
@@ -355,11 +482,11 @@ const Buy = (props) => {
                     <TouchableOpacity style={styles.addQualityButtonContainerStyle} activeOpacity={.8} onPress={onAddNewQualityHandler}>
                         <Icons name='add' color={green} size={27.5} />
                     </TouchableOpacity>
-                    <Text style={styles.addQualityTextStyle}>Add New Quality</Text>
+                    <Text style={styles.addQualityTextStyle}>{addNewQualityTextLabel}</Text>
                 </View>
                 <View style={[styles.buttonContainerStyle, {width: width * .8}]}>
                     <Button
-                        title='continue'
+                        title={continueButtonTextLabel}
                         backgroundColor={green}
                         borderColor={green}
                         color={white}
@@ -461,8 +588,10 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         alignItems: 'flex-start',
         justifyContent: 'center',
-        paddingHorizontal: defaultSize
+        paddingHorizontal: defaultSize,
+        alignItems: 'flex-end'
     },
+    modalTextStyle: {},
     modalTextBoldStyle: {
         fontSize: defaultSize * .85,
         fontWeight: 'bold'

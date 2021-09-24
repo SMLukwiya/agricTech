@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import {
-    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, ScrollView
+    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, ScrollView, FlatList
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icons from 'react-native-vector-icons/MaterialIcons';
@@ -16,7 +16,12 @@ const Customers = (props) => {
     const { height, width } = useWindowDimensions();
 
     // redux
-    const {customers} = useSelector(state => state.customer);
+    const customerState = useSelector(state => state.customer);
+    const {userID} = useSelector(state => state.user);
+    const customers = customerState.customers.filter(item => item.userID === userID)
+    const {values: {
+        customersTextLabel, addCustomerTextLabel
+    }} = useSelector(state => state.remoteConfigs);
 
     const goBack = () => props.navigation.navigate('home');
 
@@ -29,10 +34,10 @@ const Customers = (props) => {
         props.navigation.navigate('customerdetail', {id});
     }
 
-    const customerComponent = (id,imageUrl, name, phone, category) => 
+    const customerComponent = ({item: {id, imageUrl, name, phone, category}}) => 
         <TouchableOpacity activeOpacity={.8} style={styles.supplierContainerStyle} onPress={() => onCustomerHandler(id)} key={id}>
             <View style={styles.supplierImageContainerStyle}>
-                <Image source={imageUrl ? {uri: imageUrl} : images.avatar} width='100%' height='100%' resizeMode='contain' />
+                <Image source={imageUrl ? {uri: imageUrl} : images.avatar} style={styles.imageStyle} resizeMode='cover' />
             </View>
             <View style={styles.rightSupplierContainerStyle}>
                 <View>
@@ -53,17 +58,22 @@ const Customers = (props) => {
                 <View style={[styles.supplierHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
                     <View style={{width: '85%'}}>
-                        <Text style={styles.supplierHeaderTextStyle}>Customers</Text>
+                        <Text style={styles.supplierHeaderTextStyle}>{customersTextLabel}</Text>
                     </View>
                 </View>
                 <View style={[styles.supplierOverContainerStyle,{width: width * .8, height: height * .785}]}>
-                    <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
-                    {customers.length === 0 ? <Text style={{fontSize: defaultSize, fontWeight: 'bold', textAlign: 'center'}}>No customers added</Text> : customers.map(({id, imageUrl, name, phone, category}) => customerComponent(id, imageUrl, name, phone, category))}
-                    </ScrollView>
+                    
+                    {customers.length === 0 ? <Text style={{fontSize: defaultSize, fontWeight: 'bold', textAlign: 'center'}}>No customers added</Text> : 
+                        <FlatList
+                            data={customers}
+                            keyExtractor={item => item.id}
+                            renderItem={customerComponent}
+                        />
+                    }
                 </View>
                 <View style={[styles.buttonContainerStyle, {width: width * .8}]}>
                     <Button
-                        title='Add a customer'
+                        title={addCustomerTextLabel}
                         backgroundColor={green}
                         borderColor={green}
                         color={white}
@@ -110,6 +120,10 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         marginRight: defaultSize,
         marginVertical: defaultSize * .55
+    },
+    imageStyle: {
+        width: '100%',
+        height: '100%'
     },
     categoryContainerStyle: {
         flexDirection: 'row',

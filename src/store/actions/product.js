@@ -1,11 +1,13 @@
 import axios from 'axios';
 
 import {
-    FETCH_PRODUCTS, FETCH_SUBPRODUCTS, FETCH_QUALITIES, FETCH_CATEGORIES,
+    FETCH_PRODUCTS, FETCH_SUBPRODUCTS, FETCH_QUALITIES, FETCH_CATEGORIES, FETCH_OUTPUT_QUALITIES,
     CREATE_PRODUCT, CREATE_PRODUCT_SUCCESSFUL, CREATE_PRODUCT_FAILED,
     CREATE_SUBPRODUCT, CREATE_SUBPRODUCT_SUCCESSFUL, CREATE_SUBPRODUCT_FAILED,
     CREATE_QUALITY, CREATE_QUALITY_SUCCESSFUL, CREATE_QUALITY_FAILED,
-    DELETE_PRODUCT, DELETE_PRODUCT_FAILED, DELETE_PRODUCT_SUCCESSFUL
+    CREATE_OUTPUT_QUALITY, CREATE_OUTPUT_QUALITY_FAILED, CREATE_OUTPUT_QUALITY_SUCCESSFUL,
+    DELETE_PRODUCT, DELETE_PRODUCT_FAILED, DELETE_PRODUCT_SUCCESSFUL,
+    SET_PRODUCT, SET_SUBPRODUCT, SET_QUALITY_NAME
 } from './types';
 import {baseUri} from '../../config'
 
@@ -30,10 +32,38 @@ export const fetchQualities = (value) => {
     }
 }
 
+export const fetchOutputQualities = (value) => {
+    return {
+        type: FETCH_OUTPUT_QUALITIES,
+        payload: value
+    }
+}
+
 export const fetchCategories = (value) => {
     return {
         type: FETCH_CATEGORIES,
         payload: value
+    }
+}
+
+export const setProductName = (name) => {
+    return {
+        type: SET_PRODUCT,
+        payload: name
+    }
+}
+
+export const setSubProductName = (name) => {
+    return {
+        type: SET_SUBPRODUCT,
+        payload: name
+    }
+}
+
+export const setInputQualityName = (name) => {
+    return {
+        type: SET_QUALITY_NAME,
+        payload: name
     }
 }
 
@@ -88,6 +118,7 @@ export const createQuality = (values, onSuccess = () => {}, onFailure = () => {}
             const response = await axios.post(`${baseUri}product-createQuality`, { subproduct, name })
             dispatch({
                 type: CREATE_QUALITY_SUCCESSFUL,
+                payload: name
             })
             onSuccess();
         } catch (err) {
@@ -96,6 +127,25 @@ export const createQuality = (values, onSuccess = () => {}, onFailure = () => {}
         }
     }
 
+}
+
+export const createOutputQuality = (values, onSuccess = () => {}, onFailure = () => {}) => {
+    const {inputQuality, name} = values;
+
+    return async dispatch => {
+        dispatch({type: CREATE_OUTPUT_QUALITY});
+
+        try {
+            const response = await axios.post(`${baseUri}product-createOutputQuality`, { inputQuality, name })
+            dispatch({
+                type: CREATE_OUTPUT_QUALITY_SUCCESSFUL,
+            })
+            onSuccess();
+        } catch (err) {
+            dispatch({type: CREATE_OUTPUT_QUALITY_FAILED})
+            onFailure(err);
+        }
+    }
 }
 
 export const deleteProduct = (uid, onSuccess = () => {}, onFailure = () => {}) => {

@@ -2,7 +2,8 @@ import {
     FETCH_SUPPLIERS,
     CREATE_SUPPLIER, CREATE_SUPPLIER_FAILED, CREATE_SUPPLIER_SUCCESSFUL,
     UPDATE_SUPPLIER, UPDATE_SUPPLIER_FAILED, UPDATE_SUPPLIER_SUCCESSFUL,
-    DELETE_SUPPLIER, DELETE_SUPPLIER_FAILED, DELETE_SUPPLIER_SUCCESSFUL
+    DELETE_SUPPLIER, DELETE_SUPPLIER_FAILED, DELETE_SUPPLIER_SUCCESSFUL,
+    UPDATE_SUPPLIER_AVATAR, UPDATE_SUPPLIER_AVATAR_FAILED, UPDATE_SUPPLIER_AVATAR_SUCCESSFUL
 } from '../actions/types';
 
 const INITIAL_STATE = {
@@ -67,6 +68,24 @@ export default (state = INITIAL_STATE, action) => {
             }
 
         case DELETE_SUPPLIER_FAILED:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case UPDATE_SUPPLIER_AVATAR:
+            return {
+                ...state,
+                loading: true
+            }
+
+        case UPDATE_SUPPLIER_AVATAR_SUCCESSFUL:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case UPDATE_SUPPLIER_AVATAR_FAILED:
             return {
                 ...state,
                 loading: false

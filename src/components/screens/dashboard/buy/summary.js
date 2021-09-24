@@ -1,13 +1,13 @@
 import React, { Suspense, lazy, useState } from 'react';
 import {
-    View, StyleSheet, Text, StatusBar, useWindowDimensions, Animated
+    View, StyleSheet, Text, StatusBar, useWindowDimensions, Animated, ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 import { useSelector, useDispatch } from 'react-redux';
 import Spinner from 'react-native-loading-spinner-overlay';
 
-import { colors, images, defaultSize } from '../../../../config';
+import { colors, defaultSize, formatNumber } from '../../../../config';
 import Fallback from '../../../common/fallback';
 import { saveBuyMethod, buy } from '../../../../store/actions'
 
@@ -26,6 +26,13 @@ const Summary = (props) => {
 
     // redux
     const buyState = useSelector(state => state.buy);
+    const remote = useSelector(state => state.remoteConfigs);
+    const {
+        confirmCashPaymentTextLabel, confirmationSuccessfulTextLabel, summaryTextLabel, farmerTextLabel,
+        productTextLabel, weightTextLabel, quantity1TextLabel, quantity2TextLabel, totalAmountTextLabel,
+        totalWeightTextLabel, pricePerUnitTextLabel, continueButtonTextLabel, modifyTransactionButtonTextLabel,
+        closeTextLabel, confirmPaymentTextLabel, paymentMethodTextLabel
+    } = remote.values;
 
     const [payment, setPaymentMethod] = useState({id: 'none', progress: new Animated.Value(45), name: 'Quanity', open: false, payment: 'pending'});
     const [modal, setModal] = useState({modalVisible: false})
@@ -41,6 +48,7 @@ const Summary = (props) => {
         setModal({...modal, modalVisible: false})
     }
 
+    // confirm and buy
     const confirmPaymentHandler = () => {
         closeModal();
         setTimeout(() => {
@@ -58,22 +66,35 @@ const Summary = (props) => {
         }, 200);
     }
 
+    // close payment modal
     const onClosePaymentModal = () => {
         closeModal();
         goBack()
     }
 
+    // confirm payment and save payment method
     const onConfirmPayment = (method) => {
         dispatch(saveBuyMethod(method));
     }
 
+    // qualities array
+    let diffQualities = [];
+    for (key in buyState.qualities) {
+        diffQualities.push({quality: key, ...buyState.qualities[key]})
+    }
+
+    // reduce totalWeight
+    const weight = diffQualities.reduce((prev, curr) => parseInt(prev.totalWeight) + parseInt(curr.totalWeight))
+    // reduce totalAmount
+    const total = diffQualities.reduce((prev, curr) => parseInt(prev.totalAmount) + parseInt(curr.totalAmount))
+
     const paymentComponent = () => 
     <>
         <View style={[styles.modalContainerStyle, {width: width * .75, height: height * .35}]}>
-        <Text style={styles.cashTextStyle}>Please confirm Cash Payment</Text>
+        <Text style={styles.cashTextStyle}>{confirmCashPaymentTextLabel}</Text>
             <View style={[styles.buttonContainerStyle, {width: '80%'}]}>
                 <Button
-                    title='Confirm payment'
+                    title={confirmPaymentTextLabel}
                     backgroundColor={green}
                     borderColor={green}
                     color={white}
@@ -83,21 +104,23 @@ const Summary = (props) => {
         </View>
     </>
 
-const successComponent = () => 
-<>
-    <View style={[styles.modalContainerStyle, {width: width * .75, height: height * .35}]}>
-    <Text style={styles.cashTextStyle}>Confirmation Successful</Text>
-        <View style={[styles.buttonContainerStyle, {width: '80%'}]}>
-            <Button
-                title='Close'
-                backgroundColor={green}
-                borderColor={green}
-                color={white}
-                enabled onPress={onClosePaymentModal}
-            />
+    console.log(buyState.qualities)
+
+    const successComponent = () => 
+    <>
+        <View style={[styles.modalContainerStyle, {width: width * .75, height: height * .35}]}>
+        <Text style={styles.cashTextStyle}>{confirmationSuccessfulTextLabel}</Text>
+            <View style={[styles.buttonContainerStyle, {width: '80%'}]}>
+                <Button
+                    title={closeTextLabel}
+                    backgroundColor={green}
+                    borderColor={green}
+                    color={white}
+                    enabled onPress={onClosePaymentModal}
+                />
+            </View>
         </View>
-    </View>
-</>
+    </>
 
     return (
         <Suspense fallback={<Fallback />}>
@@ -107,49 +130,46 @@ const successComponent = () =>
                 <View style={[styles.summaryHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
                     <View style={{width: '85%'}}>
-                        <Text style={styles.summaryHeaderTextStyle}>Summary</Text>
+                        <Text style={styles.summaryHeaderTextStyle}>{summaryTextLabel}</Text>
                     </View>
                 </View>
                 <View style={{width: width * .8}}>
+                    <ScrollView>
                     <View style={styles.summaryContainerStyle}>
-                        <Text>Farmer</Text>
+                        <Text>{farmerTextLabel}</Text>
                         <Text>{buyState.individual}</Text>
                     </View>
                     <View style={styles.summaryContainerStyle}>
-                        <Text>Product</Text>
+                        <Text>{productTextLabel}</Text>
                         <Text>{buyState.product}, {buyState.subproduct}</Text>
                     </View>
                     <View style={styles.summaryContainerStyle}>
-                        <Text>Weight</Text>
-                        <Text>Price per unit</Text>
+                        <Text style={styles.qualityTextStyle}>{weightTextLabel}</Text>
+                        <Text style={styles.qualityTextStyle}>{pricePerUnitTextLabel}</Text>
                     </View>
-                    <View style={styles.summaryContainerStyle}>
-                        <View>
-                            <Text>Q1</Text>
-                            <Text>{buyState.quantity1} Kg</Text>
+                    {diffQualities.map(({quality, totalWeight, pricePerUnit}) =>
+                        <View style={styles.summaryContainerStyle} key={quality}>
+                            <View>
+                                <Text style={styles.qualityTextStyle}>{quality}</Text>
+                                <Text>{totalWeight} Kg</Text>
+                            </View>
+                            <Text>{pricePerUnit} UGX</Text>
                         </View>
-                        <Text>{buyState.pricePerUnit} UGX</Text>
+                    )}
+                    <View style={styles.summaryContainerStyle}>
+                        <Text>{totalWeightTextLabel}</Text>
+                        <Text>{formatNumber(Math.round(`${buyState.totalWeight}` * 100 / 100).toFixed(2))} Kg</Text>
                     </View>
                     <View style={styles.summaryContainerStyle}>
-                        <View>
-                            <Text>Q2</Text>
-                            <Text>{buyState.quantity2} Kg</Text>
-                        </View>
-                        <Text>{buyState.pricePerUnit} UGX</Text>
+                        <Text>{totalAmountTextLabel}</Text>
+                        <Text>{formatNumber(`${total}`)} UGX</Text>
                     </View>
-                    <View style={styles.summaryContainerStyle}>
-                        <Text>Total Weight</Text>
-                        <Text>{buyState.totalWeight} Kg</Text>
-                    </View>
-                    <View style={styles.summaryContainerStyle}>
-                        <Text>Total Amount</Text>
-                        <Text>{buyState.totalAmount} UGX</Text>
-                    </View>
+                    </ScrollView>
                 </View>
                 
                 <View style={[styles.buttonContainerStyle, {width: width * .8}]}>
                     <Button
-                        title='Modify Transaction'
+                        title={modifyTransactionButtonTextLabel}
                         backgroundColor={red}
                         borderColor={red}
                         color={white}
@@ -157,7 +177,7 @@ const successComponent = () =>
                     />
                 </View>
                 <View style={{width: width * .8, marginVertical: defaultSize}}>
-                    <Text style={styles.paymentTitleStyles}>Payment Method</Text>
+                    <Text style={styles.paymentTitleStyles}>{paymentMethodTextLabel}</Text>
                     <Select
                         height={payment.progress}
                         onToggleSelector={() => {}}
@@ -171,7 +191,7 @@ const successComponent = () =>
                 </View>
                 <View style={[styles.buttonContainerStyle, {width: width * .8}]}>
                     <Button
-                        title='Continue'
+                        title={continueButtonTextLabel}
                         backgroundColor={green}
                         borderColor={green}
                         color={white}
@@ -212,6 +232,10 @@ const styles = StyleSheet.create({
         borderBottomWidth: .5,
         paddingVertical: defaultSize * .75,
         marginVertical: defaultSize * .35
+    },
+    qualityTextStyle: {
+        fontSize: defaultSize,
+        fontWeight: 'bold'
     },
     paymentTitleStyles: {
         fontSize: defaultSize * 1.15,

@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useState } from 'react';
 import {
-    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, Animated, LayoutAnimation, UIManager
+    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, Animated, LayoutAnimation, UIManager, ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFormik } from 'formik';
@@ -37,6 +37,7 @@ const AddCustomer = (props) => {
 
     // redux
     const supplierState = useSelector(state => state.supplier);
+    const {userID} = useSelector(state => state.user);
 
     const [category, setCategory] = useState({id: 'none', progress: new Animated.Value(45), name: 'Category', open: false});
 
@@ -48,7 +49,7 @@ const AddCustomer = (props) => {
             email: Yup.string().email('Please enter valid email').required('Email is required')
         }),
         onSubmit: values => {
-            dispatch(createSupplier({values, category: category.name},
+            dispatch(createSupplier({values, category: category.name, userID},
                 () => {
                     props.navigation.navigate('suppliers')
                 },
@@ -93,49 +94,51 @@ const AddCustomer = (props) => {
                     </View>
                 </View>
                 <View style={[styles.addSupplierContainerStyle, {width: width * .8}]}>
-                    <View>
-                        <Text style={styles.selectCategoryStyle}>Select a supplier category</Text>
-                        <Select
-                            height={category.progress}
-                            onToggleSelector={() => onToggleCategory()}
-                            productName={category.name}
-                            isProductOpen={category.open}
-                            productList={categories}
-                            onProductSelect={onCategorySelect}
-                            buttonTitle={category.name}
-                            onCreateHandler={() => onCreateHandler()}
-                        />
-                    </View>
-                    <View style={styles.addSupplierInputContainerStyle}>
-                        <Text style={styles.enterSupplierTextStyle}>Enter supplier</Text>
-                        <Input
-                            placeholder="name"
-                            error={errors.name}
-                            value={values.name}
-                            rightComponent={false}
-                            onChangeText={handleChange('name')}
-                            onBlur={handleBlur('name')}
-                            touched={touched.name}
-                        />
-                        <Input
-                            placeholder="phone"
-                            error={errors.phone}
-                            value={values.phone}
-                            rightComponent={false}
-                            onChangeText={handleChange('phone')}
-                            onBlur={handleBlur('phone')}
-                            touched={touched.phone}
-                        />
-                        <Input
-                            placeholder="email"
-                            error={errors.email}
-                            value={values.email}
-                            rightComponent={false}
-                            onChangeText={handleChange('email')}
-                            onBlur={handleBlur('email')}
-                            touched={touched.email}
-                        />
-                    </View>
+                    <ScrollView>
+                        <View>
+                            <Text style={styles.selectCategoryStyle}>Select a supplier category</Text>
+                            <Select
+                                height={category.progress}
+                                onToggleSelector={() => onToggleCategory()}
+                                productName={category.name}
+                                isProductOpen={category.open}
+                                productList={categories}
+                                onProductSelect={onCategorySelect}
+                                buttonTitle={category.name}
+                                onCreateHandler={() => onCreateHandler()}
+                            />
+                        </View>
+                        <View style={styles.addSupplierInputContainerStyle}>
+                            <Text style={styles.enterSupplierTextStyle}>Enter supplier</Text>
+                            <Input
+                                placeholder="name"
+                                error={errors.name}
+                                value={values.name}
+                                rightComponent={false}
+                                onChangeText={handleChange('name')}
+                                onBlur={handleBlur('name')}
+                                touched={touched.name}
+                            />
+                            <Input
+                                placeholder="phone"
+                                error={errors.phone}
+                                value={values.phone}
+                                rightComponent={false}
+                                onChangeText={handleChange('phone')}
+                                onBlur={handleBlur('phone')}
+                                touched={touched.phone}
+                            />
+                            <Input
+                                placeholder="email"
+                                error={errors.email}
+                                value={values.email}
+                                rightComponent={false}
+                                onChangeText={handleChange('email')}
+                                onBlur={handleBlur('email')}
+                                touched={touched.email}
+                            />
+                        </View>
+                    </ScrollView>
                 </View>
                 <View style={[styles.buttonContainerStyle, {width: width * .8}]}>
                     <Button

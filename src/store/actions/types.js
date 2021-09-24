@@ -15,6 +15,7 @@ export const USER_GOOGLE_LOGIN_SUCCESSFUL = 'user_google_signup_successful';
 export const USER_GOOGLE_LOGIN_FAILED = 'user_google_signup_failed';
 
 export const UPDATE_USER = 'update_user'
+export const UPDATE_GENDER = 'update_gender';
 
 export const LOGOUT = 'logout';
 export const LOGOUT_SUCCESSFUL = 'logout_successful';
@@ -26,6 +27,7 @@ export const BUY = 'buy';
 export const BUY_SUCCESSFUL = 'buy_successful';
 export const BUY_FAILED = 'buy_failed';
 export const SAVE_BUY_DATA = 'save_buy_data';
+export const SAVE_BUY_QUALITY = 'save_buy_quality';
 export const SAVE_BUY_METHOD = 'save_buy_method';
 export const FETCH_PURCHASES = 'fetch_purchases';
 export const CLEAR_BUY_DATA = 'clear_buy_date';
@@ -37,6 +39,9 @@ export const CREATE_SUPPLIER_FAILED = 'create_supplier_failed';
 export const UPDATE_SUPPLIER = 'update_supplier';
 export const UPDATE_SUPPLIER_SUCCESSFUL = 'update_supplier_successful';
 export const UPDATE_SUPPLIER_FAILED = 'update_supplier_failed';
+export const UPDATE_SUPPLIER_AVATAR = 'update_supplier_avatar';
+export const UPDATE_SUPPLIER_AVATAR_SUCCESSFUL = 'update_supplier_avatar_successful';
+export const UPDATE_SUPPLIER_AVATAR_FAILED = 'update_supplier_avatar_failed';
 
 export const DELETE_SUPPLIER = 'delete_supplier';
 export const DELETE_SUPPLIER_FAILED = 'delete_supplier_failed';
@@ -51,6 +56,9 @@ export const CREATE_CUSTOMER_FAILED = 'create_customer_failed';
 export const UPDATE_CUSTOMER = 'update_customer';
 export const UPDATE_CUSTOMER_SUCCESSFUL = 'update_customer_successful';
 export const UPDATE_CUSTOMER_FAILED = 'update_customer_failed';
+export const UPDATE_CUSTOMER_AVATAR = 'update_customer_avatar';
+export const UPDATE_CUSTOMER_AVATAR_SUCCESSFUL = 'update_customer_avatar_successful';
+export const UPDATE_CUSTOMER_AVATAR_FAILED = 'update_customer_avatar_failed';
 
 export const DELETE_CUSTOMER = 'delete_customer';
 export const DELETE_CUSTOMER_FAILED = 'delete_customer_failed';
@@ -65,25 +73,33 @@ export const PICKUP_FAILED = 'pickup_failed';
 export const FETCH_PRODUCTS = 'fetch_products';
 export const FETCH_SUBPRODUCTS = 'fetch_subproducts';
 export const FETCH_QUALITIES = 'fetch_qualities';
+export const FETCH_OUTPUT_QUALITIES = 'fetch_output_qualities';
 export const FETCH_CATEGORIES = 'fetch_categories';
+export const SET_PRODUCT = 'set_product';
 export const CREATE_PRODUCT = 'create_product';
 export const CREATE_PRODUCT_SUCCESSFUL = 'create_product_successful';
 export const CREATE_PRODUCT_FAILED = 'create_product_failed';
+export const SET_SUBPRODUCT = 'set_subproduct';
 export const CREATE_SUBPRODUCT = 'create_subproduct';
 export const CREATE_SUBPRODUCT_SUCCESSFUL = 'create_subproduct_successful';
 export const CREATE_SUBPRODUCT_FAILED = 'create_subproduct_failed';
 export const CREATE_QUALITY = 'create_quality';
 export const CREATE_QUALITY_SUCCESSFUL = 'create_quality_successful';
 export const CREATE_QUALITY_FAILED = 'create_quality_failed';
+export const CREATE_OUTPUT_QUALITY = 'create_output_quality';
+export const CREATE_OUTPUT_QUALITY_SUCCESSFUL = 'create_output_quality_successful';
+export const CREATE_OUTPUT_QUALITY_FAILED = 'create_output_quality_failed';
 export const DELETE_PRODUCT = 'delete_product';
 export const DELETE_PRODUCT_SUCCESSFUL = 'delete_product_successful';
 export const DELETE_PRODUCT_FAILED = 'delete_product_failed';
+export const SET_QUALITY_NAME = 'set_quality_name';
 
 export const CREATE_BATCH_MILL = 'create_batch_mill';
 export const CREATE_BATCH_MILL_FAILED = 'create_batch_mill_failed';
 export const CREATE_BATCH_MILL_SUCCESSFUL = 'create_batch_mill_successful';
 export const SAVE_BATCHMILL_DATA = 'save_batchmill_data';
 export const CLEAR_BATCHMILL_DATA = 'clear_batchmill_data';
+export const SAVE_BATCHMILL_QUALITY_DATA = 'save_batchmill_quality_data';
 
 export const CREATE_MILL = 'create_mill';
 export const CREATE_MILL_SUCCESSFUL = 'create_mill_successful';
@@ -117,3 +133,5 @@ export const ADD_MILL_LOCATION = 'add_mill_location';
 export const ADD_MILL_LOCATION_SUCCESSFUL = 'add_mill_location_successful';
 export const ADD_MILL_LOCATION_FAILED = 'add_mill_location_failed';
 export const UPDATE_LOCATION = 'update_location';
+
+export const UPDATE_REMOTE_CONFIGS = 'update_remote_configs';

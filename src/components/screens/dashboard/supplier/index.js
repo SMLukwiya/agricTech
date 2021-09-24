@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import {
-    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, ScrollView
+    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, ScrollView, FlatList
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icons from 'react-native-vector-icons/MaterialIcons';
@@ -16,7 +16,12 @@ const Suppliers = (props) => {
     const { height, width } = useWindowDimensions();
 
     // redux
-    const {suppliers} = useSelector(state => state.supplier);
+    const supplierState = useSelector(state => state.supplier);
+    const {userID} = useSelector(state => state.user);
+    const suppliers = supplierState.suppliers.filter(item => item.userID === userID);
+    const {values: {
+        suppliersTextLabel, addSupplierTextLabel
+    }} = useSelector(state => state.remoteConfigs)
 
     const goBack = () => props.navigation.navigate('home');
 
@@ -29,10 +34,10 @@ const Suppliers = (props) => {
         props.navigation.navigate('supplierdetail', {id});
     }
 
-    const supplierComponent = (id,imageUrl, name, phone, category) => 
+    const supplierComponent = ({item: {id,imageUrl, name, phone, category}}) => 
         <TouchableOpacity activeOpacity={.8} style={styles.supplierContainerStyle} onPress={() =>onSelectSupplierHandler(id)} key={id}>
             <View style={styles.supplierImageContainerStyle}>
-                <Image source={imageUrl ? {uri: imageUrl} : images.avatar} width='100%' height='100%' resizeMode='contain' />
+                <Image source={imageUrl ? {uri: imageUrl} : images.avatar} style={styles.imageStyle} resizeMode='cover' />
             </View>
             <View style={styles.rightSupplierContainerStyle}>
                 <View>
@@ -53,17 +58,21 @@ const Suppliers = (props) => {
                 <View style={[styles.supplierHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
                     <View style={{width: '85%'}}>
-                        <Text style={styles.supplierHeaderTextStyle}>Suppliers</Text>
+                        <Text style={styles.supplierHeaderTextStyle}>{suppliersTextLabel}</Text>
                     </View>
                 </View>
                 <View style={[styles.supplierOverContainerStyle,{width: width * .8, height: height * .785}]}>
-                    <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
-                        {suppliers.length === 0 ? <Text style={{fontSize: defaultSize, fontWeight: 'bold', textAlign: 'center'}}>No suppliers added</Text> : suppliers.map(({id, imageUrl, name, phone, category}) => supplierComponent(id, imageUrl, name, phone, category))}
-                    </ScrollView>
+                        {suppliers.length === 0 ? <Text style={{fontSize: defaultSize, fontWeight: 'bold', textAlign: 'center'}}>No suppliers added</Text> :
+                        <FlatList 
+                            data={suppliers}
+                            keyExtractor={item => item.id}
+                            renderItem={supplierComponent}
+                        />
+                        }
                 </View>
                 <View style={[styles.buttonContainerStyle, {width: width * .8}]}>
                     <Button
-                        title='Add a supplier'
+                        title={addSupplierTextLabel}
                         backgroundColor={green}
                         borderColor={green}
                         color={white}
@@ -110,6 +119,10 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         marginRight: defaultSize,
         marginVertical: defaultSize * .55
+    },
+    imageStyle: {
+        width: '100%',
+        height: '100%'
     },
     categoryContainerStyle: {
         flexDirection: 'row',

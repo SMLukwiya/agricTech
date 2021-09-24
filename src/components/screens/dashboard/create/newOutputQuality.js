@@ -9,16 +9,16 @@ import Icons from 'react-native-vector-icons/MaterialIcons';
 import { useSelector, useDispatch } from 'react-redux';
 import Spinner from 'react-native-loading-spinner-overlay';
 
-import { colors, defaultSize } from '../../../../config';
+import { colors, images, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
-import { createQuality } from '../../../../store/actions';
+import { createOutputQuality } from '../../../../store/actions';
 
 const { white, green, extraLightGreen, lightGreen, darkGray, red } = colors;
 const Input = lazy(() => import('../../../common/input'));
 const Button = lazy(() => import('../../../common/button'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
 
-const NewQuality = (props) => {
+const OutputQuality = (props) => {
     const dispatch = useDispatch();
     const { height, width } = useWindowDimensions();
 
@@ -26,35 +26,28 @@ const NewQuality = (props) => {
     const [state, setState] = useState({ modalVisible: false, error: '' });
 
     // redux
-    const {qualities, loading, product, subProduct} = useSelector(state => state.product);
+    const {outputQualities, loading, product, subProduct, quality} = useSelector(state => state.product);
 
     const { handleChange, values, handleSubmit, errors, handleBlur, touched } = useFormik({
-        initialValues: { qualityName: '' },
+        initialValues: { outputQualityName: '' },
         validationSchema: Yup.object({
-            qualityName: Yup.string().required('Enter quality')
+            outputQualityName: Yup.string().required('Enter output quality')
         }),
         onSubmit: values => {
             setState({...state, modalVisible: true})
         }
     });
 
-    const goBack = () => props.navigation.navigate('createnewsubproduct');
+    const goBack = () => props.navigation.navigate('createnewquality');
 
     const closeModal = () => {
         setState({...state, modalVisible: false, error: '' })
     }
 
-    const onContinueHandler = () => {
-        closeModal();
-        dispatch(createQuality({subproduct: subProduct, name: values.qualityName},
-            () => {props.navigation.navigate('products')},
-            err => {console.log(err)}))
-    }
-
     const confirmHandler = () => {
         closeModal();
-        dispatch(createQuality({subproduct: subProduct, name: values.qualityName},
-            () => {props.navigation.navigate('createnewoutputquality')},
+        dispatch(createOutputQuality({inputQuality: quality, name: values.outputQualityName},
+            () => {props.navigation.navigate('products')},
             err => {console.log(err)}))
     }
 
@@ -70,7 +63,7 @@ const NewQuality = (props) => {
 
     const emptyQualityComponent = () =>
         <View style={styles.emptyProductContainerStyle}>
-            <Text style={styles.emptyProductTextStyle}>No Input Qualities added</Text>
+            <Text style={styles.emptyProductTextStyle}>No Output Qualities added</Text>
         </View>
 
     return (
@@ -81,15 +74,15 @@ const NewQuality = (props) => {
                 <View style={[styles.createNewProductHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
                     <View style={{width: '85%'}}>
-                        <Text style={styles.createNewProductHeaderTextStyle}>Create new Input Quality</Text>
+                        <Text style={styles.createNewProductHeaderTextStyle}>Create new Output Quality</Text>
                     </View>
                 </View>
                 <View style={[styles.productContainerStyle, {width}]}>
-                    <Text style={styles.productListTitleTextStyle}>Input Quality List</Text>
+                    <Text style={styles.productListTitleTextStyle}>Output Quality List</Text>
                     <View style={{height: height * .575}}>
                         {qualities.length === 0 ? emptyQualityComponent() : 
                         <FlatList
-                            data={qualities}
+                            data={outputQualities}
                             key={item => item.id}
                             renderItem={qualityComponent}
                             contentContainerStyle={styles.scrollViewStyle}
@@ -99,12 +92,12 @@ const NewQuality = (props) => {
                 </View>
                 <View style={[styles.inputContainerStyle, {width: width * .8}]}>
                 <Input
-                        placeholder="Enter new Input quality"
-                        error={errors.qualityName}
-                        value={values.qualityName}
-                        onChangeText={handleChange('qualityName')}
-                        onBlur={handleBlur('qualityName')}
-                        touched={touched.qualityName}
+                        placeholder="Enter new output quality"
+                        error={errors.outputQualityName}
+                        value={values.outputQualityName}
+                        onChangeText={handleChange('outputQualityName')}
+                        onBlur={handleBlur('outputQualityName')}
+                        touched={touched.outputQualityName}
                     />
                     <Button
                         title='Save'
@@ -127,33 +120,21 @@ const NewQuality = (props) => {
                                 <Text>{subProduct}</Text>
                             </View>
                             <View style={styles.textContainerStyle}>
-                                <Text>Quality</Text>
-                                <Text>{values.qualityName}</Text>
+                                <Text>Input Quality</Text>
+                                <Text>{quality}</Text>
+                            </View>
+                            <View style={styles.textContainerStyle}>
+                                <Text>Output Quality</Text>
+                                <Text>{values.outputQualityName}</Text>
                             </View>
                             <View style={styles.buttonContainerStyle}>
                                 <Button
-                                    title='Confirm and go back'
-                                    backgroundColor={green}
-                                    borderColor={green}
-                                    color={white}
-                                    enabled
-                                    onPress={onContinueHandler}
-                                />
-                                <Button
-                                    title='Confirm & Create outputQuality'
+                                    title='Confirm & Save'
                                     backgroundColor={green}
                                     borderColor={green}
                                     color={white}
                                     enabled
                                     onPress={confirmHandler}
-                                />
-                                <Button
-                                    title='Modify'
-                                    backgroundColor={red}
-                                    borderColor={red}
-                                    color={white}
-                                    enabled
-                                    onPress={closeModal}
                                 />
                             </View>
                         </View>
@@ -240,4 +221,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default NewQuality;
+export default OutputQuality;

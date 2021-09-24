@@ -8,9 +8,10 @@ import product from './product';
 import batchMill from './batchMill';
 import millingService from './milingService';
 import miller from './millers';
+import remoteConfigs from './variable';
 
 const rootReducer = combineReducers({
-    user, buy, supplier, customer, pickup, product, batchMill, millingService, miller
+    user, buy, supplier, customer, pickup, product, batchMill, millingService, miller, remoteConfigs
 });
 
 export default rootReducer;

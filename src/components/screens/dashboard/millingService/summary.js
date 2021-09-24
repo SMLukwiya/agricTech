@@ -1,18 +1,17 @@
 import React, { Suspense, lazy, useState } from 'react';
 import {
-    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, Animated
+    View, StyleSheet, Text, StatusBar, useWindowDimensions, Animated
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 import { useDispatch, useSelector } from 'react-redux';
 import Spinner from 'react-native-loading-spinner-overlay';
 
-import { colors, images, defaultSize } from '../../../../config';
+import { colors, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
 import { createMill, clearMillData } from '../../../../store/actions';
-import { set } from 'react-native-reanimated';
 
-const { white, green, blue, darkGray, red } = colors;
+const { white, green, darkGray, red } = colors;
 const Button = lazy(() => import('../../../common/button'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
 const Select = lazy(() => import('../../../common/select'));

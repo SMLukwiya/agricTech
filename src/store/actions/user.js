@@ -12,7 +12,8 @@ import {
     RESET_LOADERS, UPDATE_USER,
     UPLOAD_AVATAR, UPLOAD_AVATAR_FAILED, UPLOAD_AVATAR_SUCCESSFUL,
     UPDATE_USER_INFO, UPDATE_USER_INFO_SUCCESSFUL, UPDATE_USER_INFO_FAILED,
-    UPDATE_PASSWORD, UPDATE_PASSWORD_FAILED, UPDATE_PASSWORD_SUCCESSFUL
+    UPDATE_PASSWORD, UPDATE_PASSWORD_FAILED, UPDATE_PASSWORD_SUCCESSFUL,
+    UPDATE_GENDER
  } from './types';
 import {baseUri} from '../../config';
 
@@ -22,6 +23,10 @@ import {baseUri} from '../../config';
 
  export const updateUser = (values) => {
      return {type: UPDATE_USER, payload: values}
+ }
+
+ export const updateGender = (values) => {
+     return {type: UPDATE_GENDER, payload: values}
  }
 
 export const userEmailSignup = (values, onSuccess = () => {}, onFailure = () => {}) => {

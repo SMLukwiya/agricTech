@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import {
-    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, KeyboardAvoidingView
+    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, KeyboardAvoidingView, ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFormik } from 'formik';
@@ -23,6 +23,7 @@ const SetupMill = (props) => {
 
     // redux
     const {loading} = useSelector(state => state.miller)
+    const {userID} = useSelector(state => state.user)
 
     const { handleChange, values, handleSubmit, errors, handleBlur, touched } = useFormik({
         initialValues: { name: '', location: '', capacity: '' },
@@ -32,7 +33,7 @@ const SetupMill = (props) => {
             capacity: Yup.string().required('Capacity of mill is required')
         }),
         onSubmit: values => {
-            dispatch(setupMill(values,
+            dispatch(setupMill(values, userID,
                 () => {
                     props.navigation.navigate('selectmill');
                 },
@@ -54,35 +55,37 @@ const SetupMill = (props) => {
                     </View>
                 </View>
                 <View style={[styles.setupMillContainerStyle, {width: width * .8}]}>
-                    <KeyboardAvoidingView>
-                        <Input
-                            placeholder="Name of mill"
-                            error={errors.name}
-                            value={values.name}
-                            rightComponent={false}
-                            onChangeText={handleChange('name')}
-                            onBlur={handleBlur('name')}
-                            touched={touched.name}
-                        />
-                        <Input
-                            placeholder="Location of mill"
-                            error={errors.location}
-                            value={values.location}
-                            rightComponent={false}
-                            onChangeText={handleChange('location')}
-                            onBlur={handleBlur('location')}
-                            touched={touched.location}
-                        />
-                        <Input
-                            placeholder="Mill capacity"
-                            error={errors.capacity}
-                            value={values.capacity}
-                            rightComponent={false}
-                            onChangeText={handleChange('capacity')}
-                            onBlur={handleBlur('capacity')}
-                            touched={touched.capacity}
-                        />
-                     </KeyboardAvoidingView>
+                    <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
+                        <KeyboardAvoidingView>
+                            <Input
+                                placeholder="Name of mill"
+                                error={errors.name}
+                                value={values.name}
+                                rightComponent={false}
+                                onChangeText={handleChange('name')}
+                                onBlur={handleBlur('name')}
+                                touched={touched.name}
+                            />
+                            <Input
+                                placeholder="Location of mill"
+                                error={errors.location}
+                                value={values.location}
+                                rightComponent={false}
+                                onChangeText={handleChange('location')}
+                                onBlur={handleBlur('location')}
+                                touched={touched.location}
+                            />
+                            <Input
+                                placeholder="Mill capacity"
+                                error={errors.capacity}
+                                value={values.capacity}
+                                rightComponent={false}
+                                onChangeText={handleChange('capacity')}
+                                onBlur={handleBlur('capacity')}
+                                touched={touched.capacity}
+                            />
+                        </KeyboardAvoidingView>
+                     </ScrollView>
                 </View>
                 <View style={[styles.buttonContainerStyle, {width: width * .8}]}>
                     <Button

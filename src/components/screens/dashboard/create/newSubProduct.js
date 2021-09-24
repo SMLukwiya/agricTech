@@ -13,7 +13,7 @@ import { colors, images, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
 import { createSubProduct } from '../../../../store/actions';
 
-const { white, green, extraLightGreen, lightGreen, red } = colors;
+const { white, green, extraLightGreen, lightGreen, red, darkGray } = colors;
 const Input = lazy(() => import('../../../common/input'));
 const Button = lazy(() => import('../../../common/button'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
@@ -124,6 +124,10 @@ const NewSubProduct = (props) => {
                 <View style={[styles.createQualityContainerStyle, {height: height * .375, width: width * .75}]}>
                     <Text style={styles.createQualityTextStyle}>Create quality for product</Text>
                     <View style={styles.buttonContainerStyle}>
+                        <View style={styles.textContainerStyle}>
+                            <Text>Product</Text>
+                            <Text>{product}</Text>
+                        </View>
                         <Button
                             title='Confirm and go back'
                             backgroundColor={green}
@@ -220,6 +224,17 @@ const styles = StyleSheet.create({
     },
     buttonContainerStyle: {
         width: '80%'
+    },
+    // 
+    textContainerStyle: {
+        flexDirection: 'row',
+        width: '80%',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginVertical: defaultSize * .75,
+        paddingBottom: defaultSize * .35,
+        borderBottomWidth: .5,
+        borderBottomColor: darkGray
     },
 });
 

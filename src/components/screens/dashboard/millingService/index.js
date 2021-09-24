@@ -1,15 +1,15 @@
 import React, { Suspense, lazy, useState, useEffect } from 'react';
 import {
-    View, StyleSheet, Text, StatusBar, useWindowDimensions, Animated, LayoutAnimation, UIManager, Platform, ScrollView, TouchableOpacity
+    View, StyleSheet, Text, StatusBar, useWindowDimensions, Animated, LayoutAnimation, UIManager, Platform, ScrollView, TouchableOpacity, Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 import { useDispatch, useSelector } from 'react-redux';
+import dayjs from 'dayjs';
 
 import { colors, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
-import { saveMillData } from '../../../../store/actions';
-import dayjs from 'dayjs';
+import { saveMillData, setProductName, setSubProductName } from '../../../../store/actions';
 
 const { white, green, darkGray, lightGray } = colors;
 const Button = lazy(() => import('../../../common/button'));
@@ -204,7 +204,20 @@ const MillingService = (props) => {
     }
 
     const onCreateHandler = (type) => {
-        props.navigation.navigate(type === 'product' ? 'createnewproduct' : type === 'subproduct' ? 'createnewsubproduct' : 'createnewsubproduct')
+        closeModal();
+        if (type === 'product') {
+            props.navigation.navigate('createnewproduct')
+        } else if (type === 'subproduct') {
+            if (product.name === 'Product') return Alert.alert('Please select a product')
+            dispatch(setProductName(product.name));
+            props.navigation.navigate('createnewsubproduct')
+        } else if (type === 'inputQuality' || type === 'outputQuality') {
+            dispatch(setProductName(product.name));
+            dispatch(setSubProductName(subProduct.name));
+            props.navigation.navigate('createnewquality')
+        } else {
+            props.navigation.navigate('addsupplier')
+        }
     }
     const onAddNewQualityHandler = () => {
         closeModal();
@@ -272,7 +285,7 @@ const MillingService = (props) => {
                             onToggleSelector={() => onToggleSelector('subproduct', 'Sub Product')}
                             productName={subProduct.name}
                             isProductOpen={subProduct.open}
-                            productList={subProducts}
+                            productList={product.name !== 'Product' ? subProducts.filter(item => item.product === product.name) : subProducts}
                             onProductSelect={onProductSelect}
                             buttonTitle='Create new Sub product'
                             onCreateHandler={() => onCreateHandler('subproduct')}
@@ -287,7 +300,7 @@ const MillingService = (props) => {
                             isProductOpen={category.open}
                             productList={categories}
                             onProductSelect={onProductSelect}
-                            buttonTitle='Create new product'
+                            buttonTitle='Create new category'
                             onCreateHandler={() => onCreateHandler('category')}
                         />
                     </View>
@@ -300,7 +313,7 @@ const MillingService = (props) => {
                             isProductOpen={supplier.open}
                             productList={suppliers}
                             onProductSelect={onProductSelect}
-                            buttonTitle='Create new product'
+                            buttonTitle='Create new supplier'
                             onCreateHandler={() => onCreateHandler('supplier')}
                         />
                     </View>
@@ -325,7 +338,7 @@ const MillingService = (props) => {
                             onToggleSelector={() => onToggleSelector('inputquality', 'Select Input Quality')}
                             productName={inputQuality.name}
                             isProductOpen={inputQuality.open}
-                            productList={qualities}
+                            productList={subProduct.name !== 'Sub Product' ? qualities.filter(item => item.subproduct === subProduct.name) : qualities}
                             onProductSelect={onProductSelect}
                             buttonTitle='Create new Input Quality'
                             onCreateHandler={() => onCreateHandler('inputQuality')}
@@ -377,7 +390,7 @@ const MillingService = (props) => {
                             onToggleSelector={() => onToggleSelector('outputquality', 'Select Output Quality')}
                             productName={outputQuality.name}
                             isProductOpen={outputQuality.open}
-                            productList={qualities}
+                            productList={subProduct.name !== 'Sub Product' ? qualities.filter(item => item.subproduct === subProduct.name) : qualities}
                             onProductSelect={onSelectOutputQuality}
                             buttonTitle='Create new Output Quality'
                             onCreateHandler={() => onCreateHandler('outputQuality')}
