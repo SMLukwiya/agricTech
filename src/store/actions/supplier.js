@@ -19,14 +19,14 @@ export const fetchSuppliers = (suppliers) => {
 }
 
 export const createSupplier = (values, onSuccess = () => {}, onFailure = () => {}) => {
-    const { category, values: {name, phone, email, address} } = values;
+    const { category, values: { name, phone, email }, userID, location } = values;
 
     return async dispatch => {
         dispatch({type: CREATE_SUPPLIER});
 
         try {
             await axios.post(`${baseUri}supplier-createSupplier`, {
-                category, name, phone, email, address: address ? address : ''
+                category, name, phone, email, address: location, userID
             });
             dispatch({
                 type: CREATE_SUPPLIER_SUCCESSFUL

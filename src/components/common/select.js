@@ -23,10 +23,16 @@ const ProductComponent = (props) => {
                             <Text style={styles.productNameTextStyle}>{name}</Text>
                         </TouchableOpacity>
                     )}
-                    { productList.length && productList[0].type === 'category' || productList.length && productList[0].type === 'gender' ? <React.Fragment /> : <TouchableOpacity style={styles.createNewProductContainerStyle} activeOpacity={.8} onPress={onCreateHandler}>
-                        <Text style={styles.createNewProductTextstyle}>{buttonTitle}</Text>
-                        <Icons name='add' size={25} color={green} />
-                    </TouchableOpacity>}
+                    { productList.length && productList[0].type === 'category' || 
+                        productList.length && productList[0].type === 'gender' || 
+                        productList.length && productList[0].type === 'stockIn' ||
+                        productList.length && productList[0].type === 'stockOut' ? 
+                        <React.Fragment /> : 
+                        <TouchableOpacity style={styles.createNewProductContainerStyle} activeOpacity={.8} onPress={onCreateHandler}>
+                            <Text style={styles.createNewProductTextstyle}>{buttonTitle}</Text>
+                            <Icons name='add' size={25} color={green} />
+                        </TouchableOpacity>
+                    }
                 </ScrollView>
             }
         </Animated.View>

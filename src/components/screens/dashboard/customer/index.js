@@ -16,9 +16,7 @@ const Customers = (props) => {
     const { height, width } = useWindowDimensions();
 
     // redux
-    const customerState = useSelector(state => state.customer);
-    const {userID} = useSelector(state => state.user);
-    const customers = customerState.customers.filter(item => item.userID === userID)
+    const {customers} = useSelector(state => state.customer);
     const {values: {
         customersTextLabel, addCustomerTextLabel
     }} = useSelector(state => state.remoteConfigs);

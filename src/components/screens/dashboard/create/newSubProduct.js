@@ -121,7 +121,7 @@ const NewSubProduct = (props) => {
                     </View>
             </SafeAreaView>
             <RNModal visible={state.modalVisible} onRequestClose={closeModal} presentationStyle='overFullScreen' closeIconColor={white}>
-                <View style={[styles.createQualityContainerStyle, {height: height * .375, width: width * .75}]}>
+                <View style={[styles.createQualityContainerStyle, {width: width * .75}]}>
                     <Text style={styles.createQualityTextStyle}>Create quality for product</Text>
                     <View style={styles.buttonContainerStyle}>
                         <View style={styles.textContainerStyle}>
@@ -137,7 +137,7 @@ const NewSubProduct = (props) => {
                             onPress={onContinueHandler}
                         />
                         <Button
-                            title='Confirm and create quality'
+                            title='Confirm and create input quality'
                             backgroundColor={green}
                             borderColor={green}
                             color={white}

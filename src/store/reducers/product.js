@@ -5,7 +5,7 @@ import {
     CREATE_QUALITY, CREATE_QUALITY_SUCCESSFUL, CREATE_QUALITY_FAILED,
     CREATE_OUTPUT_QUALITY, CREATE_OUTPUT_QUALITY_FAILED, CREATE_OUTPUT_QUALITY_SUCCESSFUL,
     DELETE_PRODUCT, DELETE_PRODUCT_FAILED, DELETE_PRODUCT_SUCCESSFUL,
-    SET_PRODUCT, SET_SUBPRODUCT, SET_QUALITY_NAME
+    SET_PRODUCT, SET_SUBPRODUCT, SET_QUALITY_NAME, FETCH_STOCKIN, FETCH_STOCKOUT
 } from '../actions/types';
 
 const INITIAL_STATE = {
@@ -14,6 +14,8 @@ const INITIAL_STATE = {
     qualities: [],
     outputQualities: [],
     categories: [],
+    stockIn: [],
+    stockOut: [],
     product: '',
     subProduct: '',
     quality: '',
@@ -161,6 +163,18 @@ export default (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 quality: action.payload
+            }
+
+        case FETCH_STOCKIN:
+            return {
+                ...state,
+                stockIn: action.payload
+            }
+
+        case FETCH_STOCKOUT:
+            return {
+                ...state,
+                stockOut: action.payload
             }
 
         default:

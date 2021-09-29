@@ -11,6 +11,7 @@ import Spinner from 'react-native-loading-spinner-overlay';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import MapView, {Marker} from 'react-native-maps';
 
 import { colors, images, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
@@ -28,20 +29,18 @@ const Supplier = (props) => {
     const [state, setState] = useState({ image: {} })
     const [modal, setModal] = useState({ modalVisible: false, error: '', type: '' });
 
-    const supplierState = useSelector(state => state.supplier)
-    const {userID} = useSelector(state => state.user);
-    const suppliers = supplierState.suppliers.filter(item => item.userID === userID);
+    const {suppliers, loading} = useSelector(state => state.supplier)
 
     const { route: { params: {id} }} = props;
     const supplier = suppliers.find(item => item.id === id);
 
     const { handleChange, values, handleSubmit, errors, handleBlur, touched } = useFormik({
-        initialValues: { fullName: supplier ? supplier.name : '', phoneNumber: supplier ? supplier.phone : '', email: supplier ? supplier.email : '', location: supplier ? supplier.address : '', category: supplier ? supplier.category : '', supplies: supplier ? supplier.supplies: '' },
+        initialValues: { fullName: supplier ? supplier.name : '', phoneNumber: supplier ? supplier.phone : '', email: supplier ? supplier.email : '', location: supplier ? supplier.address.name : '', category: supplier ? supplier.category : '', supplies: supplier ? supplier.supplies: '' },
         validationSchema: Yup.object({
             fullName: Yup.string().required('Name is required'),
             phoneNumber: Yup.number('Enter a valid phone number').min(10, 'Phone number must be 10 digits').required('Phone number is required'),
             email: Yup.string().email('Enter valid email address').required('Email is required'),
-            location: Yup.string().required('Password is required'),
+            // location: Yup.string().required('Password is required'),
             category: Yup.string().required('Enter Supplier Category'),
             supplies: Yup.string().required('Enter Supplier supplies')
         }),
@@ -227,7 +226,7 @@ const Supplier = (props) => {
                     onBlur={handleBlur('email')}
                     touched={touched.email}
                 />
-                <Input
+                {/* <Input
                     placeholder="Location"
                     error={errors.location}
                     value={values.location}
@@ -235,7 +234,7 @@ const Supplier = (props) => {
                     onChangeText={handleChange('location')}
                     onBlur={handleBlur('location')}
                     touched={touched.location}
-                />
+                /> */}
                 <Input
                     placeholder="Category"
                     error={errors.category}
@@ -267,15 +266,10 @@ const Supplier = (props) => {
              </KeyboardAvoidingView>
         </View>
 
-        const errorComponent = () => 
-            <View>
-                <Text></Text>
-            </View>
-
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
-            <Spinner visible={supplierState.loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
+            <Spinner visible={loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
                 <View style={[styles.profileCloseIconStyle, {width}]}>
                     <Icons name='arrow-back-ios' size={30} color={white} onPress={onGoBackHandler} style={{width: '7%'}} />
@@ -314,7 +308,7 @@ const Supplier = (props) => {
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='location-on' size={25} color={darkGray} />
-                                    <Text style={styles.privateProfileTextStyle}>{supplier ? supplier.address : ''}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{supplier ? supplier.address.name : ''}</Text>
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
@@ -332,6 +326,18 @@ const Supplier = (props) => {
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
+                        </View>
+                        <View>
+                            <MapView
+                                style={{width: width * .8, height: defaultSize * 15}}
+                                initialRegion={{
+                                    latitude: supplier.address.geometry.location.lat,
+                                    longitude: supplier.address.geometry.location.lng,
+                                    latitudeDelta: 0.0922,
+                                    longitudeDelta: 0.0421,
+                                }}>
+                                <Marker coordinate={{ latitude : supplier.address.geometry.location.lat, longitude : supplier.address.geometry.location.lng }} />
+                            </MapView>
                         </View>
                     </ScrollView>
                 </View>

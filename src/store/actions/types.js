@@ -105,6 +105,7 @@ export const CREATE_MILL = 'create_mill';
 export const CREATE_MILL_SUCCESSFUL = 'create_mill_successful';
 export const CREATE_MILL_FAILED = 'create_mill_failed';
 export const SAVE_MILL_DATA = 'save_mill_data';
+export const SAVE_MILL_QUALITY_DATA = 'save_mill_quality_data';
 export const CLEAR_MILL_DATA = 'clear_mill_data';
 
 export const UPLOAD_AVATAR = 'upload_avatar';
@@ -135,3 +136,6 @@ export const ADD_MILL_LOCATION_FAILED = 'add_mill_location_failed';
 export const UPDATE_LOCATION = 'update_location';
 
 export const UPDATE_REMOTE_CONFIGS = 'update_remote_configs';
+
+export const FETCH_STOCKIN = 'fetch_stockin';
+export const FETCH_STOCKOUT = 'fetch_stockout';

@@ -52,6 +52,10 @@ export default (state = INITIAL_STATE, action) => {
                 pricePerUnit: action.payload.pricePerUnit,
                 totalAmount: action.payload.totalAmount
             }
+
+            let exists = state.qualities[action.payload.quality]
+            let prevAmount = `${parseInt(exists && exists.totalWeight ? exists.totalWeight : '0')}` * `${parseInt(exists && exists.pricePerUnit ? exists.pricePerUnit : '0')}`
+            
             return {
                 ...state,
                 date: action.payload.date,
@@ -60,8 +64,8 @@ export default (state = INITIAL_STATE, action) => {
                 product: action.payload.product,
                 subproduct: action.payload.subProduct,
                 qualities: newQualities,
-                totalWeight: `${parseInt(state.totalWeight === '' ? '0' : state.totalWeight) + parseInt(action.payload.totalWeight)}`,
-                totalAmount: `${parseInt(state.totalAmount === '' ? '0' : state.totalAmount) + parseInt(action.payload.totalAmount)}`
+                totalWeight: `${parseInt(state.totalWeight === '' ? '0' : state.totalWeight) - `${parseInt(exists && exists.totalWeight ? exists.totalWeight : '0')}` + parseInt(action.payload.totalWeight)}`,
+                totalAmount: `${parseInt(state.totalAmount === '' ? '0' : state.totalAmount) - prevAmount + parseInt(action.payload.totalAmount)}`
             }
 
         case SAVE_BUY_QUALITY:
@@ -71,12 +75,15 @@ export default (state = INITIAL_STATE, action) => {
                 pricePerUnit: action.payload.pricePerUnit,
                 totalAmount: action.payload.totalAmount
             }
-            console.log('Total ', action.payload.totalAmount)
+
+            let existsInput = state.qualities[action.payload.quality]
+            let prevAmountInput = `${parseInt(existsInput && existsInput.totalWeight ? existsInput.totalWeight : '0')}` * `${parseInt(existsInput && existsInput.pricePerUnit ? existsInput.pricePerUnit : '0')}`
+            console.log(prevAmountInput, state.totalAmount)
             return {
                 ...state,
                 qualities: newQualitiesPerProduct,
-                totalWeight: `${parseInt(state.totalWeight === '' ? '0' : state.totalWeight) + parseInt(action.payload.totalWeight)}`,
-                totalAmount: `${parseInt(state.totalAmount === '' ? '0' : state.totalAmount) + parseInt(action.payload.totalAmount)}`
+                totalWeight: `${parseInt(state.totalWeight === '' ? '0' : state.totalWeight) - `${parseInt(existsInput && existsInput.totalWeight ? existsInput.totalWeight : '0')}` + parseInt(action.payload.totalWeight)}`,
+                totalAmount: `${parseInt(state.totalAmount === '' ? '0' : state.totalAmount) - prevAmountInput + parseInt(action.payload.totalAmount)}`
             }
 
         case SAVE_BUY_METHOD:

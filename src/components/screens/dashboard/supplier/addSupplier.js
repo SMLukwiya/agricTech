@@ -1,6 +1,6 @@
-import React, { Suspense, lazy, useState } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import {
-    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, Animated, LayoutAnimation, UIManager, ScrollView
+    View, StyleSheet, Text, StatusBar, useWindowDimensions, Animated, LayoutAnimation, UIManager, ScrollView, TouchableOpacity, Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFormik } from 'formik';
@@ -8,8 +8,9 @@ import * as Yup from 'yup';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 import { useSelector, useDispatch } from 'react-redux';
 import Spinner from 'react-native-loading-spinner-overlay';
+import axios from 'axios';
 
-import { colors, images, defaultSize } from '../../../../config';
+import { colors, images, defaultSize, googlePlacesUrl, googlePlacesDetailsUrl } from '../../../../config';
 import Fallback from '../../../common/fallback';
 import { createSupplier } from '../../../../store/actions'
 
@@ -33,10 +34,10 @@ const transition = LayoutAnimation.create(200, 'easeInEaseOut', 'scaleY');
 
 const AddCustomer = (props) => {
     const dispatch = useDispatch();
-    const { width } = useWindowDimensions();
+    const { height, width } = useWindowDimensions();
 
     // redux
-    const supplierState = useSelector(state => state.supplier);
+    const {loading} = useSelector(state => state.supplier);
     const {userID} = useSelector(state => state.user);
 
     const [category, setCategory] = useState({id: 'none', progress: new Animated.Value(45), name: 'Category', open: false});
@@ -49,7 +50,8 @@ const AddCustomer = (props) => {
             email: Yup.string().email('Please enter valid email').required('Email is required')
         }),
         onSubmit: values => {
-            dispatch(createSupplier({values, category: category.name, userID},
+            if (!search.placePrediction) return Alert.alert('Please choose a location');
+            dispatch(createSupplier({values, location: search.placePrediction, category: category.name, userID},
                 () => {
                     props.navigation.navigate('suppliers')
                 },
@@ -58,7 +60,51 @@ const AddCustomer = (props) => {
         }
     });
 
+    // state
+    const [search, setSearch] = useState({value: '', placePrediction: {}, predictionSet: false, error: '', touch: false})
+    const [predictions, setPredictions] = useState([]);
+
     const goBack = () => props.navigation.navigate('home');
+
+    // set search text
+    const onChangeText = (value) => {
+        setSearch({...search, value, predictionSet: true})
+    }
+
+    // run on every search value change
+    const onChangeMapText = async () => {
+        if (search.value.trim() === '') return;
+        try {
+            const results = await axios.get(`${googlePlacesUrl}key=AIzaSyDmO0TPSYtgcPJw8TbBSOaIBFVqs4Ziq2Q&input=${search.value}`);
+            const {data: {predictions}} = results;
+            setPredictions(predictions);
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    const onPreditionTapped = async (id, description) => {
+        try {
+            const results = await axios.get(`${googlePlacesDetailsUrl}key=AIzaSyDmO0TPSYtgcPJw8TbBSOaIBFVqs4Ziq2Q&&place_id=${id}`)
+            const {data: {result}} = results
+            
+            setSearch({
+                ...search,
+                value: description,
+                predictionSet: false,
+                placePrediction: {
+                    ...search.placePrediction,
+                    name: result.address_components[0].long_name,
+                    geometry: result.geometry
+                }
+            })
+            setPredictions([]);
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    console.log(search.placePrediction)
 
     const onToggleCategory = () => {
         LayoutAnimation.configureNext(transition);
@@ -82,10 +128,14 @@ const AddCustomer = (props) => {
 
     const enabled = category.name !== 'Category'
 
+    useEffect(() => {
+        onChangeMapText()
+    }, [search.value])
+
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
-            <Spinner visible={supplierState.loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
+            <Spinner visible={loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
                 <View style={[styles.supplierHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
@@ -94,7 +144,7 @@ const AddCustomer = (props) => {
                     </View>
                 </View>
                 <View style={[styles.addSupplierContainerStyle, {width: width * .8}]}>
-                    <ScrollView>
+                    <ScrollView showsVerticalScrollIndicator={false}>
                         <View>
                             <Text style={styles.selectCategoryStyle}>Select a supplier category</Text>
                             <Select
@@ -137,6 +187,26 @@ const AddCustomer = (props) => {
                                 onBlur={handleBlur('email')}
                                 touched={touched.email}
                             />
+                            <Input
+                                placeholder="location"
+                                error={search.error}
+                                value={search.value}
+                                rightComponent={false}
+                                onChangeText={onChangeText}
+                                onBlur={() => {}}
+                                touched={search.touch}
+                            />
+                            {search.predictionSet && 
+                                <View style={{height: height * .35}}>
+                                    <ScrollView>
+                                        {predictions.map(({description, place_id}) => 
+                                            <TouchableOpacity activeOpacity={.8} onPress={() => onPreditionTapped(place_id, description)} key={place_id} style={[styles.placesPrediction]}>
+                                                <Text>{description}</Text>
+                                            </TouchableOpacity>
+                                        )}
+                                    </ScrollView>
+                                </View>
+                            }
                         </View>
                     </ScrollView>
                 </View>
@@ -192,6 +262,14 @@ const styles = StyleSheet.create({
     },
     buttonContainerStyle: {
         marginTop: defaultSize * 4
+    },
+    placesPrediction: {
+        marginVertical: defaultSize * .45,
+        borderWidth: 1,
+        borderColor: green,
+        paddingVertical: defaultSize * .2,
+        borderRadius: defaultSize,
+        paddingHorizontal: defaultSize * .25
     }
 });
 

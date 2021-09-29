@@ -201,7 +201,7 @@ const StockMilling = (props) => {
             if (inputQuality.name === 'Input Quality') return Alert.alert('Please select an input quality');
             dispatch(setProductName(product.name));
             dispatch(setSubProductName(subProduct.name));
-            dispatch(setInputQualityName(quality.name));
+            dispatch(setInputQualityName(inputQuality.name));
             props.navigation.navigate('createnewoutputquality')
         }
     }
@@ -447,7 +447,7 @@ const StockMilling = (props) => {
                             onToggleSelector={() => onToggleSelector('outputquality', 'Output Quality')}
                             productName={outputQuality.name}
                             isProductOpen={outputQuality.open}
-                            productList={inputQuality.name !== 'InputQuality' ? outputQualities.filter(item => item.quality === inputQuality.name) : outputQualities}
+                            productList={inputQuality.name !== 'Input Quality' ? outputQualities.filter(item => item.inputQuality === inputQuality.name) : outputQualities}
                             onProductSelect={onProductSelect}
                             buttonTitle='Create new Output Quality'
                             onCreateHandler={() => onCreateHandler('outputQuality')}

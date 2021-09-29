@@ -21,6 +21,7 @@ const Stocks = (props) => {
 
     // redux
     const batchState = useSelector(state => state.batchMill);
+    const {userID} = useSelector(state => state.user);
 
     // state
     const [modal, setModal] = useState(false)
@@ -30,7 +31,7 @@ const Stocks = (props) => {
     const onModifyBatchMill = () => props.navigation.goBack();
 
     const onConfirmBatch = () => {
-        dispatch(createBatchMill(batchState,
+        dispatch(createBatchMill(batchState, userID,
             () => {
                 setModal(true);
             },
@@ -48,15 +49,13 @@ const Stocks = (props) => {
 
     let inputQualityArray = [];
     for (key in batchState.inputQualities) {
-        inputQualityArray.push({quality: key, ...batchState.inputQualities[key]})
+        inputQualityArray.push({id: key, ...batchState.inputQualities[key]})
     }
 
     let outputQualityArray = [];
     for (key in batchState.outputQualities) {
-        outputQualityArray.push({quality: key, ...batchState.outputQualities[key]})
+        outputQualityArray.push({id: key, ...batchState.outputQualities[key]})
     }
-
-    console.log(batchState.date)
 
     return (
         <Suspense fallback={<Fallback />}>
@@ -87,8 +86,8 @@ const Stocks = (props) => {
                     <Text style={styles.summaryTotalTextTitleStyle}>Total Weight</Text>
                     <Text>Input Weight</Text>
                     {
-                        inputQualityArray.map(({quality, totalInput}) =>
-                        <View style={styles.summaryComponentSimpleContainerStyle} key={quality}>
+                        inputQualityArray.map(({id, quality, totalInput}) =>
+                        <View style={styles.summaryComponentSimpleContainerStyle} key={id}>
                             <Text>{quality}</Text>
                             <View>
                                 <Text>{formatDecNumber(totalInput)} kg</Text>
@@ -102,8 +101,8 @@ const Stocks = (props) => {
                     </View>
                     <Text>Output Weight</Text>
                     {
-                        outputQualityArray.map(({quality, totalOutput}) =>
-                        <View style={styles.summaryComponentSimpleContainerStyle} key={quality}>
+                        outputQualityArray.map(({id, quality, totalOutput}) =>
+                        <View style={styles.summaryComponentSimpleContainerStyle} key={id}>
                             <Text>{quality}</Text>
                             <View>
                                 <Text>{formatDecNumber(totalOutput)} kg</Text>

@@ -37,6 +37,9 @@ const Profile = (props) => {
 
     // redux
     const userState = useSelector(state => state.user);
+    const millState = useSelector(state => state.miller);
+    const {millers: {locations}} = millState;
+    // console.log(locations)
     const {user, gender} = userState;
 
     // state
@@ -116,9 +119,9 @@ const Profile = (props) => {
                     return console.log(`Operation cancelled with error code ${response.errorCode}`)
                 } else {
                     const imageSrc = response.assets[0];
-                    setState({ ...state, image: imageSrc, modal: {...state.modal, visible: false, type: 'save_image' } });
+                    setState({ ...state, image: imageSrc, modal: {...state.modal, visible: true, type: 'save_image' } });
                     setTimeout(() => {
-                        setState({...state, modal: {...state.modal, visible: true, type: 'save_image' } })
+                        // setState({...state, modal: {...state.modal, visible: true, type: 'save_image' } })
                     }, 350);
                 }
             })
@@ -130,16 +133,18 @@ const Profile = (props) => {
                     return console.log(`Operation error code ${response.errorCode}`);
                 } else {
                     const imageSrc = response.assets[0];
-                    setState({ ...state, image: imageSrc, modal: {...state.modal, visible: false, type: 'save_image' } });
+                    setState({ ...state, image: imageSrc, modal: {...state.modal, visible: true, type: 'save_image' } });
                     setTimeout(() => {
-                        setState({...state, modal: {...state.modal, visible: true, type: 'save_image' } })
+                        // setState({...state, modal: {...state.modal, visible: true, type: 'save_image' } })
                     }, 350);
                 }
             })
         }
     }
 
-    const onChangeProfilePicHandler = (type) => {
+    console.log('Image ', state.image)
+
+    const onChangeProfilePicHandler = () => {
         const granted = PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA, {
             title: 'Camera Permissions',
             message: 'Metajua would like to access camera for better experience',
@@ -372,6 +377,7 @@ const Profile = (props) => {
                                 </View>
                                 <Icon name='edit' size={20} color={green} onPress={() => onChangeProfileInfo('info')} />
                             </View>
+                            
                             <View style={styles.profileChangePasswordTextStyle}>
                                 <Text style={styles.profileChangeTitleTextStyle}>CHANGE PASSWORD</Text>
                                 <TouchableOpacity activeOpacity={.8} style={styles.enterNewPasswordStyle} onPress={() => onChangeProfileInfo('password')}>
@@ -504,8 +510,10 @@ const styles = StyleSheet.create({
     },
     //
     imageComponentContainerStyle: {
-        position: 'absolute',
-        bottom: defaultSize
+        // position: 'absolute',
+        // bottom: defaultSize,
+        justifyContent: 'flex-end',
+        height:'100%'
     },
     // 
     changeProfileContainerStyle: {

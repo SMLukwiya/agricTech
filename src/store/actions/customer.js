@@ -19,14 +19,14 @@ export const fetchCustomers = (suppliers) => {
 }
 
 export const createCustomer = (values, onSuccess = () => {}, onFailure = () => {}) => {
-    const { category, values: {name, phone, email, address}, userID } = values;
+    const { category, values: {name, phone, email}, userID, location } = values;
 
     return async dispatch => {
         dispatch({type: CREATE_CUSTOMER});
 
         try {
             await axios.post(`${baseUri}customer-createCustomer`, {
-                category, name, phone, email, address: address ? address : '', userID
+                category, name, phone, email, address: location, userID
             });
             dispatch({
                 type: CREATE_CUSTOMER_SUCCESSFUL

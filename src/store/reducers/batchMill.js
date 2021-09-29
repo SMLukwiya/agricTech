@@ -20,32 +20,47 @@ export default (state = INITIAL_STATE, action) => {
     switch(action.type) {
         case SAVE_BATCHMILL_QUALITY_DATA:
             let newInputQualitiesPerProduct = {...state.inputQualities}
-            newInputQualitiesPerProduct[action.payload.inputQuality] = {
+            let id = `${action.payload.inputQuality}-${action.payload.outputQuality}`
+            newInputQualitiesPerProduct[id] = {
+                quality: action.payload.inputQuality,
                 totalInput: action.payload.totalInput
             }
 
             let newOutputQualitiesPerProduct = {...state.outputQualities}
-            newOutputQualitiesPerProduct[action.payload.outputQuality] = {
+            newOutputQualitiesPerProduct[id] = {
+                quality: action.payload.outputQuality,
                 totalOutput: action.payload.totalOutput
             }
+
+            let existsInput = state.inputQualities[id];
+            let existsOuput = state.outputQualities[id];
+
             return {
                 ...state,
                 inputQualities: newInputQualitiesPerProduct,
-                totalInput: `${parseInt(state.totalInput === '' ? '0' : state.totalInput) + parseInt(action.payload.totalInput)}`,
+                totalInput: `${parseInt(state.totalInput === '' ? '0' : state.totalInput) - parseInt((existsInput && existsInput.totalInput) ? existsInput.totalInput : '0') + parseInt(action.payload.totalInput)}`,
                 outputQualities: newOutputQualitiesPerProduct,
-                totalOutput: `${parseInt(state.totalOutput === '' ? '0' : state.totalOutput) + parseInt(action.payload.totalOutput)}`
+                totalOutput: `${parseInt(state.totalOutput === '' ? '0' : state.totalOutput) - parseInt((existsOuput && exists.totalOutput) ? existsOuput.totalOutput : '0') + parseInt(action.payload.totalOutput)}`
             }
 
         case SAVE_BATCHMILL_DATA:
             let newInputQualities = {...state.inputQualities}
-            newInputQualities[action.payload.inputQuality] = {
+            let itemId = `${action.payload.inputQuality}-${action.payload.outputQuality}`
+            newInputQualities[itemId] = {
+                quality: action.payload.inputQuality,
                 totalInput: action.payload.totalInput
             }
 
             let newOutputQualities = {...state.outputQualities}
-            newOutputQualities[action.payload.outputQuality] = {
+            newOutputQualities[itemId] = {
+                quality: action.payload.outputQuality,
                 totalOutput: action.payload.totalOutput
             }
+
+            let existInp = state.inputQualities[itemId];
+            let existOut = state.outputQualities[itemId];
+
+            console.log(existsInput)
             return {
                 ...state,
                 date: action.payload.date,
@@ -53,9 +68,9 @@ export default (state = INITIAL_STATE, action) => {
                 subProduct: action.payload.subProduct,
                 mill: action.payload.mill,
                 inputQualities: newInputQualities,
-                totalInput: `${parseInt(state.totalInput === '' ? '0' : state.totalInput) + parseInt(action.payload.totalInput)}`,
+                totalInput: `${parseInt(state.totalInput === '' ? '0' : state.totalInput) - parseInt((existInp && existInp.totalInput) ? existInp.totalInput : '0') + parseInt(action.payload.totalInput)}`,
                 outputQualities: newOutputQualities,
-                totalOutput: `${parseInt(state.totalOutput === '' ? '0' : state.totalOutput) + parseInt(action.payload.totalOutput)}`
+                totalOutput: `${parseInt(state.totalOutput === '' ? '0' : state.totalOutput) - parseInt((existOut && existOut.totalOutput) ? existOut.totalOutput : '0') + parseInt(action.payload.totalOutput)}`
             }
 
         case CLEAR_BATCHMILL_DATA:

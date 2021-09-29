@@ -9,7 +9,10 @@ export const colors = {
     dark: '#000000',
     white: '#FFFFFF',
     bgColor: 'rgba(0,0,0,.85)',
-    red: '#DB4C4C'
+    red: '#DB4C4C',
+    darkPurple: '#540A85',
+    purple: '#611182',
+    lightPurple: '#761E7D'
 }
 
 export const images = {
@@ -41,6 +44,8 @@ export const images = {
 export const defaultSize = 16;
 
 export const baseUri = 'https://us-central1-agro-waste-mobile-app.cloudfunctions.net/';
+export const googlePlacesUrl = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?';
+export const googlePlacesDetailsUrl = 'https://maps.googleapis.com/maps/api/place/details/json?';
 
 export const errorTextStyle = {
     color: colors.red,

@@ -1,13 +1,13 @@
 import React, { Suspense, lazy, useState } from 'react';
 import {
-    View, StyleSheet, Text, StatusBar, useWindowDimensions, Animated
+    View, StyleSheet, Text, StatusBar, useWindowDimensions, Animated, ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 import { useDispatch, useSelector } from 'react-redux';
 import Spinner from 'react-native-loading-spinner-overlay';
 
-import { colors, defaultSize } from '../../../../config';
+import { colors, defaultSize, formatDecNumber, formatNumber } from '../../../../config';
 import Fallback from '../../../common/fallback';
 import { createMill, clearMillData } from '../../../../store/actions';
 
@@ -25,7 +25,8 @@ const Stocks = (props) => {
     const { height, width } = useWindowDimensions();
 
     // redux
-    const millState = useSelector(state => state.millingService)
+    const millState = useSelector(state => state.millingService);
+    const {userID} = useSelector(state => state.user);
 
     // state
     const [modal, setModal] = useState(false);
@@ -48,7 +49,7 @@ const Stocks = (props) => {
 
     const confirmPaymentHandler = () => {
         closeModal();
-        dispatch(createMill(millState,
+        dispatch(createMill(millState, userID,
             () => {
                 setPaymentMethod({...payment, payment: 'success'});
                 setTimeout(() => {
@@ -57,6 +58,16 @@ const Stocks = (props) => {
                 clearMillData()
             },
             err => {console.log(err)}))
+    }
+
+    let inputQualityArray = [];
+    for (key in millState.inputQualities) {
+        inputQualityArray.push({id: key, ...millState.inputQualities[key]})
+    }
+
+    let outputQualityArray = [];
+    for (key in millState.outputQualities) {
+        outputQualityArray.push({id: key, ...millState.outputQualities[key]})
     }
 
     const paymentComponent = () => 
@@ -91,6 +102,8 @@ const Stocks = (props) => {
         </View>
     </>
 
+    console.log(millState)
+
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
@@ -103,49 +116,62 @@ const Stocks = (props) => {
                     </View>
                 </View>
                 <View style={[styles.summaryContainerStyle, {width: width * .8}]}>
-                    <View style={styles.summaryComponentContainerStyle}>
-                        <Text>Date & Time</Text>
-                        <View style={styles.dateContainerStyle}>
-                            <Text style={styles.summaryTextStyle}>{millState.date}</Text>
+                    <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
+                        <View style={styles.summaryComponentContainerStyle}>
+                            <Text>Date & Time</Text>
+                            <View style={styles.dateContainerStyle}>
+                                <Text style={styles.summaryTextStyle}>{millState.date}</Text>
+                            </View>
                         </View>
-                    </View>
-                    <View style={styles.summaryComponentContainerStyle}>
-                        <Text>Mill</Text>
-                        <Text style={styles.summaryTextStyle}>{millState.mill}</Text>
-                    </View>
-                    <View style={styles.summaryComponentContainerStyle}>
-                        <Text>Product</Text>
-                        <Text style={styles.summaryTextStyle}>{millState.product}, {millState.subProduct}</Text>
-                    </View>
-                    <Text style={styles.summaryTotalTextTitleStyle}>Total Weight</Text>
-                    <Text>Input Weight</Text>
-                    <View style={styles.summaryComponentSimpleContainerStyle}>
-                        <Text>{millState.inputQuality}</Text>
-                        <View>
-                            <Text>{millState.inputQuantity1}kg</Text>
-                            <Text>{millState.inputQuantity2}kg</Text>
+                        <View style={styles.summaryComponentContainerStyle}>
+                            <Text>Mill</Text>
+                            <Text style={styles.summaryTextStyle}>{millState.mill}</Text>
                         </View>
-                    </View>
-                    <View style={styles.summaryComponentContainerStyle}>
-                        <Text style={styles.summaryTextStyle}>Total input</Text>
-                        <Text style={styles.summaryTextStyle}>{millState.totalInput} kg</Text>
-                    </View>
-                    <Text>Output Weight</Text>
-                    <View style={styles.summaryComponentSimpleContainerStyle}>
-                        <Text>{millState.outputQuality}</Text>
-                        <View>
-                            <Text>{millState.outputQuantity1}kg</Text>
-                            <Text>{millState.outputQuantity2}kg</Text>
+                        <View style={styles.summaryComponentContainerStyle}>
+                            <Text>Product</Text>
+                            <Text style={styles.summaryTextStyle}>{millState.product}, {millState.subProduct}</Text>
                         </View>
-                    </View>
-                    <View style={styles.summaryComponentContainerStyle}>
-                        <Text style={styles.summaryTextStyle}>Total output</Text>
-                        <Text style={styles.summaryTextStyle}>{millState.totalOutput}kg</Text>
-                    </View>
-                    <View style={styles.summaryComponentContainerStyle}>
-                        <Text style={styles.summaryTextStyle}>Total Payable</Text>
-                        <Text style={styles.summaryTextStyle}>{millState.totalPayable}UGX</Text>
-                    </View>
+                        <View style={styles.millQualityContainerStyle}>
+                            <Text>Input Weight</Text>
+                            <Text>Mill cost per unit</Text>
+                        </View>
+                        {
+                            inputQualityArray.map(({id, quality, pricePerUnit, totalInput}) =>
+                            <View style={styles.summaryComponentSimpleContainerStyle} key={id}>
+                                <Text>{quality}</Text>
+                                <View style={styles.inputQualityContainerStyle}>
+                                    <Text>{formatDecNumber(totalInput)} kg</Text>
+                                    <Text>{formatNumber(pricePerUnit)} UGX</Text>
+                                </View>
+                            </View> 
+                            )
+                        }
+                        <View style={styles.summaryComponentContainerStyle}>
+                            <Text style={styles.summaryTextStyle}>Total</Text>
+                            <View>
+                                <Text style={styles.summaryTextStyle}>{millState.totalInput} kg</Text>
+                            </View>
+                        </View>
+                        <Text style={{marginBottom : defaultSize * .5}}>Output Weight</Text>
+                        {
+                            outputQualityArray.map(({id, quality, totalOutput, }) =>
+                            <View style={styles.summaryComponentSimpleContainerStyle} key={id}>
+                                <Text>{quality}</Text>
+                                <View>
+                                    <Text>{formatDecNumber(totalOutput)} kg</Text>
+                                </View>
+                            </View>
+                            )
+                        }
+                        <View style={styles.summaryComponentContainerStyle}>
+                            <Text style={styles.summaryTextStyle}>Total output</Text>
+                            <Text style={styles.summaryTextStyle}>{millState.totalOutput}kg</Text>
+                        </View>
+                        <View style={styles.summaryComponentContainerStyle}>
+                            <Text style={styles.summaryTextStyle}>Total Payable</Text>
+                            <Text style={styles.summaryTextStyle}>{formatNumber(millState.totalPayable)}UGX</Text>
+                        </View>
+                    </ScrollView>
                 </View>
                 <View style={[styles.buttonContainerStyle, {width: width * .8}]}>
                     <Button
@@ -231,10 +257,22 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginVertical: defaultSize
     },
+    millQualityContainerStyle: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginVertical: defaultSize * .5
+    },
     summaryComponentSimpleContainerStyle: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        width: '100%'
+    },
+    inputQualityContainerStyle: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '60%',
     },
     modalContainerStyle: {
         backgroundColor: white,

@@ -53,10 +53,10 @@ const Pickup = (props) => {
         props.navigation.navigate('home');
     }
 
-    const customerComponent = (id, name, phone, category) => 
+    const customerComponent = (id, name, phone, category, imageUrl) => 
         <TouchableOpacity activeOpacity={.8} style={styles.supplierContainerStyle} onPress={() => onSelectPickupHandler(id)} key={id}>
             <View style={styles.supplierImageContainerStyle}>
-                <Image source={images.avatar} width='100%' height='100%' resizeMode='contain' />
+                <Image source={imageUrl ? {uri: imageUrl} : images.avatar} style={styles.imageStyle} resizeMode='cover' />
             </View>
             <View style={styles.rightSupplierContainerStyle}>
                 <View>
@@ -115,7 +115,7 @@ const Pickup = (props) => {
                 <View style={[styles.supplierOverContainerStyle,{width: width * .8, height: height * .8}]}>
                     <Text style={styles.selectACustomerTextStyle}>Please select a customer</Text>
                     <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
-                        {customers.map(({id, name, phone, category}) => customerComponent(id, name, phone, category))}
+                        {customers.map(({id, name, phone, category, imageUrl}) => customerComponent(id, name, phone, category, imageUrl))}
                     </ScrollView>
                 </View>
             </SafeAreaView>
@@ -167,6 +167,10 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         marginRight: defaultSize,
         marginVertical: defaultSize * .55
+    },
+    imageStyle: {
+        width: '100%',
+        height: '100%'
     },
     categoryContainerStyle: {
         flexDirection: 'row',

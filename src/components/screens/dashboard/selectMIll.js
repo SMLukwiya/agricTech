@@ -11,7 +11,7 @@ import { colors, defaultSize } from '../../../config';
 import Fallback from '../../common/fallback';
 import { 
     fetchSuppliers, fetchCustomers, fetchPurchases, fetchProducts, fetchSubproducts, fetchQualities , fetchCategories,
-    updateUser, updateMill, setSelectedMill, updateLocations, updateGender, fetchOutputQualities
+    updateUser, updateMill, setSelectedMill, updateLocations, updateGender, fetchOutputQualities, fetchStockIn, fetchStockOut
 } from '../../../store/actions';
 
 const { white, green, darkGray } = colors;
@@ -53,6 +53,7 @@ const SelectMill = (props) => {
     const updateSuppliers = () =>
         firestore()
             .collection('suppliers')
+            .where('userID', '==', user.userID)
             .onSnapshot(querySnapshot => {
                 let suppliers = [];
                 querySnapshot.forEach(doc => {
@@ -67,6 +68,7 @@ const SelectMill = (props) => {
     const updateCustomer = () =>
         firestore()
             .collection('customers')
+            .where('userID', '==', user.userID)
             .onSnapshot(querySnapshot => {
                 let customers = [];
                 querySnapshot.forEach(doc => {
@@ -81,6 +83,7 @@ const SelectMill = (props) => {
     const updatePurchases = () =>
         firestore()
             .collection('sales')
+            .where('userID', '==', user.userID)
             .onSnapshot(querySnapshot => {
                 let purchases = [];
                 querySnapshot.forEach(doc => {
@@ -164,6 +167,7 @@ const SelectMill = (props) => {
     const updateMillers = () =>
         firestore()
             .collection('millers')
+            .where('userID', '==', user.userID)
             .onSnapshot(querySnapshot => {
                 let millers = [];
                 querySnapshot.forEach(doc => {
@@ -190,17 +194,47 @@ const SelectMill = (props) => {
 
         // locations
     const fetchGender = () =>
-    firestore()
-        .collection('gender')
-        .onSnapshot(querySnapshot => {
-            let gender = [];
-            querySnapshot.forEach(doc => {
-                gender.push({id: doc.id, ...doc.data(), type: 'gender'})
+        firestore()
+            .collection('gender')
+            .onSnapshot(querySnapshot => {
+                let gender = [];
+                querySnapshot.forEach(doc => {
+                    gender.push({id: doc.id, ...doc.data(), type: 'gender'})
+                })
+                dispatch(updateGender(gender))
+            }, err => {
+                console.log('Gender error ', err)
             })
-            dispatch(updateGender(gender))
-        }, err => {
-            console.log('Gender error ', err)
-        })
+
+    // stock In
+    const updateStockIn = () => 
+        firestore()
+            .collection('stockIn')
+            .onSnapshot(querySnapshot => {
+                let stock = [];
+                querySnapshot.forEach(doc => {
+                    // put product data under product name
+                    category = doc.data().name
+                    stock.push({id: doc.id, name: category, [category]: {...doc.data()}, type: 'stockIn'})
+                })
+                dispatch(fetchStockIn(stock));
+            }, err => {
+                console.log('Stock in ', err)
+            })
+
+    const updateStockOut = () => 
+        firestore()
+            .collection('stockOut')
+            .onSnapshot(querySnapshot => {
+                let stock = [];
+                querySnapshot.forEach(doc => {
+                    category = doc.data().name
+                    stock.push({id: doc.id, name: category, [category]: {...doc.data()}, type: 'stockOut'})
+                })
+                dispatch(fetchStockOut(stock));
+            }, err => {
+                console.log('stock out ', err)
+            })
 
     useEffect(() => {
         updateSuppliers();
@@ -215,12 +249,14 @@ const SelectMill = (props) => {
         fetchLocations();
         fetchGender();
         updateOutputQualities();
+        updateStockIn();
+        updateStockOut();
     }, [])
 
     const millComponent = ({item: {id, name, location, capacity}}) => 
         <TouchableOpacity activeOpacity={.8} onPress={() => onSelectMillHandler(id, name, capacity, location)} style={[styles.millComponentContainerStyle, {width: width * .8}]}>
             <Text style={styles.millComponentTitleHeaderStyle}>{name}</Text>
-            <Text style={styles.millComponentTextStyle}>{location}</Text>
+            <Text style={styles.millComponentTextStyle}>{location.name}</Text>
         </TouchableOpacity>
 
     const setupMillComponent = () => 

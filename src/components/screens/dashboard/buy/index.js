@@ -407,7 +407,7 @@ const Buy = (props) => {
                             onToggleSelector={() => onToggleSelector('quality', 'Select Quality')}
                             productName={quality.name}
                             isProductOpen={quality.open}
-                            productList={qualities}
+                            productList={subProduct.name !== 'Sub Product' ? qualities.filter(item => item.subproduct === subProduct.name) : qualities}
                             onProductSelect={onProductSelect}
                             buttonTitle='Create new Quantity'
                             onCreateHandler={() => onCreateHandler('quality')}

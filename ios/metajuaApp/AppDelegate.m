@@ -16,6 +16,7 @@
 #import <SKIOSNetworkPlugin/SKIOSNetworkAdapter.h>
 #import <FlipperKitReactPlugin/FlipperKitReactPlugin.h>
 #import <Firebase.h>
+#import <GoogleMaps/GoogleMaps.h>
 
 static void InitializeFlipper(UIApplication *application) {
   FlipperClient *client = [FlipperClient sharedClient];
@@ -39,6 +40,8 @@ static void InitializeFlipper(UIApplication *application) {
 if ([FIRApp defaultApp] == nil) {
   [FIRApp configure];
 }
+
+[GMSServices provideAPIKey:@"AIzaSyAjpvA5q0cYL65uVQo8Ry_ONU599Xyk1iY"];
 
 [AppCenterReactNative register];
 [AppCenterReactNativeAnalytics registerWithInitiallyEnabled:true];

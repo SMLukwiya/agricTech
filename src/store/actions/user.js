@@ -125,6 +125,7 @@ export const logout = (_, onSuccess = () => {}, onFailure = () => {}) => {
 }
 
 export const updateProfileImage = (image, uid, onSuccess = () => {}, onFailure = () => {}) => {
+    console.log(image)
 
     return async dispatch => {
         dispatch({type: UPLOAD_AVATAR})

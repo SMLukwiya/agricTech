@@ -26,6 +26,7 @@ const Summary = (props) => {
 
     // redux
     const buyState = useSelector(state => state.buy);
+    const {userID} = useSelector(state => state.user);
     const remote = useSelector(state => state.remoteConfigs);
     const {
         confirmCashPaymentTextLabel, confirmationSuccessfulTextLabel, summaryTextLabel, farmerTextLabel,
@@ -52,7 +53,7 @@ const Summary = (props) => {
     const confirmPaymentHandler = () => {
         closeModal();
         setTimeout(() => {
-            dispatch(buy(buyState,
+            dispatch(buy(buyState, userID,
                 () => {
                     setPaymentMethod({...payment, payment: 'success'});
                     setTimeout(() => {
@@ -104,8 +105,6 @@ const Summary = (props) => {
         </View>
     </>
 
-    console.log(buyState.qualities)
-
     const successComponent = () => 
     <>
         <View style={[styles.modalContainerStyle, {width: width * .75, height: height * .35}]}>
@@ -133,37 +132,37 @@ const Summary = (props) => {
                         <Text style={styles.summaryHeaderTextStyle}>{summaryTextLabel}</Text>
                     </View>
                 </View>
-                <View style={{width: width * .8}}>
-                    <ScrollView>
-                    <View style={styles.summaryContainerStyle}>
-                        <Text>{farmerTextLabel}</Text>
-                        <Text>{buyState.individual}</Text>
-                    </View>
-                    <View style={styles.summaryContainerStyle}>
-                        <Text>{productTextLabel}</Text>
-                        <Text>{buyState.product}, {buyState.subproduct}</Text>
-                    </View>
-                    <View style={styles.summaryContainerStyle}>
-                        <Text style={styles.qualityTextStyle}>{weightTextLabel}</Text>
-                        <Text style={styles.qualityTextStyle}>{pricePerUnitTextLabel}</Text>
-                    </View>
-                    {diffQualities.map(({quality, totalWeight, pricePerUnit}) =>
-                        <View style={styles.summaryContainerStyle} key={quality}>
-                            <View>
-                                <Text style={styles.qualityTextStyle}>{quality}</Text>
-                                <Text>{totalWeight} Kg</Text>
-                            </View>
-                            <Text>{pricePerUnit} UGX</Text>
+                <View style={{width: width * .8, height: height*.575}}>
+                    <ScrollView showsVerticalScrollIndicator={false}>
+                        <View style={styles.summaryContainerStyle}>
+                            <Text>{farmerTextLabel}</Text>
+                            <Text>{buyState.individual}</Text>
                         </View>
-                    )}
-                    <View style={styles.summaryContainerStyle}>
-                        <Text>{totalWeightTextLabel}</Text>
-                        <Text>{formatNumber(Math.round(`${buyState.totalWeight}` * 100 / 100).toFixed(2))} Kg</Text>
-                    </View>
-                    <View style={styles.summaryContainerStyle}>
-                        <Text>{totalAmountTextLabel}</Text>
-                        <Text>{formatNumber(`${total}`)} UGX</Text>
-                    </View>
+                        <View style={styles.summaryContainerStyle}>
+                            <Text>{productTextLabel}</Text>
+                            <Text>{buyState.product}, {buyState.subproduct}</Text>
+                        </View>
+                        <View style={styles.summaryContainerStyle}>
+                            <Text style={styles.qualityTextStyle}>{weightTextLabel}</Text>
+                            <Text style={styles.qualityTextStyle}>{pricePerUnitTextLabel}</Text>
+                        </View>
+                        {diffQualities.map(({quality, totalWeight, pricePerUnit}) =>
+                            <View style={styles.summaryContainerStyle} key={quality}>
+                                <View>
+                                    <Text style={styles.qualityTextStyle}>{quality}</Text>
+                                    <Text>{totalWeight} Kg</Text>
+                                </View>
+                                <Text>{pricePerUnit} UGX</Text>
+                            </View>
+                        )}
+                        <View style={styles.summaryContainerStyle}>
+                            <Text>{totalWeightTextLabel}</Text>
+                            <Text>{formatNumber(Math.round(`${buyState.totalWeight}` * 100 / 100).toFixed(2))} Kg</Text>
+                        </View>
+                        <View style={styles.summaryContainerStyle}>
+                            <Text>{totalAmountTextLabel}</Text>
+                            <Text>{formatNumber(`${buyState.totalAmount}`)} UGX</Text>
+                        </View>
                     </ScrollView>
                 </View>
                 

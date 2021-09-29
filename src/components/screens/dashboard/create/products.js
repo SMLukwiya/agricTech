@@ -74,6 +74,7 @@ const Products = (props) => {
                         data={products}
                         key={(item) => item.id}
                         renderItem={productName}
+                        showsVerticalScrollIndicator={false}
                     />
                     }
                 </View>

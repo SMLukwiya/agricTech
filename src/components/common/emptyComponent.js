@@ -16,7 +16,8 @@ const styles = StyleSheet.create({
     },
     emptyProductTextStyle: {
         fontSize: defaultSize,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        textAlign: 'center'
     }
 })
 

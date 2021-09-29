@@ -7,7 +7,7 @@ import {
     CREATE_QUALITY, CREATE_QUALITY_SUCCESSFUL, CREATE_QUALITY_FAILED,
     CREATE_OUTPUT_QUALITY, CREATE_OUTPUT_QUALITY_FAILED, CREATE_OUTPUT_QUALITY_SUCCESSFUL,
     DELETE_PRODUCT, DELETE_PRODUCT_FAILED, DELETE_PRODUCT_SUCCESSFUL,
-    SET_PRODUCT, SET_SUBPRODUCT, SET_QUALITY_NAME
+    SET_PRODUCT, SET_SUBPRODUCT, SET_QUALITY_NAME, FETCH_STOCKIN, FETCH_STOCKOUT
 } from './types';
 import {baseUri} from '../../config'
 
@@ -64,6 +64,20 @@ export const setInputQualityName = (name) => {
     return {
         type: SET_QUALITY_NAME,
         payload: name
+    }
+}
+
+export const fetchStockIn = (values) => {
+    return {
+        type: FETCH_STOCKIN,
+        payload: values
+    }
+}
+
+export const fetchStockOut = (values) => {
+    return {
+        type: FETCH_STOCKOUT,
+        payload: values
     }
 }
 

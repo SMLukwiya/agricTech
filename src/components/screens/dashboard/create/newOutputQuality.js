@@ -80,7 +80,7 @@ const OutputQuality = (props) => {
                 <View style={[styles.productContainerStyle, {width}]}>
                     <Text style={styles.productListTitleTextStyle}>Output Quality List</Text>
                     <View style={{height: height * .575}}>
-                        {qualities.length === 0 ? emptyQualityComponent() : 
+                        {outputQualities.length === 0 ? emptyQualityComponent() : 
                         <FlatList
                             data={outputQualities}
                             key={item => item.id}

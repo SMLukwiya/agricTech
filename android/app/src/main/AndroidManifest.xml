@@ -27,5 +27,11 @@
         android:name="com.facebook.sdk.ApplicationId"
         android:value="@string/facebook_app_id"
       />
+      <meta-data
+        android:name="com.google.android.geo.API_KEY"
+        android:value="AIzaSyDhGCA2IdYJjq-dQOZ8Gs9QzC3n3BlmgD4" />
+
+      <!-- You will also only need to add this uses-library tag -->
+      <uses-library android:name="org.apache.http.legacy" android:required="false"/>
     </application>
 </manifest>

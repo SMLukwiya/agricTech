@@ -16,9 +16,7 @@ const Suppliers = (props) => {
     const { height, width } = useWindowDimensions();
 
     // redux
-    const supplierState = useSelector(state => state.supplier);
-    const {userID} = useSelector(state => state.user);
-    const suppliers = supplierState.suppliers.filter(item => item.userID === userID);
+    const {suppliers} = useSelector(state => state.supplier);
     const {values: {
         suppliersTextLabel, addSupplierTextLabel
     }} = useSelector(state => state.remoteConfigs)

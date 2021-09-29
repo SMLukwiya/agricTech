@@ -28,7 +28,7 @@ const Home = (props) => {
     const dev = () => Alert.alert('This feature is under development')
 
     let menuItems = [
-        {id: 'one', title: 'Stock', image: images.stockIcon, onPress: dev /*() => props.navigation.navigate('stocks')*/, order: 1},
+        {id: 'one', title: 'Stock', image: images.stockIcon, onPress: () => props.navigation.navigate('stocks'), order: 1},
         {id: 'two', title: 'Buy', image: images.buyIcon, onPress: () => props.navigation.navigate('buy'), order: 2},
         {id: 'three', title: 'Supplier', image: images.supplierIcon, onPress: () => props.navigation.navigate('suppliers'), order: 3},
         {id: 'four', title: 'Customers', image: images.customerIcon, onPress: () => props.navigation.navigate('customers'), order: 4},

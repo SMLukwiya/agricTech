@@ -140,7 +140,7 @@ const NewQuality = (props) => {
                                     onPress={onContinueHandler}
                                 />
                                 <Button
-                                    title='Confirm & Create outputQuality'
+                                    title='Confirm & Create output quality'
                                     backgroundColor={green}
                                     borderColor={green}
                                     color={white}

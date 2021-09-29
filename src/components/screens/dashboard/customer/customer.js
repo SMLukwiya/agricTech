@@ -11,6 +11,7 @@ import Spinner from 'react-native-loading-spinner-overlay';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import MapView, {Marker} from 'react-native-maps';
 
 import { colors, images, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
@@ -28,20 +29,18 @@ const Customer = (props) => {
     const [state, setState] = useState({ image: {} })
     const [modal, setModal] = useState({ modalVisible: false, error: '', type: '' });
 
-    const customerState = useSelector(state => state.customer);
-    const {userID} = useSelector(state => state.order);
-    const customers = customerState.customers.filter(item => item.userID === userID)
+    const {customers, loading} = useSelector(state => state.customer);
 
     const { route: { params: {id} }} = props;
     const customer = customers.find(item => item.id === id);
 
     const { handleChange, values, handleSubmit, errors, handleBlur, touched } = useFormik({
-        initialValues: { fullName: customer ? customer.name : '', phoneNumber: customer ? customer.phone : '', email: customer ? customer.email : '', location: customer ? customer.address : '', category: customer ? customer.category : '', supplies: customer ? customer.supplies : '' },
+        initialValues: { fullName: customer ? customer.name : '', phoneNumber: customer ? customer.phone : '', email: customer ? customer.email : '', location: customer ? customer.address.name : '', category: customer ? customer.category : '', supplies: customer ? customer.supplies : '' },
         validationSchema: Yup.object({
             fullName: Yup.string().required('Name is required'),
             phoneNumber: Yup.number('Enter a valid phone number').min(10, 'Phone number must be 10 digits').required('Phone number is required'),
             email: Yup.string().email('Enter valid email address').required('Email is required'),
-            location: Yup.string().required('Location is required'),
+            // location: Yup.string().required('Location is required'),
             category: Yup.string().required('Enter Supplier Category'),
             supplies: Yup.string().required('Enter Supplier supplies')
         }),
@@ -228,7 +227,7 @@ const Customer = (props) => {
                     onBlur={handleBlur('email')}
                     touched={touched.email}
                 />
-                <Input
+                {/* <Input
                     placeholder="Location"
                     error={errors.location}
                     value={values.location}
@@ -236,7 +235,7 @@ const Customer = (props) => {
                     onChangeText={handleChange('location')}
                     onBlur={handleBlur('location')}
                     touched={touched.location}
-                />
+                /> */}
                 <Input
                     placeholder="Category"
                     error={errors.category}
@@ -271,7 +270,7 @@ const Customer = (props) => {
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
-            <Spinner visible={customerState.loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
+            <Spinner visible={loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
                 <View style={[styles.profileCloseIconStyle, {width}]}>
                     <Icons name='arrow-back-ios' size={30} color={white} onPress={onGoBackHandler} style={{width: '5%'}} />
@@ -310,7 +309,7 @@ const Customer = (props) => {
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='location-on' size={25} color={darkGray} />
-                                    <Text style={styles.privateProfileTextStyle}>{customer ? customer.address : ''}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{customer ? customer.address.name : ''}</Text>
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
@@ -328,6 +327,18 @@ const Customer = (props) => {
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
+                        </View>
+                        <View>
+                            <MapView
+                                style={{width: width * .8, height: defaultSize * 15}}
+                                initialRegion={{
+                                    latitude: customer.address.geometry.location.lat,
+                                    longitude: customer.address.geometry.location.lng,
+                                    latitudeDelta: 0.0922,
+                                    longitudeDelta: 0.0421,
+                                }}>
+                                <Marker coordinate={{ latitude : customer.address.geometry.location.lat, longitude : customer.address.geometry.location.lng }} />
+                            </MapView>
                         </View>
                     </ScrollView>
                 </View>

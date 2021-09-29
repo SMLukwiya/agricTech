@@ -1,6 +1,6 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import {
-    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, KeyboardAvoidingView, ScrollView
+    View, StyleSheet, Text, StatusBar, useWindowDimensions, KeyboardAvoidingView, ScrollView, TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFormik } from 'formik';
@@ -9,9 +9,10 @@ import Icons from 'react-native-vector-icons/MaterialIcons';
 import { useDispatch, useSelector } from 'react-redux';
 import Spinner from 'react-native-loading-spinner-overlay';
 
-import { colors, images, defaultSize } from '../../../config';
+import { colors, defaultSize, googlePlacesUrl, googlePlacesDetailsUrl } from '../../../config';
 import Fallback from '../../common/fallback';
 import { setupMill } from '../../../store/actions';
+import axios from 'axios';
 
 const { white, green, blue, } = colors;
 const Input = lazy(() => import('../../common/input'));
@@ -19,21 +20,24 @@ const Button = lazy(() => import('../../common/button'));
 
 const SetupMill = (props) => {
     const dispatch = useDispatch();
-    const { width } = useWindowDimensions();
+    const { height, width } = useWindowDimensions();
 
     // redux
     const {loading} = useSelector(state => state.miller)
     const {userID} = useSelector(state => state.user)
 
+    // state
+    const [search, setSearch] = useState({value: '', placePrediction: {}, predictionSet: false, error: '', touch: false})
+    const [predictions, setPredictions] = useState([])
+
     const { handleChange, values, handleSubmit, errors, handleBlur, touched } = useFormik({
-        initialValues: { name: '', location: '', capacity: '' },
+        initialValues: { name: '', capacity: '' },
         validationSchema: Yup.object({
             name: Yup.string().required('Name of the mill is required'),
-            location: Yup.string().required('Location of mill is required'),
             capacity: Yup.string().required('Capacity of mill is required')
         }),
         onSubmit: values => {
-            dispatch(setupMill(values, userID,
+            dispatch(setupMill({...values, location: search.placePrediction}, userID,
                 () => {
                     props.navigation.navigate('selectmill');
                 },
@@ -42,6 +46,48 @@ const SetupMill = (props) => {
     });
 
     const goBack = () => props.navigation.navigate('home');
+
+    const onChangeText = (value) => {
+        setSearch({...search, value, predictionSet: true})
+    }
+
+    // run on every search value change
+    const onChangeMapText = async () => {
+        if (search.value.trim() === '') return;
+        try {
+            const results = await axios.get(`${googlePlacesUrl}key=AIzaSyDmO0TPSYtgcPJw8TbBSOaIBFVqs4Ziq2Q&input=${search.value}`);
+            const {data: {predictions}} = results;
+            setPredictions(predictions);
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    // tap location
+    const onPreditionTapped = async (id, description) => {
+        try {
+            const results = await axios.get(`${googlePlacesDetailsUrl}key=AIzaSyDmO0TPSYtgcPJw8TbBSOaIBFVqs4Ziq2Q&&place_id=${id}`)
+            const {data: {result}} = results
+            
+            setSearch({
+                ...search,
+                value: description,
+                predictionSet: false,
+                placePrediction: {
+                    ...search.placePrediction,
+                    name: result.address_components[0].long_name,
+                    geometry: result.geometry
+                }
+            })
+            setPredictions([]);
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    useEffect(() => {
+        onChangeMapText()
+    }, [search.value])
 
     return (
         <Suspense fallback={<Fallback />}>
@@ -68,13 +114,24 @@ const SetupMill = (props) => {
                             />
                             <Input
                                 placeholder="Location of mill"
-                                error={errors.location}
-                                value={values.location}
+                                error={search.error}
+                                value={search.value}
                                 rightComponent={false}
-                                onChangeText={handleChange('location')}
-                                onBlur={handleBlur('location')}
-                                touched={touched.location}
+                                onChangeText={onChangeText}
+                                onBlur={() => {}}
+                                touched={search.touch}
                             />
+                            {search.predictionSet && 
+                                <View style={{height: height * .35}}>
+                                    <ScrollView>
+                                        {predictions.map(({description, place_id}) => 
+                                            <TouchableOpacity activeOpacity={.8} onPress={() => onPreditionTapped(place_id, description)} key={place_id} style={[styles.placesPrediction]}>
+                                                <Text>{description}</Text>
+                                            </TouchableOpacity>
+                                        )}
+                                    </ScrollView>
+                                </View>
+                            }
                             <Input
                                 placeholder="Mill capacity"
                                 error={errors.capacity}
@@ -126,6 +183,14 @@ const styles = StyleSheet.create({
     buttonContainerStyle: {
         position: 'absolute',
         bottom: defaultSize * 3
+    },
+    placesPrediction: {
+        marginVertical: defaultSize * .45,
+        borderWidth: 1,
+        borderColor: green,
+        paddingVertical: defaultSize * .2,
+        borderRadius: defaultSize,
+        paddingHorizontal: defaultSize * .25
     }
 });
 

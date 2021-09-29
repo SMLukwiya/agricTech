@@ -10,7 +10,7 @@ import isYesterday from 'dayjs/plugin/isYesterday';
 import isBetween from 'dayjs/plugin/isBetween';
 import { useSelector } from 'react-redux';
 
-import { colors, defaultSize } from '../../../../config';
+import { colors, defaultSize, formatNumber, formatDecNumber } from '../../../../config';
 import Fallback from '../../../common/fallback';
 
 const { extraLightGreen, green, darkGray, lightGreen, white } = colors;
@@ -143,8 +143,8 @@ const Stocks = (props) => {
             <Text style={styles.purchaseComponentTextStyle}>{dayjs(date).format('YYYY-MM-DD')}</Text>
             <Text style={styles.purchaseComponentTextStyle}>{individual}</Text>
             <Text style={styles.purchaseComponentTextStyle}>{product}</Text>
-            <Text style={styles.purchaseComponentTextStyle}>{totalWeight} {weightKgUnitTextLabel}</Text>
-            <Text style={styles.purchaseComponentTextStyle}>{totalAmount} {moneyShillingTextLabel}</Text>
+            <Text style={styles.purchaseComponentTextStyle}>{formatDecNumber(totalWeight)} {weightKgUnitTextLabel}</Text>
+            <Text style={styles.purchaseComponentTextStyle}>{formatNumber(totalAmount)} {moneyShillingTextLabel}</Text>
         </View>
 
     return (
@@ -202,7 +202,7 @@ const Stocks = (props) => {
                         maxDate={`${currentYear}-${currentMonth}-${currentDate}`}
                         onDayPress={calender.id === 'min' ? setCalenderMinRangeHandler : setCalenderMaxRangeHandler}
                     />}
-                    <View>
+                    <View style={{alignItems: 'center'}}>
                         <View style={styles.purchaseHeaderTitleContainerStyle}>
                             <Text style={styles.purchaseHeaderTitleTextStyle}>{dateTextLabel}</Text>
                             <Text style={styles.purchaseHeaderTitleTextStyle}>{farmerTextLabel}</Text>
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
         marginHorizontal: defaultSize * .5
     },
     flatlistContainerStyle: {
-        width: '100%',
+        width: '100%'
     },
     purchaseComponentTitleContainerStyle: {
         flexDirection: 'row',
