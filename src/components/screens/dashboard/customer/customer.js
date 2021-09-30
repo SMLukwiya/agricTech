@@ -21,6 +21,7 @@ const { white, green, red, lightGray, darkGray } = colors;
 const Button = lazy(() => import('../../../common/button'));
 const Input = lazy(() => import('../../../common/input'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
+const EmptyComponent = lazy(() => import('../../../common/emptyComponent'));
 
 const Customer = (props) => {
     const dispatch = useDispatch();
@@ -70,14 +71,6 @@ const Customer = (props) => {
         dispatch(deleteCustomer(customer.id,
             () => onGoBackHandler(),
             err => console.log(err)))
-    }
-
-    if (customers.length === 0) {
-        return (
-            <View style={{alignItems: 'center', justifyContent: 'center'}}>
-                <Text style={{fontSize: defaultSize, fontWeight: 'bold'}}>No supplier added</Text>
-            </View>
-        )
     }
 
     const options = {
@@ -267,6 +260,10 @@ const Customer = (props) => {
              </KeyboardAvoidingView>
         </View>
 
+    if (customers.length === 0) {
+        return <EmptyComponent title='No customers added' />
+    }
+
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
@@ -306,13 +303,13 @@ const Customer = (props) => {
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
-                            <View style={styles.profilePrivateInfoContainerStyle}>
+                            {/* <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='location-on' size={25} color={darkGray} />
                                     <Text style={styles.privateProfileTextStyle}>{customer ? customer.address.name : ''}</Text>
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
-                            </View>
+                            </View> */}
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='category' size={25} color={darkGray} />

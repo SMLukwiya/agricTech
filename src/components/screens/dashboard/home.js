@@ -36,7 +36,7 @@ const Home = (props) => {
         {id: 'seven', title: 'Transaction History', image: images.salesIcon, onPress: () => props.navigation.navigate('purchase'), order: 6},
         {id: 'eight', title: 'Products', image: images.orderIcon, onPress: () => props.navigation.navigate('products'), order: 7},
         {id: 'nine', title: 'Stock Milling', image: images.stockMillingIcon, onPress: () => props.navigation.navigate('stockmilling'), order: 8},
-        {id: 'ten', title: 'Milling Services', image: images.millingServiceIcon, onPress: () => props.navigation.navigate('millingservice'), order: 9},
+        {id: 'ten', title: 'Milling Service', image: images.millingServiceIcon, onPress: () => props.navigation.navigate('millingservice'), order: 9},
         {id: 'six', title: 'Bills/Expenses', image: images.billsIcon, onPress: dev, order: 10}
     ];
 

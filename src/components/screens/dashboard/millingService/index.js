@@ -67,6 +67,7 @@ const MillingService = (props) => {
         setModal({...modal, modalVisible: false})
     }
 
+    // change default input texts
     const onChangeText = (value, type) => {
         if (type === 'defaultInput') setDefaultInputWeight({...defaultInputWeight, value, decValue: value})
         else if (type === 'defaultOutput') setDefaultOutputWeight({...defaultOutputWeight, value, decValue: value})
@@ -139,6 +140,7 @@ const MillingService = (props) => {
         })
     }
 
+    // dynamic output array
     let outputArray = [];
     for (key in addedOutputWeight.inputs) {
         outputArray.push({id: key, ...addedOutputWeight.inputs[key]})
@@ -198,42 +200,42 @@ const MillingService = (props) => {
         if (id === 'product') {
             setProduct({...product, open: !product.open, name });
             Animated.timing(product.progress, {
-                toValue: product.open ? 45 : 150,
+                toValue: product.open ? 45 : 175,
                 duration: 200,
                 useNativeDriver: false
             }).start()
         } else if (id === 'subproduct') {
             setSubProduct({...subProduct, open: !subProduct.open, name });
             Animated.timing(subProduct.progress, {
-                toValue: subProduct.open ? 45 : 150,
+                toValue: subProduct.open ? 45 : 175,
                 duration: 200,
                 useNativeDriver: false
             }).start()
         } else if (id === 'supplier') {
             setSupplier({...supplier, open: !supplier.open, name });
             Animated.timing(supplier.progress, {
-                toValue: supplier.open ? 45 : 150,
+                toValue: supplier.open ? 45 : 175,
                 duration: 200,
                 useNativeDriver: false
             }).start()
         } else if (id === 'inputquality') {
             setInputQuality({...inputQuality, open: !inputQuality.open, name });
             Animated.timing(inputQuality.progress, {
-                toValue: inputQuality.open ? 45 : 150,
+                toValue: inputQuality.open ? 45 : 175,
                 duration: 200,
                 useNativeDriver: false
             }).start()
         } else if (id === 'outputquality') {
             setOutputQuality({...outputQuality, open: !outputQuality.open, name });
             Animated.timing(outputQuality.progress, {
-                toValue: outputQuality.open ? 45 : 150,
+                toValue: outputQuality.open ? 45 : 175,
                 duration: 200,
                 useNativeDriver: false
             }).start()
         } else {
             setCategory({...category, open: !category.open, name });
             Animated.timing(category.progress, {
-                toValue: category.open ? 45 : 150,
+                toValue: category.open ? 45 : 175,
                 duration: 200,
                 useNativeDriver: false
             }).start()
@@ -290,7 +292,7 @@ const MillingService = (props) => {
         
     }
 
-    
+    // create item for different categories
     const onCreateHandler = (type) => {
         closeModal();
         if (type === 'product') {
@@ -330,11 +332,13 @@ const MillingService = (props) => {
         }, 100);
     }
 
+    // add new quality button
     const onAddNewQualityHandler = () => {
         closeModal();
         saveMillQualityHandler();
     }
 
+    // save data
     const saveData = () => {
         dispatch(saveMillData({
             date: dayjs().format('YYYY-DD-MM:H:M'),
@@ -352,6 +356,7 @@ const MillingService = (props) => {
         }))
     }
 
+    // save and continue to summary screen
     const onContinueHandler = () => {
         closeModal();
         saveData();
@@ -373,6 +378,7 @@ const MillingService = (props) => {
         })
     }
 
+    // calculate total payable
     const addTotalPayable = () => {
         setTotalPayable({
             ...totalPayable,
@@ -380,8 +386,7 @@ const MillingService = (props) => {
         });
     }
 
-    console.log(inputQuality.name)
-
+    // update weights and total
     useEffect(() => {
         addTotalInputWeight();
         addTotalOutputWeight();
@@ -448,7 +453,7 @@ const MillingService = (props) => {
                             onToggleSelector={() => onToggleSelector('supplier', 'Supplier')}
                             productName={supplier.name}
                             isProductOpen={supplier.open}
-                            productList={suppliers}
+                            productList={category.name !== 'Category' ? suppliers.filter(item => item.category === category.name) : suppliers}
                             onProductSelect={onProductSelect}
                             buttonTitle='Create new supplier'
                             onCreateHandler={() => onCreateHandler('supplier')}

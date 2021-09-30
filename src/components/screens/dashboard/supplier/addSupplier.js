@@ -10,7 +10,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import Spinner from 'react-native-loading-spinner-overlay';
 import axios from 'axios';
 
-import { colors, images, defaultSize, googlePlacesUrl, googlePlacesDetailsUrl } from '../../../../config';
+import { colors, defaultSize, googlePlacesUrl, googlePlacesDetailsUrl } from '../../../../config';
 import Fallback from '../../../common/fallback';
 import { createSupplier } from '../../../../store/actions'
 
@@ -83,6 +83,7 @@ const AddCustomer = (props) => {
         }
     }
 
+    // tap on the selected place
     const onPreditionTapped = async (id, description) => {
         try {
             const results = await axios.get(`${googlePlacesDetailsUrl}key=AIzaSyDmO0TPSYtgcPJw8TbBSOaIBFVqs4Ziq2Q&&place_id=${id}`)
@@ -104,8 +105,7 @@ const AddCustomer = (props) => {
         }
     }
 
-    console.log(search.placePrediction)
-
+    // toggle category of supplier
     const onToggleCategory = () => {
         LayoutAnimation.configureNext(transition);
         setCategory({...category, open: !category.open});
@@ -116,6 +116,7 @@ const AddCustomer = (props) => {
         }).start()
     }
 
+    // select category of supplier
     const onCategorySelect = (type, id, name) => {
         LayoutAnimation.configureNext(transition);
         setCategory({...category, id, name, open: false});
@@ -128,6 +129,7 @@ const AddCustomer = (props) => {
 
     const enabled = category.name !== 'Category'
 
+    // run place search on every text change
     useEffect(() => {
         onChangeMapText()
     }, [search.value])

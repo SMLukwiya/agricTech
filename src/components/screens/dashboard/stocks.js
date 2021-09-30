@@ -279,7 +279,7 @@ const Stocks = (props) => {
                             {productList.map(({name}) => 
                                 stockValues[name] && stockValues[name].datasets ? 
                                 <View key={name} style={styles.barChartContainerStyle} >
-                                    <Text>{name}</Text>
+                                    <Text style={styles.stockProductName}>{name}</Text>
                                     <VictoryChart 
                                         theme={VictoryTheme.material}
                                         minDomain={{ y: 0 }}
@@ -324,12 +324,12 @@ const Stocks = (props) => {
                             {productList.map(({name}) => 
                                 stockOutValues[name] && stockOutValues[name].datasets ? 
                                 <View key={name} style={styles.barChartContainerStyle} >
+                                    <Text style={styles.stockProductName}>{name}</Text>
                                     <VictoryChart 
                                         theme={VictoryTheme.material}
                                         minDomain={{ y: 0 }}
                                         origin={{y: 0}}
                                         domainPadding={{ x: 14 }}>
-                                        <Text>{name}</Text>
                                         <VictoryAxis
                                             tickValues={stockOutValues[name].labels}
                                             tickFormat={stockOutValues[name].labels} />
@@ -381,17 +381,18 @@ const styles = StyleSheet.create({
         marginTop: defaultSize * 2,
         paddingBottom: defaultSize * 12
     },
-    selectContainerStyle: {
-
-    },
+    selectContainerStyle: {},
     stockInTitleStyle: {
         fontSize: defaultSize * 1.1,
         marginBottom: defaultSize,
         marginLeft: defaultSize * .5
     },
+    stockProductName: {
+        fontSize: defaultSize,
+        fontWeight: 'bold'
+    },
     barChartContainerStyle: {
         marginVertical: defaultSize * 2,
-        
     },
     graphStyle: {
         borderLeftWidth: 1,

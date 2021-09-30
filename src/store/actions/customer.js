@@ -42,14 +42,14 @@ export const createCustomer = (values, onSuccess = () => {}, onFailure = () => {
 }
 
 export const updateCustomer = (uid, values, onSuccess = () => {}, onFailure = () => {}) => {
-    const {fullName, phoneNumber, email, location, category} = values;
+    const {fullName, phoneNumber, email, category} = values; // remove location update for now.
 
     return async dispatch => {
         dispatch({type: UPDATE_CUSTOMER});
 
         try {
             await axios.post(`${baseUri}customer-updateCustomer`, {
-                uid, category, name: fullName, phone: phoneNumber, email, address: location
+                uid, category, name: fullName, phone: phoneNumber, email
             });
             dispatch({
                 type: UPDATE_CUSTOMER_SUCCESSFUL

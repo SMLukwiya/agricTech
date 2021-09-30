@@ -17,13 +17,16 @@ const ProductComponent = (props) => {
                 <Ionicons name='caret-down-sharp' size={25} color={green} />
             </TouchableOpacity>
             {isProductOpen && 
+            <>
                 <ScrollView bounces={false}>
                     {productList.map(({type, id, name}) => 
                         <TouchableOpacity activeOpacity={.8} key={id} onPress={() => onProductSelect(type, id, name)}>
                             <Text style={styles.productNameTextStyle}>{name}</Text>
                         </TouchableOpacity>
                     )}
-                    { productList.length && productList[0].type === 'category' || 
+                    
+                </ScrollView>
+                { productList.length && productList[0].type === 'category' || 
                         productList.length && productList[0].type === 'gender' || 
                         productList.length && productList[0].type === 'stockIn' ||
                         productList.length && productList[0].type === 'stockOut' ? 
@@ -33,8 +36,9 @@ const ProductComponent = (props) => {
                             <Icons name='add' size={25} color={green} />
                         </TouchableOpacity>
                     }
-                </ScrollView>
+                </>
             }
+            
         </Animated.View>
     )
 }
@@ -51,7 +55,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingRight: defaultSize * .65
+        paddingRight: defaultSize * .65,
     },
     selectProductTextStyle: {
         fontSize: defaultSize * .85,

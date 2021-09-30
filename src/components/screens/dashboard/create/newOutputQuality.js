@@ -17,6 +17,7 @@ const { white, green, extraLightGreen, lightGreen, darkGray, red } = colors;
 const Input = lazy(() => import('../../../common/input'));
 const Button = lazy(() => import('../../../common/button'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
+const EmptyComponent = lazy(() => import('../../../common/emptyComponent'));
 
 const OutputQuality = (props) => {
     const dispatch = useDispatch();
@@ -38,12 +39,15 @@ const OutputQuality = (props) => {
         }
     });
 
-    const goBack = () => props.navigation.navigate('createnewquality');
+    // go back button
+    const goBack = () => props.navigation.goBack();
 
+    // close modal
     const closeModal = () => {
         setState({...state, modalVisible: false, error: '' })
     }
 
+    // create quality output
     const confirmHandler = () => {
         closeModal();
         dispatch(createOutputQuality({inputQuality: quality, name: values.outputQualityName},
@@ -61,11 +65,6 @@ const OutputQuality = (props) => {
             </View>
         </TouchableOpacity>
 
-    const emptyQualityComponent = () =>
-        <View style={styles.emptyProductContainerStyle}>
-            <Text style={styles.emptyProductTextStyle}>No Output Qualities added</Text>
-        </View>
-
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
@@ -80,7 +79,7 @@ const OutputQuality = (props) => {
                 <View style={[styles.productContainerStyle, {width}]}>
                     <Text style={styles.productListTitleTextStyle}>Output Quality List</Text>
                     <View style={{height: height * .575}}>
-                        {outputQualities.length === 0 ? emptyQualityComponent() : 
+                        {outputQualities.length === 0 ? <EmptyComponent title='No output qualities added' /> : 
                         <FlatList
                             data={outputQualities}
                             key={item => item.id}

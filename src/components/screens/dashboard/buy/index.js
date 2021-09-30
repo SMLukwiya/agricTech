@@ -64,35 +64,35 @@ const Buy = (props) => {
         if (id === 'product') {
             setProduct({...product, open: !product.open, name });
             Animated.timing(product.progress, {
-                toValue: product.open ? 45 : 150,
+                toValue: product.open ? 45 : 175,
                 duration: 200,
                 useNativeDriver: false
             }).start()
         } else if (id === 'subproduct') {
             setSubProduct({...subProduct, open: !subProduct.open, name });
             Animated.timing(subProduct.progress, {
-                toValue: subProduct.open ? 45 : 150,
+                toValue: subProduct.open ? 45 : 175,
                 duration: 200,
                 useNativeDriver: false
             }).start()
         } else if (id === 'supplier') {
             setSupplier({...supplier, open: !supplier.open, name });
             Animated.timing(supplier.progress, {
-                toValue: supplier.open ? 45 : 150,
+                toValue: supplier.open ? 45 : 175,
                 duration: 200,
                 useNativeDriver: false
             }).start()
         } else if (id === 'category') {
             setCategory({...category, open: !category.open, name });
             Animated.timing(category.progress, {
-                toValue: category.open ? 45 : 150,
+                toValue: category.open ? 45 : 175,
                 duration: 200,
                 useNativeDriver: false
             }).start()
         } else {
             setQuality({...quality, open: !quality.open, name });
             Animated.timing(quality.progress, {
-                toValue: quality.open ? 45 : 150,
+                toValue: quality.open ? 45 : 175,
                 duration: 200,
                 useNativeDriver: false
             }).start()
@@ -100,6 +100,7 @@ const Buy = (props) => {
         
     }
 
+    // close product
     const closeProduct = () => {
         Animated.timing(product.progress, {
             toValue: 45,
@@ -108,6 +109,7 @@ const Buy = (props) => {
         }).start()
     }
 
+    // close subproduct
     const closeSubProduct = () => {
         Animated.timing(subProduct.progress, {
             toValue: 45,
@@ -116,6 +118,7 @@ const Buy = (props) => {
         }).start()
     }
 
+    // close quality
     const closeQuality = () => {
         Animated.timing(quality.progress, {
             toValue: 45,
@@ -124,6 +127,7 @@ const Buy = (props) => {
         }).start()
     }
 
+    // close category
     const closeCategory = () => {
         Animated.timing(category.progress, {
             toValue: 45,
@@ -132,6 +136,7 @@ const Buy = (props) => {
         }).start()
     }
 
+    // close supplier
     const closeSupplier = () => {
         Animated.timing(supplier.progress, {
             toValue: 45,
@@ -162,6 +167,7 @@ const Buy = (props) => {
         
     }
 
+    // create different items from the dropdown list
     const onCreateHandler = (type) => {
         closeModal();
         if (type === 'product') {
@@ -186,10 +192,12 @@ const Buy = (props) => {
         setModal({ ...modal, modalVisible: false });
     }
 
+    // press buy
     const onBuyHandler = () => {
         setModal({...modal, modalVisible: true})
     }
 
+    // save modal data and proceed to summary screen
     const onModalContainer = () => {
         closeModal();
         saveDataHandler();
@@ -211,11 +219,13 @@ const Buy = (props) => {
         })
     }
 
+    // input Array for added weight inputs
     let inputArray = [];
     for (key in weighInput.inputs) {
         inputArray.push({id: key, ...weighInput.inputs[key]})
     }
 
+    // change text inputs of default input
     const onChangeText = (type, value) => {
         if (type === 'default') setDefaultWeight({...defaultWeight, value, decValue: value})
         else setPricePerUnit({...pricePerUnit, value})
@@ -259,6 +269,7 @@ const Buy = (props) => {
         })
     }
 
+    // calculate total payable
     const addTotalHandler = () => {
         setTotalPayable({
             ...totalPayable, 
@@ -266,6 +277,7 @@ const Buy = (props) => {
         })
     }
 
+    // update weight and payable on value changes
     useEffect(() => {
         addWeightHandler();
         addTotalHandler();
@@ -380,7 +392,7 @@ const Buy = (props) => {
                             onToggleSelector={() => onToggleSelector('supplier', 'Supplier')}
                             productName={supplier.name}
                             isProductOpen={supplier.open}
-                            productList={suppliers}
+                            productList={category.name !== 'Category' ? suppliers.filter(item => item.category === category.name) : suppliers}
                             onProductSelect={onProductSelect}
                             buttonTitle='Create new supplier'
                             onCreateHandler={() => onCreateHandler('supplier')}

@@ -44,8 +44,8 @@ export const images = {
 export const defaultSize = 16;
 
 export const baseUri = 'https://us-central1-agro-waste-mobile-app.cloudfunctions.net/';
-export const googlePlacesUrl = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?';
-export const googlePlacesDetailsUrl = 'https://maps.googleapis.com/maps/api/place/details/json?';
+export const googlePlacesUrl = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?key=AIzaSyDmO0TPSYtgcPJw8TbBSOaIBFVqs4Ziq2Q&components=country:ug&';
+export const googlePlacesDetailsUrl = 'https://maps.googleapis.com/maps/api/place/details/json?key=AIzaSyDmO0TPSYtgcPJw8TbBSOaIBFVqs4Ziq2Q&components=country:ug&';
 
 export const errorTextStyle = {
     color: colors.red,

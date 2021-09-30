@@ -17,6 +17,7 @@ const { white, green, extraLightGreen, lightGreen, red, darkGray } = colors;
 const Input = lazy(() => import('../../../common/input'));
 const Button = lazy(() => import('../../../common/button'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
+const EmptyComponent = lazy(() => import('../../../common/emptyComponent'));
 
 const NewSubProduct = (props) => {
     const dispatch = useDispatch();
@@ -38,12 +39,15 @@ const NewSubProduct = (props) => {
         }
     });
 
+    // go back button
     const goBack = () => props.navigation.goBack();
 
+    // close modal
     const closeModal = () => {
         setState({...state, modalVisible: false, error: '' })
     }
 
+    // create subnproduct and return to products
     const onContinueHandler = () => {
         closeModal();
         setTimeout(() => {
@@ -53,6 +57,7 @@ const NewSubProduct = (props) => {
         }, 200);
     }
 
+    // create subnproducts and procee to create input quality
     const onCreateSubproductHandler = () => {
         closeModal();
         setTimeout(() => {
@@ -72,11 +77,6 @@ const NewSubProduct = (props) => {
             </View>
         </TouchableOpacity>
 
-    const emptyProductComponent = () =>
-        <View style={styles.emptyProductContainerStyle}>
-            <Text style={styles.emptyProductTextStyle}>No Sub products added</Text>
-        </View>
-
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
@@ -91,7 +91,7 @@ const NewSubProduct = (props) => {
                 <View style={[styles.productContainerStyle, {width}]}>
                     <Text style={styles.productListTitleTextStyle}>Sub product List</Text>
                     <View style={{height: height * .575}}>
-                        {subProducts.length === 0 ? emptyProductComponent() : 
+                        {subProducts.length === 0 ? <EmptyComponent title='No Sub products added' /> : 
                         <FlatList
                             data={subProducts}
                             key={item => item.id}

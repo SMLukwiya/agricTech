@@ -289,17 +289,6 @@ const homeStack = () => (
             })}
         />
         <Stack.Screen
-            name="millingsummary"
-            component={MillingSummaryScreen}
-            options={() => ({
-                title: '',
-                ...TransitionPresets.FadeFromBottomAndroid,
-                headerTransparent: true,
-                headerLeft: () => null,
-                headerRight: () => null
-            })}
-        />
-        <Stack.Screen
             name="products"
             component={ProductsScreen}
             options={() => ({

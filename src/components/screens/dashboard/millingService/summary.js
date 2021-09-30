@@ -102,8 +102,6 @@ const Stocks = (props) => {
         </View>
     </>
 
-    console.log(millState)
-
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />

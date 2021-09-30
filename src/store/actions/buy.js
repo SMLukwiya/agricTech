@@ -8,14 +8,14 @@ import {
 import {baseUri} from '../../config'
 
 export const buy = (values, userID, onSuccess = () => {}, onFailure = () =>{}) => {
-    const { date, individual , category, product, subproduct, qualities, pricePerUnit, totalWeight, totalAmount, paymentMethod } = values;
+    const { date, individual, category, product, subproduct, qualities, pricePerUnit, totalWeight, totalAmount, paymentMethod } = values;
 
     return async dispatch => {
         dispatch({type: BUY});
 
         try {
             await axios.post(`${baseUri}buy-buyAgro`, {
-                date, individual , category, product, subproduct, qualities, pricePerUnit, totalWeight, totalAmount, paymentMethod, userID
+                date, individual, category, product, subproduct, qualities, pricePerUnit, totalWeight, totalAmount, paymentMethod, userID
             });
 
             dispatch({type: BUY_SUCCESSFUL});

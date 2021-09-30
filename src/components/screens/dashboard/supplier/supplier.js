@@ -21,6 +21,7 @@ const { white, green, red, lightGray, darkGray } = colors;
 const Button = lazy(() => import('../../../common/button'));
 const Input = lazy(() => import('../../../common/input'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
+const EmptyComponent = lazy(() => import('../../../common/emptyComponent'));
 
 const Supplier = (props) => {
     const dispatch = useDispatch();
@@ -54,18 +55,22 @@ const Supplier = (props) => {
         }
     });
 
+    // back button press
     const onGoBackHandler = () => {
         props.navigation.goBack();
     }
 
+    // edit supplier data
     const onEditHandler = () => {
         setModal({...modal, modalVisible: true, type: 'info'})
     }
 
+    // close modal
     const closeModal = () => {
         setModal({...modal, modalVisible: false, error: '', type: ''})
     }
 
+    // delete supplier
     const deleteSupplierHandler = () => {
         dispatch(deleteSupplier(supplier.id,
             () => onGoBackHandler(),
@@ -73,13 +78,10 @@ const Supplier = (props) => {
     }
 
     if (suppliers.length === 0) {
-        return (
-            <View style={{alignItems: 'center', justifyContent: 'center'}}>
-                <Text style={{fontSize: defaultSize, fontWeight: 'bold'}}>No suppliers added</Text>
-            </View>
-        )
+        return <EmptyComponent title='No suppliers added' />
     }
 
+    // react native camera options
     const options = {
         mediaType: 'photo',
         quality: 1,
@@ -87,6 +89,7 @@ const Supplier = (props) => {
         saveToPhotos: true
     }
 
+    // request user camera permissions
     const requsetCameraPermissions = async () => {
         if (Platform.OS === 'android') {
             try {
@@ -110,6 +113,7 @@ const Supplier = (props) => {
         }
     }
 
+    // choose between camera or gallery
     const imageHandler = (type) => {
         closeModal();
         if (type === 'camera') {
@@ -145,6 +149,7 @@ const Supplier = (props) => {
         }
     }
 
+    // change profile pic
     const onChangeProfilePicHandler = (type) => {
         const granted = PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA, {
             title: 'Camera Permissions',
@@ -159,6 +164,7 @@ const Supplier = (props) => {
         }
     }
 
+    // save profile pic
     const saveAvatarHandler = () => {
         closeModal();
         dispatch(updateSupplierImage(state.image, supplier.id,
@@ -305,13 +311,13 @@ const Supplier = (props) => {
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
-                            <View style={styles.profilePrivateInfoContainerStyle}>
+                            {/* <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='location-on' size={25} color={darkGray} />
                                     <Text style={styles.privateProfileTextStyle}>{supplier ? supplier.address.name : ''}</Text>
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
-                            </View>
+                            </View> */}
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='category' size={25} color={darkGray} />
@@ -327,9 +333,9 @@ const Supplier = (props) => {
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
                         </View>
-                        <View>
+                        <View style={styles.mapContainerStyle}>
                             <MapView
-                                style={{width: width * .8, height: defaultSize * 15}}
+                                style={{width: width * .8, height: defaultSize * 15, marginTop: defaultSize}}
                                 initialRegion={{
                                     latitude: supplier.address.geometry.location.lat,
                                     longitude: supplier.address.geometry.location.lng,
@@ -504,6 +510,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: defaultSize,
         overflow: 'hidden'
     },
+    mapContainerStyle: {}
 })
 
 export default Supplier;

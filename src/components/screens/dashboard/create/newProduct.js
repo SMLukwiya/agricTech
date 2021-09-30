@@ -17,6 +17,7 @@ const { white, green, extraLightGreen, lightGreen, red } = colors;
 const Input = lazy(() => import('../../../common/input'));
 const Button = lazy(() => import('../../../common/button'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
+const EmptyComponent = lazy(() => import('../../../common/emptyComponent'));
 
 const NewProduct = (props) => {
     const dispatch = useDispatch();
@@ -38,12 +39,15 @@ const NewProduct = (props) => {
         }
     });
 
+    // go back button
     const goBack = () => props.navigation.goBack();
 
+    // close modal
     const closeModal = () => {
         setState({...state, modalVisible: false, error: '' })
     }
 
+    // create new product and return
     const onContinueHandler = () => {
         closeModal();
         setTimeout(() => {
@@ -53,6 +57,7 @@ const NewProduct = (props) => {
         }, 200);
     }
 
+    // create new product and proceed to create subproduct
     const onCreateSubproductHandler = () => {
         closeModal();
         setTimeout(() => {
@@ -72,11 +77,6 @@ const NewProduct = (props) => {
             </View>
         </TouchableOpacity>
 
-    const emptyProductComponent = () =>
-        <View style={styles.emptyProductContainerStyle}>
-            <Text style={styles.emptyProductTextStyle}>No Products added</Text>
-        </View>
-
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
@@ -91,7 +91,7 @@ const NewProduct = (props) => {
                 <View style={[styles.productContainerStyle, {width}]}>
                     <Text style={styles.productListTitleTextStyle}>Product List</Text>
                     <View style={{height: height * .575}}>
-                        {products.length === 0 ? emptyProductComponent() : 
+                        {products.length === 0 ? <EmptyComponent title='No products added' /> : 
                         <FlatList
                             data={products}
                             key={item => item.id}

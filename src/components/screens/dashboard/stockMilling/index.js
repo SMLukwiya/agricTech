@@ -212,28 +212,28 @@ const StockMilling = (props) => {
         if (id === 'product') {
             setProduct({...product, open: !product.open, name });
             Animated.timing(product.progress, {
-                toValue: product.open ? 45 : 150,
+                toValue: product.open ? 45 : 175,
                 duration: 200,
                 useNativeDriver: false
             }).start()
         } else if (id === 'subproduct') {
             setSubProduct({...subProduct, open: !subProduct.open, name });
             Animated.timing(subProduct.progress, {
-                toValue: subProduct.open ? 45 : 150,
+                toValue: subProduct.open ? 45 : 175,
                 duration: 200,
                 useNativeDriver: false
             }).start()
         } else if (id === 'quality') {
             setInputQuality({...inputQuality, open: !inputQuality.open, name });
             Animated.timing(inputQuality.progress, {
-                toValue: inputQuality.open ? 45 : 150,
+                toValue: inputQuality.open ? 45 : 175,
                 duration: 200,
                 useNativeDriver: false
             }).start()
         } else {
             setOutputQuality({...outputQuality, open: !outputQuality.open, name });
             Animated.timing(outputQuality.progress, {
-                toValue: outputQuality.open ? 45 : 150,
+                toValue: outputQuality.open ? 45 : 175,
                 duration: 200,
                 useNativeDriver: false
             }).start()

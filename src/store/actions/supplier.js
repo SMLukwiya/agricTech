@@ -42,14 +42,14 @@ export const createSupplier = (values, onSuccess = () => {}, onFailure = () => {
 }
 
 export const updateSupplier = (uid, values, onSuccess = () => {}, onFailure = () => {}) => {
-    const {fullName, phoneNumber, email, location, category} = values;
+    const {fullName, phoneNumber, email, category} = values; // remove location update for now.
 
     return async dispatch => {
         dispatch({type: UPDATE_SUPPLIER});
 
         try {
             await axios.post(`${baseUri}supplier-updateSupplier`, {
-                uid, category, name: fullName, phone: phoneNumber, email, address: location
+                uid, category, name: fullName, phone: phoneNumber, email
             });
             dispatch({
                 type: UPDATE_SUPPLIER_SUCCESSFUL

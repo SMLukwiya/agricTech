@@ -17,6 +17,7 @@ const { white, green, extraLightGreen, lightGreen, darkGray, red } = colors;
 const Input = lazy(() => import('../../../common/input'));
 const Button = lazy(() => import('../../../common/button'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
+const EmptyComponent = lazy(() => import('../../../common/emptyComponent'));
 
 const NewQuality = (props) => {
     const dispatch = useDispatch();
@@ -38,12 +39,15 @@ const NewQuality = (props) => {
         }
     });
 
-    const goBack = () => props.navigation.navigate('createnewsubproduct');
+    // go back button
+    const goBack = () => props.navigation.goBack();
 
+    // close modal
     const closeModal = () => {
         setState({...state, modalVisible: false, error: '' })
     }
 
+    // create subproduct and return to products
     const onContinueHandler = () => {
         closeModal();
         dispatch(createQuality({subproduct: subProduct, name: values.qualityName},
@@ -51,6 +55,7 @@ const NewQuality = (props) => {
             err => {console.log(err)}))
     }
 
+    // create subproduct and proceed to create input qualities
     const confirmHandler = () => {
         closeModal();
         dispatch(createQuality({subproduct: subProduct, name: values.qualityName},
@@ -68,11 +73,6 @@ const NewQuality = (props) => {
             </View>
         </TouchableOpacity>
 
-    const emptyQualityComponent = () =>
-        <View style={styles.emptyProductContainerStyle}>
-            <Text style={styles.emptyProductTextStyle}>No Input Qualities added</Text>
-        </View>
-
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
@@ -87,7 +87,7 @@ const NewQuality = (props) => {
                 <View style={[styles.productContainerStyle, {width}]}>
                     <Text style={styles.productListTitleTextStyle}>Input Quality List</Text>
                     <View style={{height: height * .575}}>
-                        {qualities.length === 0 ? emptyQualityComponent() : 
+                        {qualities.length === 0 ? <EmptyComponent title='No Input qualities added' /> : 
                         <FlatList
                             data={qualities}
                             key={item => item.id}

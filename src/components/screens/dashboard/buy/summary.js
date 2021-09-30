@@ -135,7 +135,7 @@ const Summary = (props) => {
                 <View style={{width: width * .8, height: height*.575}}>
                     <ScrollView showsVerticalScrollIndicator={false}>
                         <View style={styles.summaryContainerStyle}>
-                            <Text>{farmerTextLabel}</Text>
+                            <Text>{buyState.category}</Text>
                             <Text>{buyState.individual}</Text>
                         </View>
                         <View style={styles.summaryContainerStyle}>
