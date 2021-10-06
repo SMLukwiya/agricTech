@@ -14,6 +14,9 @@ import { createPickup } from '../../../../store/actions';
 const { white, green, lightBlue, darkGray, lightGray } = colors;
 const Button = lazy(() => import('../../../common/button'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
+const TopCorner = lazy(() => import('../../../common/topCornerComponent'));
+const HeaderRight = lazy(() => import('../../../common/secondHeader'));
+const PageLogo = lazy(() => import('../../../common/pageLogo'));
 
 const Pickup = (props) => {
     const dispatch = useDispatch();
@@ -24,6 +27,8 @@ const Pickup = (props) => {
     // redux
     const {customers} = useSelector(state => state.customer);
     const {loading} = useSelector(state => state.pickup);
+    const {userID} = useSelector(state => state.user);
+    console.log(userID)
 
     const goBack = () => props.navigation.navigate('home');
 
@@ -40,7 +45,7 @@ const Pickup = (props) => {
         const { customer, phone, email } = state;
         closeModal();
         setTimeout(() => {
-            dispatch(createPickup({customer, phone, email},
+            dispatch(createPickup({customer, phone, email}, userID,
                 () => {
                     setState({...state, pickupConfirmed: true});
                 },
@@ -106,11 +111,14 @@ const Pickup = (props) => {
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
             <Spinner visible={loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
+                <PageLogo />
                 <View style={[styles.supplierHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
-                    <View style={{width: '85%'}}>
+                    <View style={{width: '90%'}}>
                         <Text style={styles.supplierHeaderTextStyle}>Pick up</Text>
                     </View>
+                    <TopCorner image={images.pickupIcon} />
+                    <HeaderRight navigation={props.navigation} />
                 </View>
                 <View style={[styles.supplierOverContainerStyle,{width: width * .8, height: height * .8}]}>
                     <Text style={styles.selectACustomerTextStyle}>Please select a customer</Text>
@@ -135,7 +143,7 @@ const styles = StyleSheet.create({
     },
     supplierHeaderStyle: {
         flexDirection: 'row',
-        marginTop: defaultSize * 4,
+        marginTop: defaultSize * 4.5,
         width: '100%',
         alignItems: 'center'
     },

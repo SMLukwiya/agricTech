@@ -19,8 +19,8 @@ const ProductComponent = (props) => {
             {isProductOpen && 
             <>
                 <ScrollView bounces={false}>
-                    {productList.map(({type, id, name}) => 
-                        <TouchableOpacity activeOpacity={.8} key={id} onPress={() => onProductSelect(type, id, name)}>
+                    {productList.map(({type, id, name, cat}) => 
+                        <TouchableOpacity activeOpacity={.8} key={id} onPress={() => onProductSelect(type, id, name, cat)}>
                             <Text style={styles.productNameTextStyle}>{name}</Text>
                         </TouchableOpacity>
                     )}

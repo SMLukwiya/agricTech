@@ -1,6 +1,6 @@
-import React, { Suspense, lazy, useEffect } from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 import {
-    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, KeyboardAvoidingView, ScrollView
+    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, KeyboardAvoidingView, ScrollView, TouchableOpacity, Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFormik } from 'formik';
@@ -13,11 +13,12 @@ import { CommonActions } from '@react-navigation/native';
 
 import { colors, images, defaultSize, errorTextStyle } from '../../../config';
 import Fallback from '../../common/fallback';
-import {loginEmail, googleSignup, resetLoaders} from '../../../store/actions';
+import {loginEmail, googleSignup, resetLoaders, sendPasswordReset, phoneLogin } from '../../../store/actions';
 
 const { white, green, blue, darkGray, lightGray } = colors;
 const Button = lazy(() => import('../../common/button'));
 const Input = lazy(() => import('../../common/input'));
+const RNModal = lazy(() => import('../../common/rnModal'));
 
 const Login = (props) => {
     const { width } = useWindowDimensions();
@@ -25,6 +26,13 @@ const Login = (props) => {
 
     // redux
     const reduxState = useSelector(state => state.user);
+
+    // state
+    const [modal, setModal] = useState({visible: false, type: ''})
+    const [forgotPasswordEmail, setForgotPasswordEmail] = useState({value: '', error: '', touched: false });
+
+    // regex
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
     useEffect(() => {
         // configure google sign in
@@ -34,6 +42,16 @@ const Login = (props) => {
         dispatch(resetLoaders())
     }, [])
 
+    const closeModal = () => setModal({...modal, visible: false});
+
+    const passwordResetEmail = (value) => {
+        setForgotPasswordEmail({
+            ...forgotPasswordEmail,
+            value,
+            touched: true
+        })
+    }
+
     const { handleChange, values, handleSubmit, errors, handleBlur, touched } = useFormik({
         initialValues: { emailorphonenumber: '', password: '' },
         validationSchema: Yup.object({
@@ -41,15 +59,31 @@ const Login = (props) => {
             password: Yup.string().min(6, 'Must be atleast 6 characters').required('Password is required')
         }),
         onSubmit: values => {
-            dispatch(loginEmail(values,
-                () => 
-                    props.navigation.dispatch(CommonActions.reset({
-                    type: 'stack',
-                    index: 0,
-                    routes: [{name: 'dashboard'}]
-                })),
-                err => console.log(err)
-            ));
+            const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im;
+
+            if (re.test(values.emailorphonenumber)) {
+                dispatch(loginEmail(values,
+                    () => 
+                        props.navigation.dispatch(CommonActions.reset({
+                        type: 'stack',
+                        index: 0,
+                        routes: [{name: 'dashboard'}]
+                    })),
+                    err => console.log(err)
+                ));
+            } else if (phoneRegex.test(values.emailorphonenumber)) {
+                dispatch(phoneLogin(values,
+                    () => 
+                        props.navigation.dispatch(CommonActions.reset({
+                        type: 'stack',
+                        index: 0,
+                        routes: [{name: 'dashboard'}]
+                        })),
+                    err => console.log(err)
+                ));
+            } else {
+                Alert.alert('Enter a valid email or phone number')
+            }
         }
     });
 
@@ -59,10 +93,11 @@ const Login = (props) => {
     const googleSigninHandler = async () => {
         try {
             await GoogleSignin.hasPlayServices();
-            const {idToken, user: {email, id, name, phoneNumber}} = await GoogleSignin.signIn();
+            const {idToken} = await GoogleSignin.signIn();
             const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-            await auth().signInWithCredential(googleCredential);
-            await dispatch(googleSignup({idToken, email, uid: id, fullName: name, phone: phoneNumber}));
+            const googleData = await auth().signInWithCredential(googleCredential);
+            const {user: {displayName, email, phoneNumber, uid}} = googleData;
+            await dispatch(googleSignup({idToken, email, uid, fullName: displayName, phone: phoneNumber}));
 
             props.navigation.dispatch(CommonActions.reset({
                 type: 'stack',
@@ -77,6 +112,55 @@ const Login = (props) => {
         }
     }
 
+    const onForgotPasswordHandler = () => {
+        setModal({...modal, visible: true, type: 'passwordreset'});
+    }
+
+    // forgot password
+    const onConfirmPasswordReset = () => {
+        if (!forgotPasswordEmail.value || !re.test(forgotPasswordEmail.value)) return setForgotPasswordEmail({...forgotPasswordEmail, error: 'Please enter correct email.'})
+        closeModal();
+        dispatch(sendPasswordReset(forgotPasswordEmail.value,
+            () => {
+                setModal({visible: true, type: 'passwordResetSuccess'})
+            },
+            (err) => {console.log(err)}));
+    }
+
+    const passwordResetComponent = () =>
+        <View style={[styles.modalContainerStyle, {width: width * .8}]}>
+            <Text style={styles.enterEmailTextStyle}>Enter email you used to register?</Text>
+            <Input
+                placeholder="Enter the email you used to register"
+                error={forgotPasswordEmail.error}
+                value={forgotPasswordEmail.value}
+                rightComponent={false}
+                onChangeText={passwordResetEmail}
+                onBlur={() => {}}
+                touched={forgotPasswordEmail.touched}
+                keyboardType='default'
+            />
+            <Button
+                title='Continue'
+                backgroundColor={green}
+                borderColor={green}
+                color={white}
+                enabled onPress={onConfirmPasswordReset}
+            />
+        </View>
+
+        const passwordResetSuccessComponent = () =>
+            <View style={[styles.modalContainerStyle, {width: width * .8}]}>
+                <Text style={styles.passwordResetSuccessTextStyle}>Instructions on how to change your password has been sent to your email.</Text>
+                <Button
+                    title='close'
+                    backgroundColor={green}
+                    borderColor={green}
+                    color={white}
+                    enabled onPress={closeModal}
+                />
+            </View>
+
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
@@ -84,8 +168,8 @@ const Login = (props) => {
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
                 <ScrollView contentContainerStyle={{alignItems: 'center'}} showsVerticalScrollIndicator={false}>
                     <View style={styles.logoContainer}>
-                        <View>
-                            <Image source={images.logo} />
+                        <View style={[styles.logoImageContainer, {width: width * .6, height: width * .275}]}>
+                            <Image source={images.logo} style={styles.logoImage}  />
                         </View>
                     </View>
                     <View style={[styles.inputContainerStyle, {width: width * .8}]}>
@@ -99,6 +183,7 @@ const Login = (props) => {
                                 onBlur={(handleBlur('emailorphonenumber'))}
                                 touched={touched.emailorphonenumber}
                                 keyboardType='default'
+                                label='email or phone(+2567...)'
                             />
                             <Input
                                 placeholder="Password"
@@ -120,7 +205,9 @@ const Login = (props) => {
                                 color={white}
                                 enabled onPress={handleSubmit}
                             />
-                            <Text style={styles.forgotPasswordTextStyle}>Forgot password</Text>
+                            <TouchableOpacity activeOpacity={.8} onPress={onForgotPasswordHandler}>
+                                <Text style={styles.forgotPasswordTextStyle}>Forgot password</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                     <View style={[styles.createAccountContainerStyle, {width: width * .8}]}>
@@ -150,6 +237,12 @@ const Login = (props) => {
                         />
                     </View>
                 </ScrollView>
+                <RNModal visible={modal.visible} onRequestClose={closeModal} presentationStyle='overFullScreen' closeIconColor={white}>
+                    {modal.type === 'passwordreset' ? 
+                        passwordResetComponent() :
+                        passwordResetSuccessComponent()
+                    }
+                </RNModal>
             </SafeAreaView>
         </Suspense>
     )
@@ -163,10 +256,17 @@ const styles = StyleSheet.create({
         backgroundColor: 'white'
     },
     logoContainer: {
-        marginTop: defaultSize * 4
+        marginTop: defaultSize * 3
+    },
+    logoImageContainer: {
+        
     },
     inputContainerStyle: {
-        marginTop: defaultSize * 5
+        marginTop: defaultSize * 5,
+    },
+    logoImage: {
+        width: '100%',
+        height: '100%'
     },
     forgotPasswordTextStyle: {
         fontSize: defaultSize * .7,
@@ -176,6 +276,21 @@ const styles = StyleSheet.create({
     createAccountContainerStyle: {
         marginTop: defaultSize * 2,
         marginBottom: defaultSize * 1.5
+    },
+    modalContainerStyle: {
+        backgroundColor: white,
+        paddingVertical: defaultSize,
+        paddingHorizontal: defaultSize * .5,
+        borderRadius: defaultSize * 1.5,
+        overflow: 'hidden'
+    },
+    enterEmailTextStyle: {
+        textAlign:'center',
+        fontSize: defaultSize * .85,
+        fontWeight: 'bold'
+    },
+    passwordResetSuccessTextStyle: {
+        textAlign: 'center'
     }
 });
 

@@ -11,6 +11,9 @@ import Fallback from '../../../common/fallback';
 
 const { white, green, lightBlue, darkGray, lightGray } = colors;
 const Button = lazy(() => import('../../../common/button'));
+const HeaderRight = lazy(() => import('../../../common/secondHeader'));
+const TopCorner = lazy(() => import('../../../common/topCornerComponent'));
+const PageLogo = lazy(() => import('../../../common/pageLogo'));
 
 const Suppliers = (props) => {
     const { height, width } = useWindowDimensions();
@@ -53,13 +56,16 @@ const Suppliers = (props) => {
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
+                <PageLogo />
                 <View style={[styles.supplierHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
                     <View style={{width: '85%'}}>
                         <Text style={styles.supplierHeaderTextStyle}>{suppliersTextLabel}</Text>
                     </View>
+                    <HeaderRight navigation={props.navigation} />
+                    <TopCorner image={images.supplierIcon} />
                 </View>
-                <View style={[styles.supplierOverContainerStyle,{width: width * .8, height: height * .785}]}>
+                <View style={[styles.supplierOverContainerStyle,{width: width * .8, height: height * .725}]}>
                         {suppliers.length === 0 ? <Text style={{fontSize: defaultSize, fontWeight: 'bold', textAlign: 'center'}}>No suppliers added</Text> :
                         <FlatList 
                             data={suppliers}
@@ -76,7 +82,7 @@ const Suppliers = (props) => {
                         color={white}
                         enabled onPress={onAddSupplierHandler}
                     />
-                    </View>
+                </View>
             </SafeAreaView>
         </Suspense>
     )
@@ -91,9 +97,10 @@ const styles = StyleSheet.create({
     },
     supplierHeaderStyle: {
         flexDirection: 'row',
-        marginTop: defaultSize * 4,
+        marginTop: defaultSize * 4.5,
         width: '100%',
-        alignItems: 'center'
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     supplierHeaderTextStyle: {
         textAlign: 'center',

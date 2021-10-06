@@ -1,16 +1,19 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import {
     View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, FlatList, Platform, Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
 import { colors, images, defaultSize } from '../../../config';
 import Fallback from '../../common/fallback';
+import { clearBuyState } from '../../../store/actions';
 
 const { white, green, blue, darkGray, lightGray } = colors;
+const PageLogo = lazy(() => import('../../../components/common/pageLogo'));
 
 const Home = (props) => {
+    const dispatch = useDispatch();
     const { width } = useWindowDimensions();
 
     // redux
@@ -30,7 +33,7 @@ const Home = (props) => {
     let menuItems = [
         {id: 'one', title: 'Stock', image: images.stockIcon, onPress: () => props.navigation.navigate('stocks'), order: 1},
         {id: 'two', title: 'Buy', image: images.buyIcon, onPress: () => props.navigation.navigate('buy'), order: 2},
-        {id: 'three', title: 'Supplier', image: images.supplierIcon, onPress: () => props.navigation.navigate('suppliers'), order: 3},
+        {id: 'three', title: 'Suppliers', image: images.supplierIcon, onPress: () => props.navigation.navigate('suppliers'), order: 3},
         {id: 'four', title: 'Customers', image: images.customerIcon, onPress: () => props.navigation.navigate('customers'), order: 4},
         {id: 'five', title: 'Pick Up', image: images.pickupIcon, onPress: () => props.navigation.navigate('pickup'), order: 5},
         {id: 'seven', title: 'Transaction History', image: images.salesIcon, onPress: () => props.navigation.navigate('purchase'), order: 6},
@@ -40,11 +43,18 @@ const Home = (props) => {
         {id: 'six', title: 'Bills/Expenses', image: images.billsIcon, onPress: dev, order: 10}
     ];
 
+    useEffect(() => {
+        dispatch(clearBuyState());
+    }, [])
+
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
-                <Text style={styles.headerTitleStyle}>{whatDoYouWantToDoTextLabel}</Text>
+                <PageLogo />
+                <View>
+                    <Text style={styles.headerTitleStyle}>{whatDoYouWantToDoTextLabel}</Text>
+                </View>
                 <FlatList 
                     keyExtractor={item => item.id}
                     data={menuItems}

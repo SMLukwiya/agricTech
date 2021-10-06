@@ -11,6 +11,9 @@ import Fallback from '../../../common/fallback';
 
 const { white, green, lightBlue, darkGray, lightGray } = colors;
 const Button = lazy(() => import('../../../common/button'));
+const TopCorner = lazy(() => import('../../../common/topCornerComponent'));
+const HeaderRight = lazy(() => import('../../../common/secondHeader'));
+const PageLogo = lazy(() => import('../../../common/pageLogo'));
 
 const Customers = (props) => {
     const { height, width } = useWindowDimensions();
@@ -53,14 +56,16 @@ const Customers = (props) => {
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
+                <PageLogo />
                 <View style={[styles.supplierHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
-                    <View style={{width: '85%'}}>
+                    <View style={{width: '90%'}}>
                         <Text style={styles.supplierHeaderTextStyle}>{customersTextLabel}</Text>
                     </View>
+                    <TopCorner image={images.customerIcon} />
+                    <HeaderRight navigation={props.navigation} />
                 </View>
-                <View style={[styles.supplierOverContainerStyle,{width: width * .8, height: height * .785}]}>
-                    
+                <View style={[styles.supplierOverContainerStyle,{width: width * .8, height: height * .725}]}>
                     {customers.length === 0 ? <Text style={{fontSize: defaultSize, fontWeight: 'bold', textAlign: 'center'}}>No customers added</Text> : 
                         <FlatList
                             data={customers}
@@ -92,7 +97,7 @@ const styles = StyleSheet.create({
     },
     supplierHeaderStyle: {
         flexDirection: 'row',
-        marginTop: defaultSize * 4,
+        marginTop: defaultSize * 4.5,
         width: '100%',
         alignItems: 'center'
     },

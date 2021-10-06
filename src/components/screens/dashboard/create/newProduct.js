@@ -18,6 +18,7 @@ const Input = lazy(() => import('../../../common/input'));
 const Button = lazy(() => import('../../../common/button'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
 const EmptyComponent = lazy(() => import('../../../common/emptyComponent'));
+const PageLogo = lazy(() => import('../../../common/pageLogo'));
 
 const NewProduct = (props) => {
     const dispatch = useDispatch();
@@ -84,8 +85,9 @@ const NewProduct = (props) => {
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
                 <View style={[styles.createNewProductHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
-                    <View style={{width: '85%'}}>
+                    <View style={{width: '90%'}}>
                         <Text style={styles.createNewProductHeaderTextStyle}>Create new product</Text>
+                        <PageLogo />
                     </View>
                 </View>
                 <View style={[styles.productContainerStyle, {width}]}>
@@ -109,6 +111,7 @@ const NewProduct = (props) => {
                         onChangeText={handleChange('productName')}
                         onBlur={handleBlur('productName')}
                         touched={touched.productName}
+                        backgroundColor={white}
                     />
                     <Button
                         title='Continue'

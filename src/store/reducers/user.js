@@ -8,7 +8,10 @@ import {
     UPLOAD_AVATAR, UPLOAD_AVATAR_FAILED, UPLOAD_AVATAR_SUCCESSFUL,
     UPDATE_USER_INFO, UPDATE_USER_INFO_SUCCESSFUL, UPDATE_USER_INFO_FAILED,
     UPDATE_PASSWORD, UPDATE_PASSWORD_FAILED, UPDATE_PASSWORD_SUCCESSFUL,
-    UPDATE_GENDER
+    UPDATE_GENDER,
+    SEND_PASSWORD_RESET, SEND_PASSWORD_RESET_FAILED, SEND_PASSWORD_RESET_SUCCESSFUL,
+    UPDATE_USER_EMAIL, UPDATE_USER_EMAIL_SUCCESSFUL, UPDATE_USER_EMAIL_FAILED,
+    PHONE_SIGIN, PHONE_SIGNIN_FAILED, PHONE_SIGNIN_SUCCESSFUL
 } from '../actions/types';
 
 const INITIAL_STATE = {
@@ -173,6 +176,63 @@ export default (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 gender: action.payload
+            }
+
+        case SEND_PASSWORD_RESET:
+            return {
+                ...state,
+                loading: true
+            }
+
+        case SEND_PASSWORD_RESET_SUCCESSFUL:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case SEND_PASSWORD_RESET_FAILED:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case UPDATE_USER_EMAIL:
+            return {
+                ...state,
+                loading: true
+            }
+
+        case UPDATE_USER_EMAIL_SUCCESSFUL:
+            return {
+                ...state,
+                loading: false
+            } 
+        
+        case UPDATE_USER_EMAIL_FAILED:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case PHONE_SIGIN:
+            return {
+                ...state,
+                loading: true
+            }
+
+        case PHONE_SIGNIN_SUCCESSFUL:
+            return {
+                ...state,
+                loading: false,
+                userID: action.payload.response.user.uid,
+                userEmail: action.payload.response.user.email,
+                userToken: action.payload.idToken
+            }
+        case PHONE_SIGNIN_FAILED:
+            return {
+                ...state,
+                loading: false,
+                error: action.payload
             }
 
         default:

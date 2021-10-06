@@ -15,7 +15,7 @@ import * as Yup from 'yup';
 
 import { colors, images, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
-import { updateProfileImage, updateUserInfo, updatePassword } from '../../../../store/actions';
+import { updateProfileImage, updateUserInfo, updatePassword, updateUserEmail } from '../../../../store/actions';
 
 const { white, green, red, lightGray, darkGray } = colors;
 const Button = lazy(() => import('../../../common/button'));
@@ -39,14 +39,17 @@ const Profile = (props) => {
     const userState = useSelector(state => state.user);
     const millState = useSelector(state => state.miller);
     const {millers: {locations}} = millState;
-    // console.log(locations)
     const {user, gender} = userState;
 
     // state
     const [state, setState] = useState({ 
         image: {},
         modal: {visible: false, type: '', error: ''},
-        password: {value: '', error: ''}
+        oldPassword: {value: '', error: ''},
+        password: {value: '', error: ''},
+        confirmPassword: {value: '', error: '', touched: false},
+        type: '',
+        newEmail: {value: '', error: '', touched: false}
     })
 
     const [userGender, setGender] = useState({progress: new Animated.Value(45), name: 'Gender', open: false});
@@ -169,17 +172,26 @@ const Profile = (props) => {
             err => {console.log(err)}))
     }
 
+    const onEnterOldPassword = () => {
+        setState({...state, oldPassword: {...state.oldPassword, value}})
+    }
+
     const onChangePasswordHandler = (value) => {
         setState({...state, password: {...state.password, value}})
     }
 
+    const onConfirmPasswordHandler = (value) => {
+        setState({...state, confirmPassword: {...state.confirmPassword, value, touched: true}})
+    }
+
     const updateUserPassword = () => {
         if (state.password.value.length < 6) return setState({...state, password: {...state.password, error: 'Minimum character is 6'}})
+        if (state.password.value !== state.confirmPassword.value) return setState({...state, confirmPassword: {...state.confirmPassword, error: 'Passwords do not match'}})
         closeModal();
         setTimeout(() => {
             dispatch(updatePassword(userState.userID, state.password.value,
                 () => {
-                    setState({...state, password: {...state.password, error: '', value: ''}})
+                    setState({...state, password: {...state.password, error: '', value: ''}, confirmPassword: {...state.confirmPassword, error: '', value: ''}})
                 },
                 err => {console.log(err)} ))
         }, 200);
@@ -209,6 +221,44 @@ const Profile = (props) => {
             duration: 200,
             useNativeDriver: false
         }).start()
+    }
+
+    const onEditEmailHandler = () => {
+        setState({
+            ...state,
+            modal: {
+                ...state.modal,
+                visible: true,
+                type: 'update-email'
+            }
+        })
+    }
+
+    const onChangeNewEmailHandler = (value) => {
+        setState({
+            ...state,
+            newEmail: {
+                ...state.newEmail,
+                value: value,
+                touched: true
+            }
+        })
+    }
+
+    const updateUserEmailHandler = () => {
+        const {newEmail} = state;
+        const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        if (!newEmail.value || !re.test(newEmail.value)) 
+            return setState({
+                ...state, 
+                newEmail: {
+                    ...state.newEmail, 
+                    error: 'Please enter correct email.'
+                }})
+        closeModal();
+        dispatch(updateUserEmail(userState.userID, newEmail.value, 
+            () => {},
+            err => { console.log(err)}))
     }
 
     const ImageComponent = () =>
@@ -258,6 +308,7 @@ const Profile = (props) => {
                 onChangeText={handleChange('phone')}
                 onBlur={handleBlur('phone')}
                 touched={touched.phone}
+                keyboardType='phone-pad'
             />
             <Input
                 placeholder="Location"
@@ -312,7 +363,16 @@ const Profile = (props) => {
                 rightComponent={false}
                 onChangeText={onChangePasswordHandler}
                 onBlur={() => {}}
-                touched={true}
+                touched={state.password.touched}
+            />
+            <Input
+                placeholder="Confirm Password"
+                error={state.confirmPassword.error}
+                value={state.confirmPassword.value}
+                rightComponent={false}
+                onChangeText={onConfirmPasswordHandler}
+                onBlur={() => {}}
+                touched={state.confirmPassword.touched}
             />
             <Button
                 title='Save'
@@ -321,6 +381,27 @@ const Profile = (props) => {
                 color={white}
                 enabled={state.password.value}
                 onPress={updateUserPassword} 
+            />
+        </View>
+
+    const updateEmailComponent = () => 
+        <View style={[styles.modalContainerStyle, {width: width * .8}]}>
+            <Input
+                placeholder="Enter New Email"
+                error={state.newEmail.error}
+                value={state.newEmail.value}
+                rightComponent={false}
+                onChangeText={onChangeNewEmailHandler}
+                onBlur={() => {}}
+                touched={state.newEmail.touched}
+            />
+            <Button
+                title='update'
+                backgroundColor={green}
+                borderColor={green}
+                color={white}
+                enabled={state.newEmail.value}
+                onPress={updateUserEmailHandler} 
             />
         </View>
 
@@ -337,7 +418,7 @@ const Profile = (props) => {
                 <TouchableOpacity activeOpacity={.8} style={[styles.avatarImageContainerStyle]} onPress={onChangeProfilePicHandler}>
                     <Image source={user.imageUrl ? {uri: user.imageUrl} : images.avatar} style={styles.profileImageStyle} resizeMode='cover' />
                 </TouchableOpacity>
-                <View style={[styles.profileInfoContainer, {width: width * .8, height: height * .55}]}>
+                <View style={[styles.profileInfoContainer, {width: width * .8, height: height * .535}]}>
                     <View style={styles.profileTitleContainerStyle}>
                         <Text style={styles.profileNameStyle}>{user.fullName}</Text>
                         <Icon name='edit' size={20} color={green} onPress={() => onChangeProfileInfo('info')} />
@@ -352,16 +433,16 @@ const Profile = (props) => {
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='mail' size={25} color={darkGray} />
-                                    <Text style={styles.privateProfileTextStyle}>{user.fullName}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{user.email}</Text>
                                 </View>
-                                <Icon name='edit' size={20} color={green} onPress={() => onChangeProfileInfo('info')} />
+                                <Icon name='edit' size={20} color={green} onPress={onEditEmailHandler} />
                             </View>
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='phone-enabled' size={25} color={darkGray} />
                                     <Text style={styles.privateProfileTextStyle}>{user.phone}</Text>
                                 </View>
-                                <Icon name='edit' size={20} color={green} />
+                                <Icon name='edit' size={20} color={green} onPress={() => onChangeProfileInfo('info')} />
                             </View>
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
@@ -407,6 +488,8 @@ const Profile = (props) => {
                             ProfileComponent('name') :
                             state.modal.type === 'password' ?
                             PasswordComponent() :
+                            state.modal.type === 'update-email' ?
+                            updateEmailComponent() :
                             SaveImageComponent()
                         }
                     </ScrollView>
@@ -506,7 +589,7 @@ const styles = StyleSheet.create({
         marginLeft: defaultSize
     },
     buttonContainerStyle: {
-        marginTop: defaultSize * .75
+        marginTop: defaultSize * .65
     },
     //
     imageComponentContainerStyle: {

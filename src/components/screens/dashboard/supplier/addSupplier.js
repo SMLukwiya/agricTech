@@ -10,7 +10,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import Spinner from 'react-native-loading-spinner-overlay';
 import axios from 'axios';
 
-import { colors, defaultSize, googlePlacesUrl, googlePlacesDetailsUrl } from '../../../../config';
+import { colors, defaultSize, googlePlacesUrl, googlePlacesDetailsUrl, phoneRegex } from '../../../../config';
 import Fallback from '../../../common/fallback';
 import { createSupplier } from '../../../../store/actions'
 
@@ -18,6 +18,7 @@ const { white, green, blue, darkGray } = colors;
 const Select = lazy(() => import('../../../common/select'));
 const Input = lazy(() => import('../../../common/input'));
 const Button = lazy(() => import('../../../common/button'));
+const PageLogo = lazy(() => import('../../../common/pageLogo'));
 
 const categories = [
     {type: 'category', id: 1, name: 'Farmer'},
@@ -46,11 +47,12 @@ const AddCustomer = (props) => {
         initialValues: { name: '', phone: '', email: '' },
         validationSchema: Yup.object({
             name: Yup.string().required('Name is required'),
-            phone: Yup.string().required('Phone is required'),
+            phone: Yup.string().min(13, 'Enter valid phone number').max(13, 'Please enter valid phone number').required('Phone is required'),
             email: Yup.string().email('Please enter valid email').required('Email is required')
         }),
         onSubmit: values => {
             if (!search.placePrediction) return Alert.alert('Please choose a location');
+            if (!phoneRegex.test(values.phone)) return Alert('Enter valid phone number');
             dispatch(createSupplier({values, location: search.placePrediction, category: category.name, userID},
                 () => {
                     props.navigation.navigate('suppliers')
@@ -139,10 +141,11 @@ const AddCustomer = (props) => {
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
             <Spinner visible={loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
+                <PageLogo />
                 <View style={[styles.supplierHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
-                    <View style={{width: '85%'}}>
-                        <Text style={styles.supplierHeaderTextStyle}>Add a supplier & category</Text>
+                    <View style={{width: '90%'}}>
+                        <Text style={styles.supplierHeaderTextStyle}>Add a supplier</Text>
                     </View>
                 </View>
                 <View style={[styles.addSupplierContainerStyle, {width: width * .8}]}>
@@ -179,6 +182,8 @@ const AddCustomer = (props) => {
                                 onChangeText={handleChange('phone')}
                                 onBlur={handleBlur('phone')}
                                 touched={touched.phone}
+                                keyboardType='phone-pad'
+                                label='+2567....'
                             />
                             <Input
                                 placeholder="email"
@@ -236,7 +241,7 @@ const styles = StyleSheet.create({
     },
     supplierHeaderStyle: {
         flexDirection: 'row',
-        marginTop: defaultSize * 4,
+        marginTop: defaultSize * 4.5,
         width: '100%',
         alignItems: 'center'
     },

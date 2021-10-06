@@ -1,13 +1,13 @@
 import React, { Suspense, lazy, useState, useEffect } from 'react';
 import {
-    View, StyleSheet, Text, StatusBar, useWindowDimensions, Animated, LayoutAnimation, UIManager, Platform, ScrollView, TouchableOpacity, KeyboardAvoidingView, Alert
+    View, StyleSheet, Text, StatusBar, useWindowDimensions, Animated, LayoutAnimation, UIManager, Platform, ScrollView, TouchableOpacity, KeyboardAvoidingView, Alert, Image
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 import { useSelector, useDispatch } from 'react-redux';
 import dayjs from 'dayjs';
 
-import { colors, defaultSize, formatNumber } from '../../../../config';
+import { colors, defaultSize, images, formatNumber } from '../../../../config';
 import Fallback from '../../../common/fallback';
 import { saveBuyData, saveBuyQuality, setProductName, setSubProductName } from '../../../../store/actions';
 
@@ -16,6 +16,9 @@ const Button = lazy(() => import('../../../common/button'));
 const Select = lazy(() => import('../../../common/select'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
 const Input = lazy(() => import('../../../common/input'));
+const TopCornerImage = lazy(() => import('../../../common/topCornerComponent'));
+const HeaderRight = lazy(() => import('../../../common/secondHeader'));
+const PageLogo = lazy(() => import('../../../common/pageLogo'));
 
 if (Platform.OS === 'android') {
     if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -41,11 +44,11 @@ const Buy = (props) => {
     } = remote.values;
 
     // state
-    const [product, setProduct] = useState({id: 'none', progress: new Animated.Value(45) , name: 'Product', open: false});
-    const [subProduct, setSubProduct] = useState({id: 'none', progress: new Animated.Value(45), name: 'Sub Product', open: false});
+    const [product, setProduct] = useState({id: 'none', progress: new Animated.Value(45) , name: 'Product', cat: '', open: false});
+    const [subProduct, setSubProduct] = useState({id: 'none', progress: new Animated.Value(45), name: 'Sub Product', cat: '', open: false});
     const [category, setCategory] = useState({id: 'none', progress: new Animated.Value(45), name: 'Category', open: false});
     const [supplier, setSupplier] = useState({id: 'none', progress: new Animated.Value(45), name: 'Supplier', open: false});
-    const [quality, setQuality] = useState({id: 'none', progress: new Animated.Value(45), name: 'Quality', open: false});
+    const [quality, setQuality] = useState({id: 'none', progress: new Animated.Value(45), name: 'Quality', cat: '', open: false});
     // input
     const [defaultWeight, setDefaultWeight] = useState({value: '', decValue: '', error: ''});
     const [weighInput, setWeightInput] = useState({inputs: {}, inputCount: 0, total: ''});
@@ -146,13 +149,13 @@ const Buy = (props) => {
     }
 
     // select product
-    const onProductSelect = (type, id, name) => {
+    const onProductSelect = (type, id, name, cat) => {
         LayoutAnimation.configureNext(transition);
         if (type === 'product') {
-            setProduct({...product, id: id === product.id ? '' : id, name, open: false });
+            setProduct({...product, id: id === product.id ? '' : id, name, cat, open: false });
             closeProduct()
         } else if (type === 'subproduct') {
-            setSubProduct({...subProduct, id: id === subProduct.id ? '' : id, name, open: false });
+            setSubProduct({...subProduct, id: id === subProduct.id ? '' : id, cat, name, open: false });
             closeSubProduct()
         } else if (type === 'supplier') {
             setSupplier({...supplier, id: id === supplier.id ? '' : id, name, open: false });
@@ -161,7 +164,7 @@ const Buy = (props) => {
             setCategory({...category, id: id === category.id ? '' : id, name, open: false });
             closeCategory()
         } else {
-            setQuality({...quality, id: id === quality.id ? '' : id, name, open: false });
+            setQuality({...quality, id: id === quality.id ? '' : id, name, cat, open: false });
             closeQuality()
         }
         
@@ -176,15 +179,14 @@ const Buy = (props) => {
             if (product.name === 'Product') return Alert.alert('Please select a product')
             dispatch(setProductName(product.name));
             closeSubProduct()
-            props.navigation.navigate('createnewsubproduct')
+            props.navigation.navigate('createnewsubproduct', {productCat: product.cat, name: product.name, fromScreen: 'buy'})
         } else if (type === 'quality') {
             dispatch(setProductName(product.name));
             dispatch(setSubProductName(subProduct.name));
-            props.navigation.navigate('createnewquality')
+            props.navigation.navigate('createnewquality', {subProductCat: subProduct.cat, name: subProduct.name, fromScreen: 'buy'})
         } else {
             props.navigation.navigate('addsupplier')
         }
-        // props.navigation.navigate(type === 'product' ? 'createnewproduct' : type === 'subproduct' ? 'createnewsubproduct' : type === 'supplier' ? 'addsupplier' : 'createnewquality')
     }
 
     // close modal
@@ -281,7 +283,12 @@ const Buy = (props) => {
     useEffect(() => {
         addWeightHandler();
         addTotalHandler();
-    }, [defaultWeight.value, weighInput.value, pricePerUnit.value, weighInput.total])
+    }, [defaultWeight.value, pricePerUnit.value, weighInput.total, totalWeight.value])
+
+    // clear total payable
+    useEffect(() => {
+        clearQualityInformation();
+    }, [])
 
     // clear quality information
     const clearQualityInformation = () => {
@@ -312,6 +319,7 @@ const Buy = (props) => {
 
     // add new quality information
     const onAddNewQualityHandler = () => {
+        if (quality.name === 'Quality') return Alert.alert('Please select input quality');
         saveQualityHandler();
     }
 
@@ -338,11 +346,14 @@ const Buy = (props) => {
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
             <SafeAreaView style={[styles.container, {width, height}]} edges={['bottom']}>
+                <PageLogo />
                 <View style={[styles.buyHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
                     <View style={{width: '85%'}}>
                         <Text style={styles.buyHeaderTextStyle}>{buyTextLabel}</Text>
                     </View>
+                    <TopCornerImage image={images.buyIcon} />
+                    <HeaderRight navigation={props.navigation} />
                 </View>
                 <View style={[styles.buyContainerStyle, {width: width * .8, height: height * .75}]}>
                     <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
@@ -366,7 +377,7 @@ const Buy = (props) => {
                             onToggleSelector={() => onToggleSelector('subproduct', 'Sub Product')}
                             productName={subProduct.name}
                             isProductOpen={subProduct.open}
-                            productList={product.name !== 'Product' ? subProducts.filter(item => item.product === product.name) : subProducts}
+                            productList={product.name !== 'Product' ? subProducts.filter(item => item.product === product.cat) : subProducts}
                             onProductSelect={onProductSelect}
                             buttonTitle='Create new Sub product'
                             onCreateHandler={() => onCreateHandler('subproduct')}
@@ -409,6 +420,7 @@ const Buy = (props) => {
                         enabled={enabled1} onPress={onBuyHandler}
                     />
                 </View>
+                
             </SafeAreaView>
             <RNModal visible={modal.modalVisible} onRequestClose={closeModal} presentationStyle='overFullScreen' closeIconColor={white}>
                 <Text style={styles.productDetailsTitleText}>{productDetailTextLabel}</Text>
@@ -419,7 +431,7 @@ const Buy = (props) => {
                             onToggleSelector={() => onToggleSelector('quality', 'Select Quality')}
                             productName={quality.name}
                             isProductOpen={quality.open}
-                            productList={subProduct.name !== 'Sub Product' ? qualities.filter(item => item.subproduct === subProduct.name) : qualities}
+                            productList={subProduct.name !== 'Sub Product' ? qualities.filter(item => item.subproduct === subProduct.cat) : qualities}
                             onProductSelect={onProductSelect}
                             buttonTitle='Create new Quantity'
                             onCreateHandler={() => onCreateHandler('quality')}
@@ -490,12 +502,12 @@ const Buy = (props) => {
                         </View>
                     </ScrollView>                  
                 </View>
-                <View style={[styles.addQualityContainerStyle, {width: width * .8}]}>
-                    <TouchableOpacity style={styles.addQualityButtonContainerStyle} activeOpacity={.8} onPress={onAddNewQualityHandler}>
+                <TouchableOpacity style={[styles.addQualityContainerStyle, {width: width * .8}]} activeOpacity={.8} onPress={onAddNewQualityHandler}>
+                    <View style={styles.addQualityButtonContainerStyle}>
                         <Icons name='add' color={green} size={27.5} />
-                    </TouchableOpacity>
+                    </View>
                     <Text style={styles.addQualityTextStyle}>{addNewQualityTextLabel}</Text>
-                </View>
+                </TouchableOpacity>
                 <View style={[styles.buttonContainerStyle, {width: width * .8}]}>
                     <Button
                         title={continueButtonTextLabel}
@@ -518,7 +530,7 @@ const styles = StyleSheet.create({
     },
     buyHeaderStyle: {
         flexDirection: 'row',
-        marginTop: defaultSize * 4,
+        marginTop: defaultSize * 4.5,
         width: '100%',
         alignItems: 'center'
     },
@@ -607,7 +619,7 @@ const styles = StyleSheet.create({
     modalTextBoldStyle: {
         fontSize: defaultSize * .85,
         fontWeight: 'bold'
-    }
+    },
 });
 
 export default Buy;

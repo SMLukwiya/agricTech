@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useState } from 'react';
 import {
-    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, ScrollView, PermissionsAndroid, KeyboardAvoidingView
+    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, ScrollView, PermissionsAndroid, KeyboardAvoidingView, Animated, LayoutAnimation, UIManager, Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icons from 'react-native-vector-icons/MaterialIcons';
@@ -22,6 +22,15 @@ const Button = lazy(() => import('../../../common/button'));
 const Input = lazy(() => import('../../../common/input'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
 const EmptyComponent = lazy(() => import('../../../common/emptyComponent'));
+const Select = lazy(() => import('../../../common/select'));
+
+if (Platform.OS === 'android') {
+    if (UIManager.setLayoutAnimationEnabledExperimental) {
+        UIManager.setLayoutAnimationEnabledExperimental(true);
+    }
+}
+
+const transition = LayoutAnimation.create(200, 'easeInEaseOut', 'scaleY');
 
 const Supplier = (props) => {
     const dispatch = useDispatch();
@@ -29,26 +38,33 @@ const Supplier = (props) => {
 
     const [state, setState] = useState({ image: {} })
     const [modal, setModal] = useState({ modalVisible: false, error: '', type: '' });
+    const [product, setProduct] = useState({id: 'none', progress: new Animated.Value(45), name: 'Supplies', open: false});
 
+    // redux
     const {suppliers, loading} = useSelector(state => state.supplier)
+    const {products} = useSelector(state => state.product);
+    const remote = useSelector(state => state.remoteConfigs);
+    const {
+        suppliersListTextLabel
+    } = remote.values
 
     const { route: { params: {id} }} = props;
     const supplier = suppliers.find(item => item.id === id);
 
     const { handleChange, values, handleSubmit, errors, handleBlur, touched } = useFormik({
-        initialValues: { fullName: supplier ? supplier.name : '', phoneNumber: supplier ? supplier.phone : '', email: supplier ? supplier.email : '', location: supplier ? supplier.address.name : '', category: supplier ? supplier.category : '', supplies: supplier ? supplier.supplies: '' },
+        initialValues: { fullName: supplier ? supplier.name : '', phoneNumber: supplier ? supplier.phone : '', email: supplier ? supplier.email : '', location: supplier ? supplier.address.name : '', category: supplier ? supplier.category : '' },
         validationSchema: Yup.object({
             fullName: Yup.string().required('Name is required'),
             phoneNumber: Yup.number('Enter a valid phone number').min(10, 'Phone number must be 10 digits').required('Phone number is required'),
             email: Yup.string().email('Enter valid email address').required('Email is required'),
             // location: Yup.string().required('Password is required'),
             category: Yup.string().required('Enter Supplier Category'),
-            supplies: Yup.string().required('Enter Supplier supplies')
         }),
         onSubmit: values => {
             closeModal();
             setTimeout(() => {
-                dispatch(updateSupplier(supplier.id, values,
+                if (product.name === 'Supplies') return Alert.alert('Pick a supply');
+                dispatch(updateSupplier(supplier.id, {...values, supplies: product.name},
                     () => {},
                     err => setModal({...modal, error: err})))
             }, 200);
@@ -172,6 +188,34 @@ const Supplier = (props) => {
             err => {console.log(err)}))
     }
 
+    // toggle category of supplier
+    const onToggleProduct = () => {
+        LayoutAnimation.configureNext(transition);
+        setProduct({...product, open: !product.open});
+        Animated.timing(product.progress, {
+            toValue: product.open ? 45 : 150,
+            duration: 200,
+            useNativeDriver: false
+        }).start()
+    }
+
+    // select category of supplier
+    const onProductSelect = (type, id, name) => {
+        LayoutAnimation.configureNext(transition);
+        setProduct({...product, id, name, open: false});
+        Animated.timing(product.progress, {
+            toValue: product.open ? 45 : 150,
+            duration: 200,
+            useNativeDriver: false
+        }).start()
+    }
+
+    // create different items from the dropdown list
+    const onCreateHandler = () => {
+        closeModal();
+        props.navigation.navigate('createnewproduct');
+    }
+
     const ImageComponent = () =>
         <View style={[styles.imageComponentContainerStyle, {width: width * .8}]}>
             <Button
@@ -222,6 +266,7 @@ const Supplier = (props) => {
                     onChangeText={handleChange('phoneNumber')}
                     onBlur={handleBlur('phoneNumber')}
                     touched={touched.phoneNumber}
+                    keyboardType='phone-pad'
                 />
                 <Input
                     placeholder="Email"
@@ -250,14 +295,15 @@ const Supplier = (props) => {
                     onBlur={handleBlur('category')}
                     touched={touched.category}
                 />
-                <Input
-                    placeholder="Supplies"
-                    error={errors.supplies}
-                    value={values.supplies}
-                    rightComponent={false}
-                    onChangeText={handleChange('supplies')}
-                    onBlur={handleBlur('supplies')}
-                    touched={touched.supplies}
+                <Select
+                    height={product.progress}
+                    onToggleSelector={() => onToggleProduct()}
+                    productName={product.name}
+                    isProductOpen={product.open}
+                    productList={products}
+                    onProductSelect={onProductSelect}
+                    buttonTitle={product.name}
+                    onCreateHandler={() => onCreateHandler()}
                 />
              
                 <View style={styles.modalButtonContainerStyle}>
@@ -307,7 +353,7 @@ const Supplier = (props) => {
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='mail' size={25} color={darkGray} />
-                                    <Text style={styles.privateProfileTextStyle}>{supplier ? supplier.email : ''}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{supplier ? supplier.email : 'Supplier Email'}</Text>
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
@@ -328,7 +374,7 @@ const Supplier = (props) => {
                             <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                 <Icons name='category' size={25} color={darkGray} />
-                                    <Text style={styles.privateProfileTextStyle}>{supplier ? supplier.supplies : ''}</Text>
+                                    <Text style={styles.privateProfileTextStyle}>{ supplier && supplier.supplies ? supplier.supplies : suppliersListTextLabel}</Text>
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
@@ -337,8 +383,8 @@ const Supplier = (props) => {
                             <MapView
                                 style={{width: width * .8, height: defaultSize * 15, marginTop: defaultSize}}
                                 initialRegion={{
-                                    latitude: supplier.address.geometry.location.lat,
-                                    longitude: supplier.address.geometry.location.lng,
+                                    latitude:  supplier ? supplier.address.geometry.location.lat: '',
+                                    longitude: supplier ? supplier.address.geometry.location.lng: '',
                                     latitudeDelta: 0.0922,
                                     longitudeDelta: 0.0421,
                                 }}>
@@ -358,12 +404,16 @@ const Supplier = (props) => {
                 </View>
             </SafeAreaView>
             <RNModal visible={modal.modalVisible} onRequestClose={closeModal} presentationStyle='overFullScreen' closeIconColor={white}>
-                {modal.type === 'image' ?
-                    ImageComponent() :
-                    modal.type === 'info' ?
-                    updateComponent() :
-                    SaveImageComponent()
-                }
+                <View style={{height: height * .75}}>
+                    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{height: '100%'}}>
+                        {modal.type === 'image' ?
+                            ImageComponent() :
+                            modal.type === 'info' ?
+                            updateComponent() :
+                            SaveImageComponent()
+                        }
+                    </ScrollView>
+                </View>
             </RNModal>
         </Suspense>
     )
@@ -476,8 +526,9 @@ const styles = StyleSheet.create({
     },
     //
     imageComponentContainerStyle: {
-        position: 'absolute',
-        bottom: defaultSize
+        // position: 'absolute',
+        height: '100%',
+        justifyContent: 'flex-end'
     },
     // 
     changeProfileContainerStyle: {

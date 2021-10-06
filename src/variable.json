@@ -39,5 +39,6 @@
     "customersTextLabel": "Customers",
     "addCustomerTextLabel": "Add a customer",
     "suppliersTextLabel": "Suppliers",
-    "addSupplierTextLabel": "Add a supplier"
+    "addSupplierTextLabel": "Add a supplier",
+    "suppliersListTextLabel": "Supplies"
 }

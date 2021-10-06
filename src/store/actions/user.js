@@ -13,7 +13,10 @@ import {
     UPLOAD_AVATAR, UPLOAD_AVATAR_FAILED, UPLOAD_AVATAR_SUCCESSFUL,
     UPDATE_USER_INFO, UPDATE_USER_INFO_SUCCESSFUL, UPDATE_USER_INFO_FAILED,
     UPDATE_PASSWORD, UPDATE_PASSWORD_FAILED, UPDATE_PASSWORD_SUCCESSFUL,
-    UPDATE_GENDER
+    UPDATE_GENDER,
+    SEND_PASSWORD_RESET, SEND_PASSWORD_RESET_FAILED, SEND_PASSWORD_RESET_SUCCESSFUL,
+    UPDATE_USER_EMAIL, UPDATE_USER_EMAIL_SUCCESSFUL, UPDATE_USER_EMAIL_FAILED,
+    PHONE_SIGIN, PHONE_SIGNIN_FAILED, PHONE_SIGNIN_SUCCESSFUL
  } from './types';
 import {baseUri} from '../../config';
 
@@ -49,9 +52,20 @@ export const userEmailSignup = (values, onSuccess = () => {}, onFailure = () => 
             });
             onSuccess();
         } catch (err) {
+            let error = ''
+            if (err.code === 'auth/email-already-in-use') {
+                error = 'Email is already in use'
+            } else if (err.code === 'auth/user-not-found') {
+                error = 'This user does not exist'
+            } else if (err.code === 'auth/wrong-password') {
+                error = 'Password does not match'
+            } else {
+                error = err.response.data.error
+            }
+
             dispatch({
                 type: USER_EMAIL_SIGNUP_FAILED,
-                payload: err.code ? err.code : err
+                payload: error
             })
             onFailure(err);
         }
@@ -75,9 +89,10 @@ export const googleSignup = (values) => {
             });
             
         } catch (err) {
+            console.log('Err', err)
             dispatch({
                 type: USER_GOOGLE_SIGNUP_FAILED,
-                payload: err
+                payload: 'err'
             });
         }
     }
@@ -100,9 +115,19 @@ export const loginEmail = (values, onSuccess = () => {}, onFailure = () => {}) =
             onSuccess();
 
         } catch (err) {
+            let error = ''
+            if (err.code === 'auth/email-already-in-use') {
+                error = 'Email is already in use'
+            } else if (err.code === 'auth/user-not-found') {
+                error = 'This user does not exist'
+            } else if (err.code === 'auth/wrong-password') {
+                error = 'Password does not match'
+            } else {
+                error = err.response.data.error
+            }
             dispatch({
                 type: LOGIN_EMAIL_FAILED,
-                payload: err.code
+                payload: error
             });
             onFailure(err);
         }
@@ -124,8 +149,35 @@ export const logout = (_, onSuccess = () => {}, onFailure = () => {}) => {
     }
 }
 
+export const phoneLogin = (values, onSuccess = () => {}, onFailure = () => {}) => {
+    const {emailorphonenumber, password} = values;
+
+    return async dispatch => {
+        dispatch({type: PHONE_SIGIN});
+
+        try {
+            const res = await axios.post(`${baseUri}users-retrieveUser`, {phoneNumber: emailorphonenumber});
+            const {data: {response: {email }}} = res;
+
+            const response = await auth().signInWithEmailAndPassword(email, password);
+            const idToken = await auth().currentUser.getIdToken();
+            
+            dispatch({
+                type: PHONE_SIGNIN_SUCCESSFUL,
+                payload: {response, idToken}
+            })
+            onSuccess()
+        } catch (err) {
+            dispatch({
+                type: PHONE_SIGNIN_FAILED,
+                payload: err.code
+            });
+            onFailure(err)
+        }
+    }
+}
+
 export const updateProfileImage = (image, uid, onSuccess = () => {}, onFailure = () => {}) => {
-    console.log(image)
 
     return async dispatch => {
         dispatch({type: UPLOAD_AVATAR})
@@ -184,6 +236,51 @@ export const updatePassword = (uid, password, onSuccess = () => {}, onFailure = 
         } catch (err) {
             dispatch({type: UPDATE_PASSWORD_FAILED});
             onFailure(err)
+        }
+    }
+}
+
+export const sendPasswordReset = (email, onSuccess = () => {}, onFailure = () => {}) => {
+
+    const actionCodeSettings = {
+        url: 'https://agro-waste-mobile-app.firebaseapp.com',
+        iOS: {
+          bundleId: 'com.metajua.metajua'
+        },
+        android: {
+          packageName: 'com.metajua.metajua',
+          installApp: true,
+          minimumVersion: '1'
+        },
+        handleCodeInApp: false,
+        dynamicLinkDomain: 'metajua.page.link'
+      }
+
+    return async dispatch => {
+        dispatch({type: SEND_PASSWORD_RESET});
+
+        try {
+            await auth().sendPasswordResetEmail(email, actionCodeSettings)
+            dispatch({type: SEND_PASSWORD_RESET_SUCCESSFUL})
+            onSuccess();
+        } catch (err) {
+            dispatch({type: SEND_PASSWORD_RESET_FAILED});
+            onFailure(err);
+        }
+    }
+}
+
+export const updateUserEmail = (userID, email, onSuccess = () => {}, onFailure = () => {}) => {
+    return async dispatch => {
+        dispatch({type: UPDATE_USER_EMAIL});
+
+        try {
+            await axios.post(`${baseUri}users-updateUserEmail`, {userID, email})
+            dispatch({type: UPDATE_USER_EMAIL_SUCCESSFUL})
+            onSuccess();
+        } catch (err) {
+            dispatch({type: UPDATE_USER_EMAIL_FAILED});
+            onFailure(err);
         }
     }
 }

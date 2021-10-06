@@ -15,6 +15,7 @@ const { white, green, red, darkGray } = colors;
 const Select = lazy(() => import('../../../common/select'));
 const Button = lazy(() => import('../../../common/button'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
+const PageLogo = lazy(()=> import('../../../common/pageLogo'));
 
 const paymentMethods = [
     {id: 1, name: 'Cash'}
@@ -126,6 +127,7 @@ const Summary = (props) => {
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
             <Spinner visible={buyState.loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
+                <PageLogo />
                 <View style={[styles.summaryHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
                     <View style={{width: '85%'}}>
@@ -214,7 +216,7 @@ const styles = StyleSheet.create({
     },
     summaryHeaderStyle: {
         flexDirection: 'row',
-        marginTop: defaultSize * 4,
+        marginTop: defaultSize * 4.5,
         width: '100%',
         alignItems: 'center'
     },

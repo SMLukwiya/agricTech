@@ -9,7 +9,7 @@ import Icons from 'react-native-vector-icons/MaterialIcons';
 import { useSelector, useDispatch } from 'react-redux';
 import dayjs from 'dayjs';
 
-import { colors, defaultSize, formatNumber, formatDecNumber } from '../../../../config';
+import { colors, defaultSize, formatNumber, formatDecNumber, images } from '../../../../config';
 import Fallback from '../../../common/fallback';
 import { saveBatchMillData, saveBatchQualityData, setProductName, setSubProductName, setInputQualityName } from '../../../../store/actions';
 
@@ -18,6 +18,9 @@ const Select = lazy(() => import('../../../common/select'));
 const Button = lazy(() => import('../../../common/button'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
 const Input = lazy(() => import('../../../common/input'));
+const HeaderRight = lazy(() => import('../../../common/secondHeader'));
+const TopCorner = lazy(() => import('../../../common/topCornerComponent'));
+const PageLogo = lazy(() => import('../../../common/pageLogo'));
 
 if (Platform.OS === 'android') {
     if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -41,9 +44,9 @@ const StockMilling = (props) => {
 
     // state
     const [modal, setModal] = useState({modalVisible: false});
-    const [product, setProduct] = useState({id: 'none', progress: new Animated.Value(45) , name: 'Product', open: false});
-    const [subProduct, setSubProduct] = useState({id: 'none', progress: new Animated.Value(45), name: 'Sub Product', open: false});
-    const [inputQuality, setInputQuality] = useState({id: 'none', progress: new Animated.Value(45), name: 'Input Quality', open: false})
+    const [product, setProduct] = useState({id: 'none', progress: new Animated.Value(45) , name: 'Product', cat: '', open: false});
+    const [subProduct, setSubProduct] = useState({id: 'none', progress: new Animated.Value(45), name: 'Sub Product', cat: '', open: false});
+    const [inputQuality, setInputQuality] = useState({id: 'none', progress: new Animated.Value(45), name: 'Input Quality', cat: '', open: false})
     const [outputQuality, setOutputQuality] = useState({id: 'none', progress: new Animated.Value(45), name: 'Output Quality', open: false});
 
     // input
@@ -192,17 +195,17 @@ const StockMilling = (props) => {
         } else if (type === 'subproduct') {
             if (product.name === 'Product') return Alert.alert('Please select a product');
             dispatch(setProductName(product.name));
-            props.navigation.navigate('createnewsubproduct')
+            props.navigation.navigate('createnewsubproduct', {productCat: product.cat, name: product.name, fromScreen: 'stockmilling'})
         } else if (type === 'inputQuality') {
             dispatch(setProductName(product.name));
             dispatch(setSubProductName(subProduct.name));
-            props.navigation.navigate('createnewquality')
+            props.navigation.navigate('createnewquality', {subProductCat: subProduct.cat, name: subProduct.name, fromScreen: 'stockmilling'})
         } else {
             if (inputQuality.name === 'Input Quality') return Alert.alert('Please select an input quality');
             dispatch(setProductName(product.name));
             dispatch(setSubProductName(subProduct.name));
             dispatch(setInputQualityName(inputQuality.name));
-            props.navigation.navigate('createnewoutputquality')
+            props.navigation.navigate('createnewoutputquality', {inputQualityCat: inputQuality.cat, name: inputQuality.name, fromScreen: 'stockmilling'})
         }
     }
 
@@ -241,24 +244,24 @@ const StockMilling = (props) => {
     }
 
     // select product
-    const onProductSelect = (type, id, name) => {
+    const onProductSelect = (type, id, name, cat) => {
         LayoutAnimation.configureNext(transition);
         if (type === 'product') {
-            setProduct({...product, id: id === product.id ? '' : id, name, open: false });
+            setProduct({...product, id: id === product.id ? '' : id, name, cat, open: false });
             Animated.timing(product.progress, {
                 toValue: 45,
                 duration: 200,
                 useNativeDriver: false
             }).start()
         } else if (type === 'subproduct') {
-            setSubProduct({...subProduct, id: id === subProduct.id ? '' : id, name, open: false });
+            setSubProduct({...subProduct, id: id === subProduct.id ? '' : id, name, cat, open: false });
             Animated.timing(subProduct.progress, {
                 toValue: 45,
                 duration: 200,
                 useNativeDriver: false
             }).start()
         } else if (type === 'quality') {
-            setInputQuality({...inputQuality, id: id === inputQuality.id ? '' : id, name, open: false });
+            setInputQuality({...inputQuality, id: id === inputQuality.id ? '' : id, name, cat, open: false });
             Animated.timing(inputQuality.progress, {
                 toValue: 45,
                 duration: 200,
@@ -343,11 +346,14 @@ const StockMilling = (props) => {
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
+                <PageLogo />
                 <View style={[styles.createAccountHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
-                    <View style={{width: '85%'}}>
+                    <View style={{width: '90%'}}>
                         <Text style={styles.createAccountHeaderTextStyle}>Stock Milling</Text>
                     </View>
+                    <TopCorner image={images.pickupIcon} />
+                    <HeaderRight navigation={props.navigation} />
                 </View>
                 <View style={[styles.stockSelectContainerStyle, {width: width * .8}]}>
                     <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
@@ -368,7 +374,7 @@ const StockMilling = (props) => {
                             onToggleSelector={() => onToggleSelector('subproduct', 'Sub Product')}
                             productName={subProduct.name}
                             isProductOpen={subProduct.open}
-                            productList={product.name !== 'Product' ? subProducts.filter(item => item.product === product.name) : subProducts}
+                            productList={product.name !== 'Product' ? subProducts.filter(item => item.product === product.cat) : subProducts}
                             onProductSelect={onProductSelect}
                             buttonTitle='Create new Sub product'
                             onCreateHandler={() => onCreateHandler('subproduct')}
@@ -395,7 +401,7 @@ const StockMilling = (props) => {
                             onToggleSelector={() => onToggleSelector('quality', 'Input Quality')}
                             productName={inputQuality.name}
                             isProductOpen={inputQuality.open}
-                            productList={subProduct.name !== 'Sub Product' ? qualities.filter(item => item.subproduct === subProduct.name) : qualities}
+                            productList={subProduct.name !== 'Sub Product' ? qualities.filter(item => item.subproduct === subProduct.cat) : qualities}
                             onProductSelect={onProductSelect}
                             buttonTitle='Create new Input Quality'
                             onCreateHandler={() => onCreateHandler('inputQuality')}
@@ -447,7 +453,7 @@ const StockMilling = (props) => {
                             onToggleSelector={() => onToggleSelector('outputquality', 'Output Quality')}
                             productName={outputQuality.name}
                             isProductOpen={outputQuality.open}
-                            productList={inputQuality.name !== 'Input Quality' ? outputQualities.filter(item => item.inputQuality === inputQuality.name) : outputQualities}
+                            productList={inputQuality.name !== 'Input Quality' ? outputQualities.filter(item => item.inputQuality === inputQuality.cat) : outputQualities}
                             onProductSelect={onProductSelect}
                             buttonTitle='Create new Output Quality'
                             onCreateHandler={() => onCreateHandler('outputQuality')}
@@ -537,7 +543,7 @@ const styles = StyleSheet.create({
     },
     createAccountHeaderStyle: {
         flexDirection: 'row',
-        marginTop: defaultSize * 4,
+        marginTop: defaultSize * 4.5,
         width: '100%',
         alignItems: 'center'
     },

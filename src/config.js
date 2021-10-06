@@ -38,7 +38,9 @@ export const images = {
     info: require('./assets/images/info.png'),
     support: require('./assets/images/support.png'),
     finance: require('./assets/images/finance.png'),
-    find: require('./assets/images/find.png')
+    find: require('./assets/images/find.png'),
+    filter: require('./assets/images/filterIcon.png'),
+    logoDots: require('./assets/images/logoDots.png')
 }
 
 export const defaultSize = 16;
@@ -46,6 +48,8 @@ export const defaultSize = 16;
 export const baseUri = 'https://us-central1-agro-waste-mobile-app.cloudfunctions.net/';
 export const googlePlacesUrl = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?key=AIzaSyDmO0TPSYtgcPJw8TbBSOaIBFVqs4Ziq2Q&components=country:ug&';
 export const googlePlacesDetailsUrl = 'https://maps.googleapis.com/maps/api/place/details/json?key=AIzaSyDmO0TPSYtgcPJw8TbBSOaIBFVqs4Ziq2Q&components=country:ug&';
+
+export const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im;
 
 export const errorTextStyle = {
     color: colors.red,
@@ -60,4 +64,8 @@ export const formatNumber = (num) => {
 
 export const formatDecNumber = (num) => {
     return formatNumber((Math.round(num * 100) / 100).toFixed(2))
+}
+
+export const capitalize = (str) => {
+    return str.charAt(0).toUpperCase() + str.slice(1);
 }

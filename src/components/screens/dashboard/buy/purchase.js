@@ -10,13 +10,16 @@ import isYesterday from 'dayjs/plugin/isYesterday';
 import isBetween from 'dayjs/plugin/isBetween';
 import { useSelector } from 'react-redux';
 
-import { colors, defaultSize, formatNumber, formatDecNumber } from '../../../../config';
+import { colors, defaultSize, formatNumber, formatDecNumber, images } from '../../../../config';
 import Fallback from '../../../common/fallback';
 
 const { extraLightGreen, green, darkGray, lightGreen, white } = colors;
 const Calendar = lazy(() => import('../../../common/calendar'));
 const EmptyComponent = lazy(() => import('../../../common/emptyComponent'));
 const Select = lazy(() => import('../../../common/select'));
+const TopCornerImage = lazy(() => import('../../../common/topCornerComponent'));
+const HeaderRight = lazy(() => import('../../../common/secondHeader'));
+const PageLogo = lazy(() => import('../../../common/pageLogo'));
 
 // extend dayjs
 dayjs.extend(isToday);
@@ -151,11 +154,14 @@ const Stocks = (props) => {
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
+                <PageLogo />
                 <View style={[styles.purchaseHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
-                    <View style={{width: '85%'}}>
+                    <View style={{width: '90%'}}>
                         <Text style={styles.purchaseHeaderTextStyle}>{purchasesTextLabel}</Text>
                     </View>
+                    <TopCornerImage image={images.salesIcon} />
+                    <HeaderRight navigation={props.navigation} />
                 </View>
                 <View style={[styles.selectFilterContainerStyle, {width: width * .8}]}>
                     <TouchableOpacity activeOpacity={.8} onPress={() => selectFilterMethod('date')}>
@@ -235,7 +241,7 @@ const styles = StyleSheet.create({
     },
     purchaseHeaderStyle: {
         flexDirection: 'row',
-        marginTop: defaultSize * 4,
+        marginTop: defaultSize * 4.5,
         width: '100%',
         alignItems: 'center'
     },

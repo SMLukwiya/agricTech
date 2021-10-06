@@ -15,13 +15,14 @@ import {
 } from '../../../store/actions';
 
 const { white, green, darkGray } = colors;
-
+const PageLogo = lazy(() => import('../../../components/common/pageLogo'));
 
 const SelectMill = (props) => {
     const dispatch = useDispatch();
     const { height, width } = useWindowDimensions();
 
     const user = useSelector(state => state.user);
+    console.log(user)
     const {millers} = useSelector(state => state.miller);
     const remote = useSelector(state => state.remoteConfigs);
     const {setupMillLabel, setupMillDescriptionLabel, selectMillTextLabel} = remote.values;
@@ -272,14 +273,14 @@ const SelectMill = (props) => {
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
+                <PageLogo />
                 <View style={[styles.selectMillHeaderStyle, {width: width * .8}]}>
                     <View style={{width: '100%'}}>
                         <Text style={styles.selectMillHeaderTextStyle}>{selectMillTextLabel}</Text>
                     </View>
                 </View>
                 <View style={[styles.millContainerStyle, {width: width * .8}]}>
-                    {setupMillComponent()}
-                    <View style={{height: height * .65}}>
+                    <View style={{/*height: height * .65*/}}>
                         <FlatList
                             data={millers}
                             keyExtractor={item => item.id}
@@ -288,6 +289,7 @@ const SelectMill = (props) => {
                             showsVerticalScrollIndicator={false}
                         />
                     </View>
+                    {setupMillComponent()}
                 </View>
                 
             </SafeAreaView>
@@ -304,7 +306,7 @@ const styles = StyleSheet.create({
     },
     selectMillHeaderStyle: {
         flexDirection: 'row',
-        marginTop: defaultSize * 4,
+        marginTop: defaultSize * 4.5,
         width: '100%',
         alignItems: 'center'
     },

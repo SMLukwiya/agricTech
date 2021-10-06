@@ -22,6 +22,7 @@ const Button = lazy(() => import('../../../common/button'));
 const Input = lazy(() => import('../../../common/input'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
 const EmptyComponent = lazy(() => import('../../../common/emptyComponent'));
+const PageLogo = lazy(() => import('../../../common/pageLogo'));
 
 const Customer = (props) => {
     const dispatch = useDispatch();
@@ -43,7 +44,7 @@ const Customer = (props) => {
             email: Yup.string().email('Enter valid email address').required('Email is required'),
             // location: Yup.string().required('Location is required'),
             category: Yup.string().required('Enter Supplier Category'),
-            supplies: Yup.string().required('Enter Supplier supplies')
+            // supplies: Yup.string().required('Enter Supplier supplies')
         }),
         onSubmit: values => {
             closeModal();
@@ -210,6 +211,7 @@ const Customer = (props) => {
                     onChangeText={handleChange('phoneNumber')}
                     onBlur={handleBlur('phoneNumber')}
                     touched={touched.phoneNumber}
+                    keyboardType='phone-pad'
                 />
                 <Input
                     placeholder="Email"
@@ -238,7 +240,7 @@ const Customer = (props) => {
                     onBlur={handleBlur('category')}
                     touched={touched.category}
                 />
-                <Input
+                {/* <Input
                     placeholder="Supplies"
                     error={errors.supplies}
                     value={values.supplies}
@@ -246,7 +248,7 @@ const Customer = (props) => {
                     onChangeText={handleChange('supplies')}
                     onBlur={handleBlur('supplies')}
                     touched={touched.supplies}
-                />
+                /> */}
              
                 <View style={styles.modalButtonContainerStyle}>
                     <Button
@@ -280,7 +282,7 @@ const Customer = (props) => {
                 <TouchableOpacity activeOpacity={.8} style={[styles.avatarImageContainerStyle]} onPress={onChangeProfilePicHandler}>
                     <Image source={ customer && customer.imageUrl ? {uri: customer.imageUrl} : images.avatar} style={styles.profileImageStyle} resizeMode='cover' />
                 </TouchableOpacity>
-                <View style={[styles.profileInfoContainer, {width: width * .8, height: height * .55}]}>
+                <View style={[styles.profileInfoContainer, {width: width * .8, height: height * .535}]}>
                     <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
                         <View>
                             <View style={styles.profilePrivateInfoContainerStyle}>
@@ -317,24 +319,24 @@ const Customer = (props) => {
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
                             </View>
-                            <View style={styles.profilePrivateInfoContainerStyle}>
+                            {/* <View style={styles.profilePrivateInfoContainerStyle}>
                                 <View style={styles.profilePrivateLeftComponent}>
                                     <Icons name='category' size={25} color={darkGray} />
                                     <Text style={styles.privateProfileTextStyle}>{customer ? customer.supplies : ''}</Text>
                                 </View>
                                 <FeatherIcons name='edit' size={20} color={green} onPress={onEditHandler} />
-                            </View>
+                            </View> */}
                         </View>
                         <View>
                             <MapView
                                 style={{width: width * .8, height: defaultSize * 15}}
                                 initialRegion={{
-                                    latitude: customer.address.geometry.location.lat,
-                                    longitude: customer.address.geometry.location.lng,
+                                    latitude: customer ? customer.address.geometry.location.lat : '',
+                                    longitude: customer ? customer.address.geometry.location.lng : '',
                                     latitudeDelta: 0.0922,
                                     longitudeDelta: 0.0421,
                                 }}>
-                                <Marker coordinate={{ latitude : customer.address.geometry.location.lat, longitude : customer.address.geometry.location.lng }} />
+                                <Marker coordinate={{ latitude : customer ? customer.address.geometry.location.lat : '', longitude : customer ? customer.address.geometry.location.lng : ''}} />
                             </MapView>
                         </View>
                     </ScrollView>

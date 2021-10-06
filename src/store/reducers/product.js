@@ -5,7 +5,14 @@ import {
     CREATE_QUALITY, CREATE_QUALITY_SUCCESSFUL, CREATE_QUALITY_FAILED,
     CREATE_OUTPUT_QUALITY, CREATE_OUTPUT_QUALITY_FAILED, CREATE_OUTPUT_QUALITY_SUCCESSFUL,
     DELETE_PRODUCT, DELETE_PRODUCT_FAILED, DELETE_PRODUCT_SUCCESSFUL,
-    SET_PRODUCT, SET_SUBPRODUCT, SET_QUALITY_NAME, FETCH_STOCKIN, FETCH_STOCKOUT
+    SET_PRODUCT, SET_SUBPRODUCT, SET_QUALITY_NAME, FETCH_STOCKIN, FETCH_STOCKOUT,
+    UPDATE_PRODUCT, UPDATE_PRODUCT_SUCCESSFUL, UPDATE_PRODUCT_FAILED,
+    UPDATE_SUBPRODUCT, UPDATE_SUBPRODUCT_SUCCESSFUL, UPDATE_SUBPRODUCT_FAILED,
+    UPDATE_INPUT_QUALITY,UPDATE_INPUT_QUALITY_SUCCESSFUL, UPDATE_INPUT_QUALITY_FAILED,
+    UPDATE_OUTPUT_QUALITY, UPDATE_OUTPUT_QUALITY_SUCCESSFUL, UPDATE_OUTPUT_QUALITY_FAILED,
+    DELETE_SUBPRODUCT, DELETE_SUBPRODUCT_SUCCESSFUL, DELETE_SUBPRODUCT_FAILED,
+    DELETE_INPUT_QUALITY, DELETE_INPUT_QUALITY_SUCCESSFUL, DELETE_INPUT_QUALITY_FAILED,
+    DELETE_OUTPUT_QUALITY, DELETE_OUTPUT_QUALITY_SUCCESSFUL, DELETE_OUTPUT_QUALITY_FAILED
 } from '../actions/types';
 
 const INITIAL_STATE = {
@@ -177,6 +184,132 @@ export default (state = INITIAL_STATE, action) => {
                 stockOut: action.payload
             }
 
+        case UPDATE_PRODUCT:
+            return {
+                ...state,
+                loading: true
+            }
+
+        case UPDATE_PRODUCT_SUCCESSFUL:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case UPDATE_PRODUCT_FAILED:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case UPDATE_SUBPRODUCT:
+            return {
+                ...state,
+                loading: true
+            }
+
+        case UPDATE_SUBPRODUCT_SUCCESSFUL:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case UPDATE_SUBPRODUCT_FAILED:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case UPDATE_INPUT_QUALITY:
+            return {
+                ...state,
+                loading: true
+            }
+
+        case UPDATE_INPUT_QUALITY_SUCCESSFUL:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case UPDATE_INPUT_QUALITY_FAILED:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case UPDATE_OUTPUT_QUALITY:
+            return {
+                ...state,
+                loading: true
+            }
+
+        case UPDATE_OUTPUT_QUALITY_SUCCESSFUL:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case UPDATE_OUTPUT_QUALITY_FAILED:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case DELETE_SUBPRODUCT:
+            return {
+                ...state,
+                loading: true
+            }
+
+        case DELETE_SUBPRODUCT_SUCCESSFUL:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case DELETE_SUBPRODUCT_FAILED:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case DELETE_INPUT_QUALITY:
+            return {
+                ...state,
+                loading: true
+            }
+
+        case DELETE_INPUT_QUALITY_SUCCESSFUL:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case DELETE_INPUT_QUALITY_FAILED:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case DELETE_OUTPUT_QUALITY:
+            return {
+                ...state,
+                loading: true
+            }
+
+        case DELETE_OUTPUT_QUALITY_SUCCESSFUL:
+            return {
+                ...state,
+                loading: false
+            }
+
+        case DELETE_OUTPUT_QUALITY_FAILED:
+            return {
+                ...state,
+                loading: false
+            }
+        
         default:
             return {...state}
     }

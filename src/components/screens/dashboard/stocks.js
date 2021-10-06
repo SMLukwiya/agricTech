@@ -8,12 +8,14 @@ import { PieChart, BarChart} from 'react-native-chart-kit';
 import { useSelector } from 'react-redux';
 import { VictoryBar, VictoryChart, VictoryTheme, VictoryAxis } from 'victory-native';
 
-import { colors, images, defaultSize } from '../../../config';
+import { colors, images, defaultSize, capitalize } from '../../../config';
 import Fallback from '../../common/fallback';
-import { defaults } from 'lodash';
 
 const { white, green, blue, darkGray, purple, lightGray } = colors;
 const Select = lazy(() => import('../../common/select'));
+const TopCornerImage = lazy(() => import('../../common/topCornerComponent'));
+const HeaderRight = lazy(() => import('../../common/secondHeader'));
+const PageLogo = lazy(() => import('../../common/pageLogo'));
 
 if (Platform.OS === 'android') {
     if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -254,11 +256,14 @@ const Stocks = (props) => {
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
+                <PageLogo />
                 <View style={[styles.createAccountHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
-                    <View style={{width: '85%'}}>
+                    <View style={{width: '90%'}}>
                         <Text style={styles.createAccountHeaderTextStyle}>Your Stocks</Text>
                     </View>
+                    <TopCornerImage image={images.stockIcon} />
+                    <HeaderRight navigation={props.navigation} />
                 </View>
                 <View style={[styles.containerStyle, {width: width * .8}]}>
                     <ScrollView showsVerticalScrollIndicator={false}>
@@ -279,7 +284,7 @@ const Stocks = (props) => {
                             {productList.map(({name}) => 
                                 stockValues[name] && stockValues[name].datasets ? 
                                 <View key={name} style={styles.barChartContainerStyle} >
-                                    <Text style={styles.stockProductName}>{name}</Text>
+                                    <Text style={styles.stockProductName}>{capitalize(name)}</Text>
                                     <VictoryChart 
                                         theme={VictoryTheme.material}
                                         minDomain={{ y: 0 }}
@@ -324,7 +329,7 @@ const Stocks = (props) => {
                             {productList.map(({name}) => 
                                 stockOutValues[name] && stockOutValues[name].datasets ? 
                                 <View key={name} style={styles.barChartContainerStyle} >
-                                    <Text style={styles.stockProductName}>{name}</Text>
+                                    <Text style={styles.stockProductName}>{capitalize(name)}</Text>
                                     <VictoryChart 
                                         theme={VictoryTheme.material}
                                         minDomain={{ y: 0 }}
@@ -368,7 +373,7 @@ const styles = StyleSheet.create({
     },
     createAccountHeaderStyle: {
         flexDirection: 'row',
-        marginTop: defaultSize * 4,
+        marginTop: defaultSize * 4.5,
         width: '100%',
         alignItems: 'center'
     },

@@ -6,24 +6,46 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import { useSelector, useDispatch } from 'react-redux';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 
-import { colors, defaultSize } from '../../../../config';
+import { colors, defaultSize, images } from '../../../../config';
 import Fallback from '../../../common/fallback';
-import { deleteProduct } from '../../../../store/actions';
+import { updateProduct, deleteProduct, setProductName } from '../../../../store/actions';
 
 const { white, green, darkGray, red } = colors;
 const Button = lazy(() => import('../../../common/button'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
+const TopCornerImage = lazy(() => import('../../../common/topCornerComponent'));
+const HeaderRight = lazy(() => import('../../../common/secondHeader'));
+const EmptyComponent = lazy(() => import('../../../common/emptyComponent'));
+const Input = lazy(() => import('../../../common/input'));
+const PageLogo = lazy(() => import('../../../common/pageLogo'));
 
 const Products = (props) => {
     const dispatch = useDispatch();
     const { height, width } = useWindowDimensions();
 
     // state
-    const [state, setState] = useState({ modalVisible: false, error: '', productID: '', name: '' })
+    const [state, setState] = useState({ modalVisible: false, error: '', productID: '', name: '', cat: '' })
 
     // redux
     const {products} = useSelector(state => state.product);
+
+    const { handleChange, values, handleSubmit, errors, handleBlur, touched } = useFormik({
+        initialValues: { productName: '' },
+        validationSchema: Yup.object({
+            productName: Yup.string().required('Product name is required'),
+        }),
+        onSubmit: values => {
+            closeModal();
+            dispatch(updateProduct(values.productName, state.productID,
+                () => {
+                    
+                },
+                err => {console.log(err)}))
+        }
+    });
 
     const goBack = () => props.navigation.navigate('home');
 
@@ -32,11 +54,17 @@ const Products = (props) => {
     }
 
     const onEditHandler = (id) => {
-        setState({...state, modalVisible: true, productID: id, name: products.find(item => item.id === id).name});
+        setState({...state, modalVisible: true, productID: id, name: products.find(item => item.id === id).name, cat: products.find(item => item.id === id).cat});
     }
 
     const addProductHandler = () => {
         props.navigation.navigate('createnewproduct');
+    }
+
+    const editSubproduct = () => {
+        closeModal();
+        dispatch(setProductName(state.name));
+        props.navigation.navigate('createnewsubproduct', {productCat: state.cat, name: state.name});
     }
 
     const onDeleteProductHandler = () => {
@@ -52,24 +80,22 @@ const Products = (props) => {
             <FeatherIcon name='edit' size={20} color={green} onPress={() => onEditHandler(id)} />
         </View>
 
-    const emptyProductComponent = () =>
-            <View style={styles.emptyProductContainerStyle}>
-                <Text style={styles.emptyProductTextStyle}>No Products added</Text>
-            </View>
-
 
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
+                <PageLogo />
                 <View style={[styles.createAccountHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
-                    <View style={{width: '85%'}}>
+                    <View style={{width: '90%'}}>
                         <Text style={styles.createAccountHeaderTextStyle}>Products</Text>
                     </View>
+                    <TopCornerImage image={images.orderIcon} />
+                    <HeaderRight navigation={props.navigation} />
                 </View>
                 <View style={[styles.flatlistContainerStyle, {width: width * .8, height: height * .725}]}>
-                    {products.length === 0 ? emptyProductComponent() :
+                    {products.length === 0 ? <EmptyComponent title='No Products added' /> :
                     <FlatList
                         data={products}
                         key={(item) => item.id}
@@ -92,6 +118,29 @@ const Products = (props) => {
             <RNModal visible={state.modalVisible} onRequestClose={closeModal} presentationStyle='overFullScreen' closeIconColor={white}>
                 <View style={[styles.modalContainerStyle, {width: width * .8}]}>
                     <Text style={styles.modalTextStyle}>{state.name}</Text>
+                    <Input 
+                        placeholder='Update product name'
+                        error={errors.productName}
+                        value={values.productName}
+                        onChangeText={handleChange('productName')}
+                        keyboardType='default' 
+                        onBlur={handleBlur('productName')}
+                        touched={touched.productName}
+                    />
+                    <Button
+                        title='Update product'
+                        backgroundColor={green}
+                        borderColor={green}
+                        color={white} 
+                        enabled onPress={handleSubmit}
+                    />
+                    <Button
+                        title='Edit sub products'
+                        backgroundColor={green}
+                        borderColor={green}
+                        color={white} 
+                        enabled onPress={editSubproduct}
+                    />
                     <Button
                         title='Delete'
                         backgroundColor={red}
@@ -114,7 +163,7 @@ const styles = StyleSheet.create({
     },
     createAccountHeaderStyle: {
         flexDirection: 'row',
-        marginTop: defaultSize * 4,
+        marginTop: defaultSize * 4.5,
         width: '100%',
         alignItems: 'center'
     },

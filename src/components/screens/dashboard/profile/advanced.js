@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useState } from 'react';
 import {
-    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, KeyboardAvoidingView, ScrollView
+    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, KeyboardAvoidingView, ScrollView, FlatList
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFormik } from 'formik';
@@ -9,6 +9,7 @@ import Icons from 'react-native-vector-icons/MaterialIcons';
 import Icon from 'react-native-vector-icons/Feather';
 import { useDispatch, useSelector } from 'react-redux';
 import Spinner from 'react-native-loading-spinner-overlay';
+import MapView, {Marker} from 'react-native-maps';
 
 import { colors, images, defaultSize } from '../../../../config';
 import Fallback from '../../../common/fallback';
@@ -18,6 +19,7 @@ const { white, green, blue, darkGray } = colors;
 const Button = lazy(() => import('../../../common/button'));
 const Input = lazy(() => import('../../../common/input'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
+const PageLogo = lazy(() => import('../../../common/pageLogo'));
 
 const Stocks = (props) => {
     const dispatch = useDispatch();
@@ -27,7 +29,6 @@ const Stocks = (props) => {
     const miller = useSelector(state => state.miller);
     const {selectedMill, locations} = miller;
     const mill = miller.millers.find(item => item.id === selectedMill.id)
-    const millLocations = locations.filter(item => item.millID === mill.id)
 
     const { handleChange, values, handleSubmit, errors, handleBlur, touched } = useFormik({
         initialValues: { tin: mill ? mill.tin : '', certificate: mill ? mill.certificate : '', capacity: mill ? mill.capacity : '' },
@@ -39,7 +40,7 @@ const Stocks = (props) => {
         onSubmit: values => {
             closeModal();
             setTimeout(() => {
-                dispatch(updateMillInfo(selectedMill.id, values,
+                dispatch(updateMillInfo(state.millSelected.id, values,
                     () => {},
                     err => {
                         console.log(err)
@@ -51,7 +52,8 @@ const Stocks = (props) => {
 
     const [state, setState] = useState({
         modal: {visible: false, type: '', error: ''},
-        location: {name: '', capacity: ''}
+        location: {name: '', capacity: ''},
+        millSelected: {id: ''}
     })
 
     const goBack = () => props.navigation.goBack();
@@ -60,8 +62,8 @@ const Stocks = (props) => {
         setState({...state, modal: {...state.modal, visible: false, type: ''}});
     }
 
-    const onEditMillHandler = () => {
-        setState({...state, modal: {...state.modal, visible: true, type: 'millInfo'}});
+    const onEditMillHandler = (id) => {
+        setState({...state, modal: {...state.modal, visible: true, type: 'millInfo'},  millSelected: {...state.millSelected, id}});
     }
 
     const onChangeHandler = (value, type) => {
@@ -86,118 +88,138 @@ const Stocks = (props) => {
     }
 
     const MillInfoComponent = () => 
-    <View  style={[styles.modalContainerStyle, {width: width * .8}]}>
-        <KeyboardAvoidingView >
-            <Input
-                placeholder="Tin Number"
-                error={errors.tin}
-                value={values.tin}
-                rightComponent={false}
-                onChangeText={handleChange('tin')}
-                onBlur={handleBlur('tin')}
-                touched={touched.tin}
-            />
-            <Input
-                placeholder="Certificate Inoformation"
-                error={errors.certificate}
-                value={values.certificate}
-                rightComponent={false}
-                onChangeText={handleChange('certificate')}
-                onBlur={handleBlur('certificate')}
-                touched={touched.certificate}
-            />
-            <Input
-                placeholder="Capacity"
-                error={errors.capacity}
-                value={values.capacity}
-                rightComponent={false}
-                onChangeText={handleChange('capacity')}
-                onBlur={handleBlur('capacity')}
-                touched={touched.capacity}
-            />
-            <View style={styles.modalButtonContainerStyle}>
-                <Button
-                    title='Save changes'
-                    backgroundColor={green}
-                    borderColor={green}
-                    color={white}
-                    enabled onPress={handleSubmit}
+        <View  style={[styles.modalContainerStyle, {width: width * .8}]}>
+            <KeyboardAvoidingView >
+                <Input
+                    placeholder="Tin Number"
+                    error={errors.tin}
+                    value={values.tin}
+                    rightComponent={false}
+                    onChangeText={handleChange('tin')}
+                    onBlur={handleBlur('tin')}
+                    touched={touched.tin}
+                    label='Tin Number'
                 />
+                <Input
+                    placeholder="Certificate Inoformation"
+                    error={errors.certificate}
+                    value={values.certificate}
+                    rightComponent={false}
+                    onChangeText={handleChange('certificate')}
+                    onBlur={handleBlur('certificate')}
+                    touched={touched.certificate}
+                    label='Certificate Information'
+                />
+                <Input
+                    placeholder="Capacity"
+                    error={errors.capacity}
+                    value={values.capacity}
+                    rightComponent={false}
+                    onChangeText={handleChange('capacity')}
+                    onBlur={handleBlur('capacity')}
+                    touched={touched.capacity}
+                    keyboardType='numeric'
+                    label='Kgs per hour'
+                />
+                <View style={styles.modalButtonContainerStyle}>
+                    <Button
+                        title='Save changes'
+                        backgroundColor={green}
+                        borderColor={green}
+                        color={white}
+                        enabled onPress={handleSubmit}
+                    />
+                </View>
+                </KeyboardAvoidingView>
             </View>
-            </KeyboardAvoidingView>
-        </View>
 
     const AddLocationComponent = () => 
-    <View style={[styles.addLocationContainerStyle, {width: width * .8}]}>
-        <Input
-            placeholder="Location Name"
-            error={state.location.error}
-            value={state.location.name}
-            rightComponent={false}
-            onChangeText={(value) => onChangeHandler(value, 'name')}
-            onBlur={() => {}}
-            touched={true}
-        />
-        <Input
-            placeholder="Location Capacity"
-            error={state.location.error}
-            value={state.location.capacity}
-            rightComponent={false}
-            onChangeText={(value) => onChangeHandler(value, 'capacity')}
-            onBlur={() => {}}
-            touched={true}
-        />
-        <Button
-            title='Save'
-            backgroundColor={green}
-            borderColor={green}
-            color={white}
-            enabled={state.location.name && state.location.capacity}
-            onPress={addLocation} 
-        />
-    </View>
+        <View style={[styles.addLocationContainerStyle, {width: width * .8}]}>
+            <Input
+                placeholder="Location Name"
+                error={state.location.error}
+                value={state.location.name}
+                rightComponent={false}
+                onChangeText={(value) => onChangeHandler(value, 'name')}
+                onBlur={() => {}}
+                touched={true}
+            />
+            <Input
+                placeholder="Location Capacity"
+                error={state.location.error}
+                value={state.location.capacity}
+                rightComponent={false}
+                onChangeText={(value) => onChangeHandler(value, 'capacity')}
+                onBlur={() => {}}
+                touched={true}
+            />
+            <Button
+                title='Save'
+                backgroundColor={green}
+                borderColor={green}
+                color={white}
+                enabled={state.location.name && state.location.capacity}
+                onPress={addLocation} 
+            />
+        </View>
+
+    const millComponent = ({item: {id, name, tin, certificate, capacity, location}}) => 
+        <View style={[styles.advancedProfileContainerStyle, {width: width * .8}]}>
+            <Text style={styles.advancedProfileMillerTitleStyle}>{name}</Text>
+            <View>
+                <View style={styles.advancedProfileItemContainerStyle}>
+                    <Text>TIN Number {tin}</Text>
+                    <Icon name='edit' size={20} color={green} onPress={() => onEditMillHandler(id)} />
+                </View>
+                <Text style={styles.labelTextStyle}>Tin Number</Text>
+            </View>
+            <View>
+                <View style={styles.advancedProfileItemContainerStyle}>
+                    <Text>{certificate}</Text>
+                    <Icon name='edit' size={20} color={green} onPress={() => onEditMillHandler(id)} />
+                </View>
+                <Text style={styles.labelTextStyle}>Certificate Information</Text>
+            </View>
+            <View>
+                <View style={styles.advancedProfileItemContainerStyle}>
+                    <Text>{capacity}</Text>
+                    <Icon name='edit' size={20} color={green} onPress={() => onEditMillHandler(id)} />
+                </View>
+                <Text style={styles.labelTextStyle}>Kgs per hour</Text>
+            </View>
+            <View>
+                <MapView
+                    style={{width: width * .8, height: defaultSize * 15, marginTop: defaultSize}}
+                    initialRegion={{
+                        latitude: location.geometry.latitude,
+                        longitude: location.geometry.longitude,
+                        latitudeDelta: location.geometry.latitudeDelta ? location.geometry.latitudeDelta : 0.0922,
+                        longitudeDelta: location.geometry.longitudeDelta ? location.geometry.longitudeDelta : 0.0421,
+                    }}>
+                    <Marker coordinate={{ latitude : location.geometry.latitude, longitude : location.geometry.longitude }} />
+                </MapView>
+            </View>
+        </View>
 
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
             <Spinner visible={miller.loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
+                <PageLogo />
                 <View style={[styles.createAccountHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
-                    <View style={{width: '85%'}}>
+                    <View style={{width: '90%'}}>
                         <Text style={styles.createAccountHeaderTextStyle}>Advanced Profile</Text>
                     </View>
                 </View>
-                <View style={[styles.advancedProfileContainerStyle, {width: width * .8}]}>
-                    <Text style={styles.advancedProfileMillerTitleStyle}>{mill.name}</Text>
-                    <View style={styles.advancedProfileItemContainerStyle}>
-                        <Text>TIN Number {mill.tin}</Text>
-                        <Icon name='edit' size={20} color={green} onPress={onEditMillHandler} />
-                    </View>
-                    <View style={styles.advancedProfileItemContainerStyle}>
-                        <Text>{mill.certificate}</Text>
-                        <Icon name='edit' size={20} color={green} onPress={onEditMillHandler} />
-                    </View>
-                    <View style={styles.advancedProfileItemContainerStyle}>
-                        <Text>{mill.capacity}</Text>
-                        <Icon name='edit' size={20} color={green} onPress={onEditMillHandler} />
-                    </View>
-                </View>
-                <View style={[styles.advancedProfileLocationContainerStyle, {width: width * .8, height: height * .4}]}>
-                    <ScrollView bounces={false}>
-                        {millLocations.map(({id, name, capacity}) => 
-                        <View style={styles.advancedProfileLocationItemStyle} key={id}>
-                            <Text>{name}</Text>
-                            <View style={styles.advancedProfileLocationItemContainerStyle}>
-                                <View style={{justifyContent: 'center', marginRight: defaultSize * .75}}>
-                                    <Text style={styles.advancedProfileLocationTextStyle}>{name} Capacity</Text>
-                                    <Text style={styles.capacityTextStyle}>{capacity}</Text>
-                                </View>
-                                <Icon name='edit' size={20} color={green} />
-                            </View>
-                        </View>
-                    )}
-                    </ScrollView>
+                <View style={[{height: height * .775}]}>
+                    <FlatList 
+                        keyExtractor={item => item.id}
+                        data={miller.millers}
+                        renderItem={millComponent}
+                        contentContainerStyle={{height: '100%'}}
+                    />
                 </View>
                 <View style={[styles.addNewLocationContainerStyle, {width: width * .8}]}>
                     <Icons name='add-circle' size={45} color={darkGray} onPress={onAddLocationHandler} />
@@ -223,7 +245,7 @@ const styles = StyleSheet.create({
     },
     createAccountHeaderStyle: {
         flexDirection: 'row',
-        marginTop: defaultSize * 4,
+        marginTop: defaultSize * 4.5,
         width: '100%',
         alignItems: 'center'
     },
@@ -295,6 +317,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: defaultSize,
         borderRadius: defaultSize,
         overflow: 'hidden'
+    },
+    labelTextStyle: {
+        fontSize: defaultSize * .7,
+        marginLeft: defaultSize * .15,
+        marginTop: - defaultSize
     }
 });
 

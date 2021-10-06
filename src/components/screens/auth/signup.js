@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useEffect } from 'react';
 import {
-    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, ScrollView, KeyboardAvoidingView
+    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, ScrollView, KeyboardAvoidingView, Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFormik } from 'formik';
@@ -40,18 +40,20 @@ const Signup = (props) => {
         initialValues: { fullName: '', phoneNumber: '', email:'', password: '' },
         validationSchema: Yup.object({
             fullName: Yup.string().required('Name is required'),
-            phoneNumber: Yup.number('Enter a valid phone number').min(10, 'Phone number must be 10 digits').required('Phone number is required'),
+            phoneNumber: Yup.string('Enter a valid phone number').min(13, 'Phone number must be 13 digits').max(13, 'Phone number must be 13 digits').required('Phone number is required'),
             email: Yup.string().email('Enter valid email address').required('Email is required'),
             password: Yup.string().min(6, 'Must be atleast 6 characters').required('Password is required')
         }),
         onSubmit: values => {
+            const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im;
+            if (!phoneRegex.test(values.phoneNumber)) return Alert.alert('Please enter valid phone number')
             dispatch(userEmailSignup(values,
                 () => props.navigation.dispatch(CommonActions.reset({
                     type: 'stack',
                     index: 0,
                     routes: [{name: 'dashboard'}]
                 })),
-                err => console.log('Error', err)
+                err => console.log(err)
             ));
         }
     });
@@ -62,10 +64,11 @@ const Signup = (props) => {
     const googleSigninHandler = async () => {
         try {
             await GoogleSignin.hasPlayServices();
-            const {idToken, user: {email, id, name, phoneNumber}} = await GoogleSignin.signIn();
+            const {idToken} = await GoogleSignin.signIn();
             const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-            await auth().signInWithCredential(googleCredential);
-            await dispatch(googleSignup({idToken, email, uid: id, fullName: name, phone: phoneNumber}));
+            const googleData = await auth().signInWithCredential(googleCredential);
+            const {user: {displayName, email, phoneNumber, uid}} = googleData;
+            await dispatch(googleSignup({idToken, email, uid, fullName: displayName, phone: phoneNumber}));
 
             props.navigation.dispatch(CommonActions.reset({
                 type: 'stack',
@@ -76,7 +79,7 @@ const Signup = (props) => {
             if (err.code === statusCodes.SIGN_IN_CANCELLED) console.log('user cancalled sign in process')
             else if (err.code === statusCodes.IN_PROGRESS) console.log('sign in process still in progress')
             else if (err.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) console.log('Play services not available')
-            else console.log(err)
+            else console.log('ERr', err)
         }
     }
 
@@ -111,6 +114,8 @@ const Signup = (props) => {
                             onChangeText={handleChange('phoneNumber')}
                             onBlur={handleBlur('phoneNumber')}
                             touched={touched.phoneNumber}
+                            keyboardType='phone-pad'
+                            label='+2567.....'
                         />
                         <Input
                             placeholder="Email"

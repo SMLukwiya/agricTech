@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import {
-    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, Alert
+    View, StyleSheet, Text, Image, StatusBar, useWindowDimensions, TouchableOpacity, Alert, ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CommonActions } from '@react-navigation/native';
@@ -15,7 +15,7 @@ const { white, green, red, lightGray } = colors;
 const Button = lazy(() => import('../../../common/button'));
 
 const CustomDrawer = (props) => {
-    const { width } = useWindowDimensions();
+    const { height, width } = useWindowDimensions();
     const dispatch = useDispatch();
 
     // redux
@@ -70,12 +70,14 @@ const CustomDrawer = (props) => {
                 </View>
                 <View>
                     <Text style={styles.profileTitleStyle}>{user ? user.fullName: ''}</Text>
-                    <View style={{width: width * .8, marginTop: defaultSize}}>
-                        {items.map(({id, name, image, onPress}) => profileComponent(id, name, image, onPress))}
+                    <View style={{width: width * .8, marginTop: defaultSize, height: height * .425}}>
+                        <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
+                            {items.map(({id, name, image, onPress}) => profileComponent(id, name, image, onPress))}
+                        </ScrollView>
                     </View>
                 </View>
                 <View style={{justifyContent: 'space-around'}}>
-                    <View style={{width: width * .8, alignItems: 'center', marginTop: defaultSize}}>
+                    <View style={{width: width * .8, alignItems: 'center', marginTop: defaultSize * .5}}>
                         <Text style={styles.lowerContainerTitleStyle}>Other Services</Text>
                         <View style={styles.lowerOuterContainerStyle}>
                             <View style={styles.lowerProfileComponentContainerStyle}>
@@ -168,7 +170,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         width: '100%',
-        marginTop: defaultSize
+        marginTop: defaultSize * .5
     },
     lowerProfileComponentContainerStyle: {
         flexDirection: 'row',
@@ -184,7 +186,7 @@ const styles = StyleSheet.create({
         marginLeft: defaultSize * .5
     },
     buttonContainer: {
-        marginTop:defaultSize
+        marginTop:defaultSize * .5
     }
 });
 

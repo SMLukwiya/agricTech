@@ -14,6 +14,10 @@ export const USER_GOOGLE_LOGIN = 'user_google-signup';
 export const USER_GOOGLE_LOGIN_SUCCESSFUL = 'user_google_signup_successful';
 export const USER_GOOGLE_LOGIN_FAILED = 'user_google_signup_failed';
 
+export const PHONE_SIGIN = 'phone_signin';
+export const PHONE_SIGNIN_SUCCESSFUL = 'phone_signin_successful';
+export const PHONE_SIGNIN_FAILED = 'phone_signin_FAILED';
+
 export const UPDATE_USER = 'update_user'
 export const UPDATE_GENDER = 'update_gender';
 
@@ -93,6 +97,27 @@ export const DELETE_PRODUCT = 'delete_product';
 export const DELETE_PRODUCT_SUCCESSFUL = 'delete_product_successful';
 export const DELETE_PRODUCT_FAILED = 'delete_product_failed';
 export const SET_QUALITY_NAME = 'set_quality_name';
+export const UPDATE_PRODUCT = 'update_product';
+export const UPDATE_PRODUCT_SUCCESSFUL = 'update_product_successful';
+export const UPDATE_PRODUCT_FAILED = 'update_product_failed';
+export const UPDATE_SUBPRODUCT = 'update_subproduct';
+export const UPDATE_SUBPRODUCT_SUCCESSFUL = 'update_subproduct_successful';
+export const UPDATE_SUBPRODUCT_FAILED = 'update_subproduct_failed';
+export const UPDATE_INPUT_QUALITY = 'update_input_quality';
+export const UPDATE_INPUT_QUALITY_SUCCESSFUL = 'update_input_quality_successful';
+export const UPDATE_INPUT_QUALITY_FAILED = 'update_input_quality_failed';
+export const UPDATE_OUTPUT_QUALITY = 'update_output_quality';
+export const UPDATE_OUTPUT_QUALITY_SUCCESSFUL = 'update_output_quality_successful';
+export const UPDATE_OUTPUT_QUALITY_FAILED = 'update_output_quality_failed';
+export const DELETE_SUBPRODUCT = 'delete_subproduct';
+export const DELETE_SUBPRODUCT_SUCCESSFUL = 'delete_subproduct_successful';
+export const DELETE_SUBPRODUCT_FAILED = 'delete_subproduct_failed';
+export const DELETE_INPUT_QUALITY = 'delete_input_quality';
+export const DELETE_INPUT_QUALITY_SUCCESSFUL = 'delete_input_quality_successful';
+export const DELETE_INPUT_QUALITY_FAILED = 'delete_input_quality_failed';
+export const DELETE_OUTPUT_QUALITY = 'delete_output_quality';
+export const DELETE_OUTPUT_QUALITY_SUCCESSFUL = 'delete_output_quality_successful';
+export const DELETE_OUTPUT_QUALITY_FAILED = 'delete_output_quality_failed';
 
 export const CREATE_BATCH_MILL = 'create_batch_mill';
 export const CREATE_BATCH_MILL_FAILED = 'create_batch_mill_failed';
@@ -139,3 +164,11 @@ export const UPDATE_REMOTE_CONFIGS = 'update_remote_configs';
 
 export const FETCH_STOCKIN = 'fetch_stockin';
 export const FETCH_STOCKOUT = 'fetch_stockout';
+
+export const SEND_PASSWORD_RESET = 'send_password_reset';
+export const SEND_PASSWORD_RESET_SUCCESSFUL = 'send_password_reset_successful';
+export const SEND_PASSWORD_RESET_FAILED = 'send_password_reset_failed';
+
+export const UPDATE_USER_EMAIL = 'update_user_email';
+export const UPDATE_USER_EMAIL_SUCCESSFUL = 'update_user_email_successful';
+export const UPDATE_USER_EMAIL_FAILED = 'update_user_email_failed';

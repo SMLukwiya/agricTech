@@ -100,7 +100,7 @@ export default (state = INITIAL_STATE, action) => {
                 category: "",
                 product: "",
                 subproduct: "",
-                qualities: "",
+                qualities: {},
                 totalWeight: "",
                 totalAmount: "",
                 paymentMethod: "cash",

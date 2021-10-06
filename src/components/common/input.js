@@ -7,7 +7,7 @@ import { colors, defaultSize } from '../../config'
 const { white, darkGray } = colors;
 
 const Input = (props) => {
-    const { placeholder, error, value, rightComponent, onChangeText, onBlur, touched, keyboardType, secureTextEntry, textAlign } = props;
+    const { placeholder, error, value, rightComponent, onChangeText, onBlur, touched, keyboardType, secureTextEntry, textAlign, label, onPressIn, backgroundColor } = props;
 
     // check user theme
     const colorScheme = Appearance.getColorScheme();
@@ -17,7 +17,7 @@ const Input = (props) => {
             <View style={styles.textInputContainerStyle}>
                 {rightComponent && rightComponent}
                 <TextInput
-                    style={[styles.textInputStyle, {color: darkGray, textAlign: textAlign}]}
+                    style={[styles.textInputStyle, {color: darkGray, textAlign: textAlign, backgroundColor: backgroundColor}]}
                     placeholder={placeholder}
                     placeholderTextColor={colorScheme === 'dark' ? darkGray : darkGray}
                     value={value}
@@ -28,9 +28,11 @@ const Input = (props) => {
                     autoCorrect={false}
                     autoCapitalize='none'
                     secureTextEntry={secureTextEntry}
+                    onPressIn={onPressIn}
                 />
              </View>
              {(!!error && touched) && <Text style={styles.errorTextStyle}>{error}</Text>}
+             {(!!label) && <Text style={styles.labelTextStyle}>{label}</Text>}
         </View>
     )
 }
@@ -56,6 +58,10 @@ const styles = StyleSheet.create({
     },
     errorTextStyle: {
         color: 'red',
+        fontSize: defaultSize * .7,
+        marginLeft: defaultSize
+    },
+    labelTextStyle: {
         fontSize: defaultSize * .7,
         marginLeft: defaultSize
     }

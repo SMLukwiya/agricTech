@@ -14,6 +14,7 @@ import { createBatchMill, clearBatchData } from '../../../../store/actions';
 const { white, green, blue, darkGray, red } = colors;
 const Button = lazy(() => import('../../../common/button'));
 const RNModal = lazy(() => import('../../../common/rnModal'));
+const PageLogo = lazy(() => import('../../../common/pageLogo'));
 
 const Stocks = (props) => {
     const dispatch = useDispatch();
@@ -62,9 +63,10 @@ const Stocks = (props) => {
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
             <Spinner visible={batchState.loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
+                <PageLogo />
                 <View style={[styles.summaryHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
-                    <View style={{width: '85%'}}>
+                    <View style={{width: '90%'}}>
                         <Text style={styles.summaryHeaderTextStyle}>Batch Summary</Text>
                     </View>
                 </View>
@@ -162,7 +164,7 @@ const styles = StyleSheet.create({
     },
     summaryHeaderStyle: {
         flexDirection: 'row',
-        marginTop: defaultSize * 4,
+        marginTop: defaultSize * 4.5,
         width: '100%',
         alignItems: 'center'
     },
