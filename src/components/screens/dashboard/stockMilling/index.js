@@ -305,6 +305,7 @@ const StockMilling = (props) => {
             product: product.name,
             subProduct: subProduct.name,
             mill: selectedMill.name,
+            miller: selectedMill.surname,
             inputQuality: inputQuality.name, 
             totalInput: totalWeightInput.value,
             outputQuality: outputQuality.name,

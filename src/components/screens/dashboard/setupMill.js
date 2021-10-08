@@ -44,8 +44,8 @@ const SetupMill = (props) => {
         }),
         onSubmit: values => {
             if (!search.placePrediction || !search.placePrediction.name) return Alert.alert('Please choose a location');
-            if ( (phone.value && !phoneRegex.test(phone)) || (phone.value && phone.value.length < 13) ) return setPhone({...phone, error: 'Please enter valid phone number'})
-            dispatch(setupMill({...values, location: search.placePrediction, phoneNumber: phone}, userID,
+            if ( (phone.value && !phoneRegex.test(phone.value)) || (phone.value && phone.value.length < 13) ) return setPhone({...phone, error: 'Please enter valid phone number'})
+            dispatch(setupMill({...values, location: search.placePrediction, phoneNumber: phone.value}, userID,
                 () => {
                     props.navigation.navigate('selectmill');
                 },
@@ -167,11 +167,11 @@ const SetupMill = (props) => {
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
             <Spinner visible={loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
+                <PageLogo />
                 <View style={[styles.setupMillHeaderStyle, {width: width * .8}]}>
                     <Icons name='arrow-back-ios' size={25} onPress={goBack} />
                     <View style={{width: '85%'}}>
                         <Text style={styles.setupMillHeaderTextStyle}>Setup New Mill</Text>
-                        <PageLogo />
                     </View>
                 </View>
                 <View style={[styles.setupMillContainerStyle, {width: width * .8, height: height * .75}]}>
@@ -303,7 +303,7 @@ const styles = StyleSheet.create({
     },
     setupMillHeaderStyle: {
         flexDirection: 'row',
-        marginTop: defaultSize * 4,
+        marginTop: defaultSize * 4.5,
         width: '100%',
         alignItems: 'center'
     },

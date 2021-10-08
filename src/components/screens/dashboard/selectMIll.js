@@ -27,8 +27,8 @@ const SelectMill = (props) => {
     const remote = useSelector(state => state.remoteConfigs);
     const {setupMillLabel, setupMillDescriptionLabel, selectMillTextLabel} = remote.values;
 
-    const onSelectMillHandler = (id, name, capacity, location) => {
-        dispatch(setSelectedMill({id, name, capacity, location}));
+    const onSelectMillHandler = (id, name, capacity, location, surname, phone) => {
+        dispatch(setSelectedMill({id, name, capacity, location, surname, phone}));
         setTimeout(() => {
             props.navigation.navigate('home');
         }, 150);
@@ -254,8 +254,8 @@ const SelectMill = (props) => {
         updateStockOut();
     }, [])
 
-    const millComponent = ({item: {id, name, location, capacity}}) => 
-        <TouchableOpacity activeOpacity={.8} onPress={() => onSelectMillHandler(id, name, capacity, location)} style={[styles.millComponentContainerStyle, {width: width * .8}]}>
+    const millComponent = ({item: {id, name, location, capacity, surname, phone}}) => 
+        <TouchableOpacity activeOpacity={.8} onPress={() => onSelectMillHandler(id, name, capacity, location, surname, phone)} style={[styles.millComponentContainerStyle, {width: width * .8}]}>
             <Text style={styles.millComponentTitleHeaderStyle}>{name}</Text>
             <Text style={styles.millComponentTextStyle}>{location.name}</Text>
         </TouchableOpacity>

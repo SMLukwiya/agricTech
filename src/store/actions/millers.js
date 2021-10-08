@@ -37,7 +37,7 @@ export const setupMill = (values, userID,  onSuccess = () => {}, onFailure = () 
 
         try {
             const response = await axios.post(`${baseUri}milling-setupMill`, {
-                name, location, capacity, userID, surname, phoneNumber
+                name, location, capacity, userID, surname, phone: phoneNumber
             });
             dispatch({type: SETUP_MILL_SUCCESSFUL})
             onSuccess();

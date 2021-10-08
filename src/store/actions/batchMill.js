@@ -26,14 +26,14 @@ export const clearBatchData = () => {
 }
 
 export const createBatchMill = (values, userID, onSuccess = () => {}, onFailure = () => {}) => {
-    const {date, product, subProduct, mill, inputQualities, totalInput, outputQualities, totalOutput} = values;
+    const {date, product, subProduct, mill, inputQualities, totalInput, outputQualities, totalOutput, miller} = values;
 
     return async dispatch => {
         dispatch({type: CREATE_BATCH_MILL});
 
         try {
             const response = await axios.post(`${baseUri}milling-createStockMill`, {
-                date, product, subProduct, mill, inputQualities, totalInput, outputQualities, totalOutput, userID
+                date, product, subProduct, mill, inputQualities, totalInput, outputQualities, totalOutput, userID, miller
             })
             dispatch({type: CREATE_BATCH_MILL_SUCCESSFUL})
             onSuccess();

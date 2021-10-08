@@ -58,6 +58,8 @@ const Stocks = (props) => {
         outputQualityArray.push({id: key, ...batchState.outputQualities[key]})
     }
 
+    console.log(batchState)
+
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
