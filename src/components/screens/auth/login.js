@@ -166,14 +166,14 @@ const Login = (props) => {
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
             <Spinner visible={reduxState.loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
-                <ScrollView contentContainerStyle={{alignItems: 'center'}} showsVerticalScrollIndicator={false}>
+                <KeyboardAvoidingView behavior='padding'>
                     <View style={styles.logoContainer}>
                         <View style={[styles.logoImageContainer, {width: width * .6, height: width * .275}]}>
                             <Image source={images.logo} style={styles.logoImage}  />
                         </View>
                     </View>
                     <View style={[styles.inputContainerStyle, {width: width * .8}]}>
-                        <KeyboardAvoidingView>
+                        
                             <Input
                                 placeholder="Email/Phone Number"
                                 error={errors.emailorphonenumber}
@@ -195,7 +195,7 @@ const Login = (props) => {
                                 touched={touched.password}
                                 secureTextEntry={true}
                             />
-                        </KeyboardAvoidingView>
+                        
                         {!!reduxState.error && <Text style={errorTextStyle}>{reduxState.error}</Text>}
                         <View>
                             <Button
@@ -210,6 +210,7 @@ const Login = (props) => {
                             </TouchableOpacity>
                         </View>
                     </View>
+                
                     <View style={[styles.createAccountContainerStyle, {width: width * .8}]}>
                         <Text style={styles.forgotPasswordTextStyle}>Don't have an account?</Text>
                         <Button
@@ -236,7 +237,7 @@ const Login = (props) => {
                             enabled onPress={googleSigninHandler}
                         />
                     </View>
-                </ScrollView>
+                    </KeyboardAvoidingView>
                 <RNModal visible={modal.visible} onRequestClose={closeModal} presentationStyle='overFullScreen' closeIconColor={white}>
                     {modal.type === 'passwordreset' ? 
                         passwordResetComponent() :
@@ -256,7 +257,9 @@ const styles = StyleSheet.create({
         backgroundColor: 'white'
     },
     logoContainer: {
-        marginTop: defaultSize * 3
+        marginTop: defaultSize * 3,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     logoImageContainer: {
         

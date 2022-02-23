@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect } from 'react';
+import React, { Suspense, lazy, useEffect, useMemo } from 'react';
 import {
     View, StyleSheet, Text, StatusBar, useWindowDimensions, TouchableOpacity, FlatList
 } from 'react-native';
@@ -22,7 +22,6 @@ const SelectMill = (props) => {
     const { height, width } = useWindowDimensions();
 
     const user = useSelector(state => state.user);
-    console.log(user)
     const {millers} = useSelector(state => state.miller);
     const remote = useSelector(state => state.remoteConfigs);
     const {setupMillLabel, setupMillDescriptionLabel, selectMillTextLabel} = remote.values;
@@ -254,13 +253,14 @@ const SelectMill = (props) => {
         updateStockOut();
     }, [])
 
-    const millComponent = ({item: {id, name, location, capacity, surname, phone}}) => 
+    const millComponent = ({item: {id, name, location, capacity, surname, phone}}) => (
         <TouchableOpacity activeOpacity={.8} onPress={() => onSelectMillHandler(id, name, capacity, location, surname, phone)} style={[styles.millComponentContainerStyle, {width: width * .8}]}>
             <Text style={styles.millComponentTitleHeaderStyle}>{name}</Text>
             <Text style={styles.millComponentTextStyle}>{location.name}</Text>
         </TouchableOpacity>
+    )
 
-    const setupMillComponent = () => 
+    const setupMillComponent = useMemo(() => (
         <TouchableOpacity activeOpacity={.8} onPress={onsetupNewMillHandler} style={styles.setupNewMillContainerStyle}>
             <View>
                 <Text style={styles.setupMillTitleHeaderStyle}>{setupMillLabel}</Text>
@@ -268,6 +268,7 @@ const SelectMill = (props) => {
             </View>
             <Icons name='add-circle' size={35} color={green} />
         </TouchableOpacity>
+    ), [])  
 
     return (
         <Suspense fallback={<Fallback />}>
@@ -287,9 +288,13 @@ const SelectMill = (props) => {
                             renderItem={millComponent}
                             contentContainerStyle={{}}
                             showsVerticalScrollIndicator={false}
+                            removeClippedSubviews
+                            maxToRenderPerBatch={7}
+                            initialNumToRender={7}
+                            windowSize={11}
                         />
                     </View>
-                    {setupMillComponent()}
+                    {setupMillComponent}
                 </View>
                 
             </SafeAreaView>

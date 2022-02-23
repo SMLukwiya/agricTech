@@ -9,6 +9,7 @@ import Icons from 'react-native-vector-icons/MaterialIcons';
 import { useDispatch, useSelector } from 'react-redux';
 import Spinner from 'react-native-loading-spinner-overlay';
 import MapView, {Marker} from 'react-native-maps';
+import _ from 'lodash';
 
 import { colors, defaultSize, googlePlacesUrl, googlePlacesDetailsUrl, phoneRegex } from '../../../config';
 import Fallback from '../../common/fallback';
@@ -56,7 +57,8 @@ const SetupMill = (props) => {
     const goBack = () => props.navigation.navigate('home');
 
     const onChangeText = (value) => {
-        setSearch({...search, value, predictionSet: true, touch: true})
+        setSearch({...search, value, predictionSet: true, touch: true});
+        debounceSearch(value)
     }
 
     const closeModal = () => {
@@ -84,16 +86,18 @@ const SetupMill = (props) => {
     }
 
     // run on every search value change
-    const onChangeMapText = async () => {
-        if (search.value.trim() === '') return;
+    const onChangeMapText = async (value) => {
+        if (value.trim() === '') return;
         try {
-            const results = await axios.get(`${googlePlacesUrl}key=AIzaSyDmO0TPSYtgcPJw8TbBSOaIBFVqs4Ziq2Q&input=${search.value}`);
+            const results = await axios.get(`${googlePlacesUrl}key=AIzaSyDmO0TPSYtgcPJw8TbBSOaIBFVqs4Ziq2Q&input=${value}`);
             const {data: {predictions}} = results;
             setPredictions(predictions);
         } catch (err) {
             console.log(err);
         }
     }
+
+    const debounceSearch = _.debounce(onChangeMapText, 1000)
 
     // tap location
     const onPreditionTapped = async (id, description) => {
@@ -158,14 +162,14 @@ const SetupMill = (props) => {
         closeModal();
     }
 
-    useEffect(() => {
-        onChangeMapText()
-    }, [search.value])
+    // useEffect(() => {
+    //     onChangeMapText()
+    // }, [search.value])
 
     return (
         <Suspense fallback={<Fallback />}>
             <StatusBar translucent barStyle='dark-content' backgroundColor='transparent' />
-            <Spinner visible={loading} textContent={'Loading'} textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
+            <Spinner visible={loading} textContent='Loading' textStyle={{color: white}} overlayColor='rgba(0,0,0,0.5)' animation='fade' color={white} />
             <SafeAreaView style={[styles.container, {width}]} edges={['bottom']}>
                 <PageLogo />
                 <View style={[styles.setupMillHeaderStyle, {width: width * .8}]}>
@@ -175,8 +179,8 @@ const SetupMill = (props) => {
                     </View>
                 </View>
                 <View style={[styles.setupMillContainerStyle, {width: width * .8, height: height * .75}]}>
-                    <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
-                        <KeyboardAvoidingView>
+                    <KeyboardAvoidingView behavior='padding'>
+                        <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
                             <Input
                                 placeholder="Name of mill"
                                 error={errors.name}
@@ -224,8 +228,9 @@ const SetupMill = (props) => {
                                 keyboardType='numeric'
                                 label='Kgs per hour'
                             />
-                        </KeyboardAvoidingView>
-                     </ScrollView>
+                        
+                        </ScrollView>
+                    </KeyboardAvoidingView>
                 </View>
                 <View style={[styles.buttonContainerStyle, {width: width * .8}]}>
                     <Button
@@ -254,7 +259,7 @@ const SetupMill = (props) => {
                     />
                     {search.predictionSet && 
                         <View style={{height: height * .35}}>
-                            <ScrollView>
+                            <ScrollView bounces={false}>
                                 {predictions.map(({description, place_id}) => 
                                     <TouchableOpacity activeOpacity={.8} onPress={() => onPreditionTapped(place_id, description)} key={place_id} style={[styles.placesPrediction]}>
                                         <Text>{description}</Text>
