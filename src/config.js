@@ -46,8 +46,8 @@ export const images = {
 export const defaultSize = 16;
 
 export const baseUri = 'https://us-central1-agro-waste-mobile-app.cloudfunctions.net/';
-export const googlePlacesUrl = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?key=AIzaSyDmO0TPSYtgcPJw8TbBSOaIBFVqs4Ziq2Q&components=country:ug&';
-export const googlePlacesDetailsUrl = 'https://maps.googleapis.com/maps/api/place/details/json?key=AIzaSyDmO0TPSYtgcPJw8TbBSOaIBFVqs4Ziq2Q&components=country:ug&';
+export const googlePlacesUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?key=${process.env.googleApiKey}&components=country:ug&`;
+export const googlePlacesDetailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?key=${process.env.googleApiKey}&components=country:ug&`;
 
 export const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im;
 

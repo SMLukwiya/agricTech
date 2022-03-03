@@ -89,7 +89,7 @@ const SetupMill = (props) => {
     const onChangeMapText = async (value) => {
         if (value.trim() === '') return;
         try {
-            const results = await axios.get(`${googlePlacesUrl}key=AIzaSyDmO0TPSYtgcPJw8TbBSOaIBFVqs4Ziq2Q&input=${value}`);
+            const results = await axios.get(`${googlePlacesUrl}key=${process.env.googleApiKey}&input=${value}`);
             const {data: {predictions}} = results;
             setPredictions(predictions);
         } catch (err) {
@@ -102,7 +102,7 @@ const SetupMill = (props) => {
     // tap location
     const onPreditionTapped = async (id, description) => {
         try {
-            const results = await axios.get(`${googlePlacesDetailsUrl}key=AIzaSyDmO0TPSYtgcPJw8TbBSOaIBFVqs4Ziq2Q&&place_id=${id}`)
+            const results = await axios.get(`${googlePlacesDetailsUrl}key=${process.env.googleApiKey}&&place_id=${id}`)
             const {data: {result}} = results
             
             setSearch({

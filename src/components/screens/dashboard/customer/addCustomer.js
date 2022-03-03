@@ -78,7 +78,7 @@ const AddCustomer = (props) => {
     const onChangeMapText = async () => {
         if (search.value.trim() === '') return;
         try {
-            const results = await axios.get(`${googlePlacesUrl}input=${search.value}`);
+            const results = await axios.get(`${googlePlacesUrl}key=${process.env.googleApiKey}&input=${search.value}`);
             const {data: {predictions}} = results;
             setPredictions(predictions);
         } catch (err) {
@@ -88,7 +88,7 @@ const AddCustomer = (props) => {
 
     const onPreditionTapped = async (id, description) => {
         try {
-            const results = await axios.get(`${googlePlacesDetailsUrl}place_id=${id}`)
+            const results = await axios.get(`${googlePlacesDetailsUrl}key=${process.env.googleApiKey}&place_id=${id}`)
             const {data: {result}} = results
             
             setSearch({
